@@ -1,8 +1,0 @@
-application: channel-client-demo # enter your application name here
-version: 1
-runtime: python
-api_version: 1
-
-handlers:
-- url: .*
-  script: main.py

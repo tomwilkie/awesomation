@@ -1,1 +1,5 @@
 .hg
+dist/
+*~
+src/common/creds.py
+*.pyc
