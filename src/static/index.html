@@ -4,21 +4,25 @@
 	<script type="text/javascript" src="jquery.js"></script>
 </head>	
 <body>
-	<p>Light 1: <button data-num="0" data-mode="true">on</button><button data-num="0" data-mode="false">off</button></p>
-	<p>Light 2: <button data-num="1" data-mode="true">on</button><button data-num="1" data-mode="false">off</button></p>
-	<p>Light 3: <button data-num="2" data-mode="true">on</button><button data-num="2" data-mode="false">off</button></p>
-	<p>Light 4: <button data-num="3" data-mode="true">on</button><button data-num="3" data-mode="false">off</button></p>
-	<p>Light 5: <button data-num="4" data-mode="true">on</button><button data-num="4" data-mode="false">off</button></p>
+  <p>System code:<input id="system_code" value="01010"></p>
+	<p>Light 1: <button data-code="10000" data-mode="true">on</button><button data-code="10000" data-mode="false">off</button></p>
+	<p>Light 2: <button data-code="01000" data-mode="true">on</button><button data-code="01000" data-mode="false">off</button></p>
+	<p>Light 3: <button data-code="00100" data-mode="true">on</button><button data-code="00100" data-mode="false">off</button></p>
+	<p>Light 4: <button data-code="00010" data-mode="true">on</button><button data-code="00010" data-mode="false">off</button></p>
+	<p>Light 5: <button data-code="00001" data-mode="true">on</button><button data-code="00001" data-mode="false">off</button></p>
 	<script>
 		$(function () {		
 			$("button").click(function () {
 				var that = $(this);
-				var num = parseInt(that.data("num"));
+				var system_code = $("input#system_code").val();
+				var device_code = that.data("code");
 				var mode = that.data("mode");
-				console.log(num + " " + mode);
 				$.ajax("/channel/test", {
 					method: "post",
-					data: JSON.stringify({"num": num, "mode": mode}),
+					data: JSON.stringify({
+					  "system_code": system_code,
+					  "device_code": device_code,
+					  "mode": mode}),
 				});
 			});
 		});

@@ -1,40 +1,51 @@
 #include <RCSwitch.h>
 
-RCSwitch mySwitch = RCSwitch();
+#define ZERO 48
+#define ONE 49
 
-void setup() { 
-  mySwitch.enableTransmit(10);
-  Serial.begin(9600);
-}
+RCSwitch rc_switch = RCSwitch();
 
-char* systemCode = "01010";
-char* codes[] = { "10000", "01000", "00100", "00010", "00001" };
+char system_code[6];
+char device_code[6];
 char buffer[128];
 
-#define ZERO 48
+void setup() { 
+  rc_switch.enableTransmit(10);
+  Serial.begin(9600);
+  system_code[5] = '\0';
+  device_code[5] = '\0';
+}
 
 void loop() {
   int length = Serial.readBytesUntil('\n', buffer, 128);
   if (length == 0)
-      return;
-
-  if (length != 2) {
-    Serial.print("0\n");
     return;
-  }
     
-  char mode = buffer[0];
-  char code = buffer[1];
-  if (code < ZERO || code > ZERO + 5) {
-    Serial.print("0\n");
+  // Commands are 11 chars - 0/1 for off/on, 5 chars for system code,
+  // 5 chars for device code
+  if (length != 11) {
+    Serial.print("-1\n");
     return;
   }
-  int index = code - ZERO;
 
-  if (mode != ZERO) {
-    mySwitch.switchOn(systemCode, codes[index]);
-  } else {
-    mySwitch.switchOff(systemCode, codes[index]);
+  // Commands are all ASCII ones or zeros...  Sorry!
+  for (int i=0; i<11; i++) {
+    if (buffer[i] != ZERO && buffer[i] != ONE) {
+      Serial.print("-2\n");
+      return;
+    }
   }
+
+  // Copy into new buffers - need null char.
+  memcpy(device_code, &buffer[6], 5);
+  memcpy(system_code, &buffer[1], 5);;
+
+  if (buffer[0] != ZERO) {
+    rc_switch.switchOn(system_code, device_code);
+  } else {
+    rc_switch.switchOff(system_code, device_code);
+  }
+  
   Serial.print("1\n");
 }
+

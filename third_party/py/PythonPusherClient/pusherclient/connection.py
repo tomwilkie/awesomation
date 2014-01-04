@@ -12,7 +12,8 @@ except:
 class Connection(Thread):
     def __init__(self, event_handler, url, log_level=logging.INFO):
         Thread.__init__(self)
-	
+        self.daemon = True
+
         self.event_handler = event_handler
         self.url = url
 

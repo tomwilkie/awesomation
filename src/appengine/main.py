@@ -10,6 +10,7 @@ from google.appengine.ext.webapp import util
 class ChannelHandler(webapp.RequestHandler):
     def post(self, chan_name):
 		event = json.loads(self.request.body)
+		print event
 		p = pusher.Pusher(app_id=creds.pusher_app_id, 
 			key=creds.pusher_key, secret=creds.pusher_secret)
 		p[chan_name].trigger('event', event)
