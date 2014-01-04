@@ -28,7 +28,7 @@ $(foreach dir,$(third_party),$(eval $(call THIRD_PARTY_template,$(dir))))
 static_files := $(patsubst %,dist/static/%,index.html jquery.js)
 py_files := $(patsubst src/%,dist/%,$(shell find src -name *.py))
 third_party_files := $(shell find third_party/py -name *.py \
-	| egrep -v "example|doc|setup|test|tools" 				\
+	| egrep -v "example|doc|setup|test"						\
 	| sed 's,^[^/]*/[^/]*/[^/]*/,,'							\
 	| egrep -v "^__init__.py" | tr "\\n" " ")
 third_party_files := $(patsubst %,dist/%,$(third_party_files))
