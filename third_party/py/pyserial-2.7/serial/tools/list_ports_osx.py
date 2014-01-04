@@ -185,7 +185,8 @@ def comports():
         # If the serial port is implemented by a
         usb_device = GetParentDeviceByType(service, "IOUSBDevice")
         if usb_device != None:
-            info.append(get_string_property(usb_device, "USB Product Name"))
+            product_name = get_string_property(usb_device, "USB Product Name")
+            info.append(product_name if product_name is not None else 'n/a')
 
             info.append(
                 "USB VID:PID=%x:%x SNR=%s"%(
