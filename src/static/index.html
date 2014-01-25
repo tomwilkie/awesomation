@@ -1,31 +1,89 @@
+<!DOCTYPE html>
 <html>
 <head>
-	<title>Home Awesomation</title>
-	<script type="text/javascript" src="jquery.js"></script>
+  <title>Awesomation</title>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <script src="jquery-2.0.3.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script>
+    $(function () {
+      $('#login-modal').modal({keyboard: false, show: true});
+      
+      $("input#add_device").click(function () {
+        
+      });
+      
+      $("button").click(function () {
+        var that = $(this);
+        var system_code = $("input#system_code").val();
+        var device_code = that.data("code");
+        var mode = that.data("mode");
+        $.ajax("/channel/test", {
+          method: "post",
+          data: JSON.stringify({
+            "system_code": system_code,
+            "device_code": device_code,
+            "mode": mode}),
+        });
+      });
+    });
+  </script>
 </head>	
 <body>
+  <div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="login-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="login-modal-label">Login</h4>
+        </div>
+        <div class="modal-body">
+          <form class="form-horizontal" role="form">
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
+              <div class="col-sm-10">
+                <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
+              <div class="col-sm-10">
+                <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" checked> Remember me
+                  </label>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary">Sign in</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+  
+  <input name="add_device" value="Add Device" type="submit"/>
+  <ol id="devices">
+  </ol>
+  
+  <!--
   <p>System code:<input id="system_code" value="01010"></p>
-	<p>Light 1: <button data-code="10000" data-mode="true">on</button><button data-code="10000" data-mode="false">off</button></p>
-	<p>Light 2: <button data-code="01000" data-mode="true">on</button><button data-code="01000" data-mode="false">off</button></p>
-	<p>Light 3: <button data-code="00100" data-mode="true">on</button><button data-code="00100" data-mode="false">off</button></p>
-	<p>Light 4: <button data-code="00010" data-mode="true">on</button><button data-code="00010" data-mode="false">off</button></p>
-	<p>Light 5: <button data-code="00001" data-mode="true">on</button><button data-code="00001" data-mode="false">off</button></p>
-	<script>
-		$(function () {		
-			$("button").click(function () {
-				var that = $(this);
-				var system_code = $("input#system_code").val();
-				var device_code = that.data("code");
-				var mode = that.data("mode");
-				$.ajax("/channel/test", {
-					method: "post",
-					data: JSON.stringify({
-					  "system_code": system_code,
-					  "device_code": device_code,
-					  "mode": mode}),
-				});
-			});
-		});
-  	</script>
+  <p>Light 1: <button class="toggle" data-code="10000" data-mode="true">on</button>
+    <button class="toggle" data-code="10000" data-mode="false">off</button></p>
+  <p>Light 2: <button class="toggle" data-code="01000" data-mode="true">on</button>
+    <button class="toggle" data-code="01000" data-mode="false">off</button></p>
+  <p>Light 3: <button class="toggle" data-code="00100" data-mode="true">on</button>
+    <button class="toggle" data-code="00100" data-mode="false">off</button></p>
+  <p>Light 4: <button class="toggle" data-code="00010" data-mode="true">on</button>
+    <button class="toggle" data-code="00010" data-mode="false">off</button></p>
+  <p>Light 5: <button class="toggle" data-code="00001" data-mode="true">on</button>
+    <button class="toggle" data-code="00001" data-mode="false">off</button></p>
+  -->
 </body>
 </html>

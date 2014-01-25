@@ -1,4 +1,9 @@
-dist/static/jquery.js: third_party/jquery/jquery-2.0.3.js
+
+dist/static/%:  third_party/static/bootstrap/%
+	@mkdir -p $(@D)
+	cp $< $@
+
+dist/static/%:  third_party/static/jquery/%
 	@mkdir -p $(@D)
 	cp $< $@
 
@@ -23,15 +28,18 @@ dist/%.py: third_party/py/$(1)/%.py
 	cp $$< $$@
 endef
 
-third_party := $(shell find third_party/py/* -maxdepth 0 | sed 's,^[^/]*/[^/]*/,,' | tr "\\n" " ")
+third_party := $(shell find third_party/py/* -maxdepth 0 -type d | sed 's,^[^/]*/[^/]*/,,' | tr "\\n" " ")
 $(foreach dir,$(third_party),$(eval $(call THIRD_PARTY_template,$(dir))))
-static_files := $(patsubst %,dist/static/%,index.html jquery.js)
 py_files := $(patsubst src/%,dist/%,$(shell find src -name *.py))
 third_party_files := $(shell find third_party/py -name *.py \
 	| egrep -v "example|doc|setup|test"						\
 	| sed 's,^[^/]*/[^/]*/[^/]*/,,'							\
 	| egrep -v "^__init__.py" | tr "\\n" " ")
 third_party_files := $(patsubst %,dist/%,$(third_party_files))
+
+bootstap_files := $(shell find third_party/static/bootstrap -type file)
+bootstap_files := $(patsubst third_party/static/bootstrap/%,%,$(bootstap_files))
+static_files := $(patsubst %,dist/static/%,index.html jquery-2.0.3.js $(bootstap_files))
 
 dist: dist/app.yaml $(py_files) $(static_files) $(third_party_files)
 
@@ -43,3 +51,9 @@ devapp: dist
 
 runpi: dist
 	PYTHONPATH=${PYTHONPATH}:./dist python dist/pi/control.py
+
+third_party/fswatch/fswatch: third_party/fswatch/fswatch.o
+	gcc -framework CoreServices -o third_party/fswatch/fswatch third_party/fswatch/fswatch.o
+
+live: third_party/fswatch/fswatch
+	third_party/fswatch/fswatch . 'make dist'

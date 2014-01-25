@@ -7,9 +7,22 @@ threadsafe: true
 handlers:
 - url: /channel/.*
   script: appengine.main.app
+  secure: always
+  login: required
+
+- url: /rpc
+  script: appengine.main.app
+  secure: always
+  login: required
     
 - url: /
   static_dir: static
+  secure: always
+  
+- url: /
+  static_files: static/index\.html
+  upload: static/index\.html
+  secure: always
 
 libraries:
 - name: webapp2
