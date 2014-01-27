@@ -10,10 +10,14 @@ handlers:
   secure: always
   login: required
 
-- url: /rpc
+- url: /device.*
   script: appengine.main.app
   secure: always
   login: required
+  
+- url: /user
+  script: appengine.main.app
+  secure: always
     
 - url: /
   static_dir: static

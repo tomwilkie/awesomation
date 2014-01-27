@@ -52,8 +52,9 @@ devapp: dist
 runpi: dist
 	PYTHONPATH=${PYTHONPATH}:./dist python dist/pi/control.py
 
-third_party/fswatch/fswatch: third_party/fswatch/fswatch.o
-	gcc -framework CoreServices -o third_party/fswatch/fswatch third_party/fswatch/fswatch.o
+dist/fswatch/fswatch: third_party/fswatch/fswatch.o
+	@mkdir -p $(@D)
+	gcc -framework CoreServices -o $@ $<
 
-live: third_party/fswatch/fswatch
-	third_party/fswatch/fswatch . 'make dist'
+live: dist/fswatch/fswatch
+	dist/fswatch/fswatch . 'make dist'
