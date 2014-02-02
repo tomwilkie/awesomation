@@ -47,7 +47,7 @@ upload: dist
 	appcfg.py --oauth2 update dist
 
 devapp: dist
-	dev_appserver.py dist/app.yaml
+	dev_appserver.py --use_mtime_file_watcher=true dist/app.yaml
 
 runpi: dist
 	PYTHONPATH=${PYTHONPATH}:./dist python dist/pi/control.py

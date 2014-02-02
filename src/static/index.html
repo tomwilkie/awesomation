@@ -9,8 +9,13 @@
     $(function () {
       //$('#login-modal').modal({keyboard: false, show: true});
       
-      $("input#add_device").click(function () {
-        
+      $("input#new_account").click(function () {
+        $.ajax("/api/account", {
+          method: "post",
+          data: JSON.stringify({
+            type: "netatmo"
+          })
+        })
       });
       
       $("button").click(function () {
@@ -30,45 +35,7 @@
   </script>
 </head>	
 <body>
-  <div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="login-modal-label" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title" id="login-modal-label">Login</h4>
-        </div>
-        <div class="modal-body">
-          <form class="form-horizontal" role="form">
-            <div class="form-group">
-              <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
-              <div class="col-sm-10">
-                <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
-              <div class="col-sm-10">
-                <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
-              </div>
-            </div>
-            <div class="form-group">
-              <div class="col-sm-offset-2 col-sm-10">
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" checked> Remember me
-                  </label>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary">Sign in</button>
-        </div>
-      </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-  </div><!-- /.modal -->
-  
-  <input name="add_device" value="Add Device" type="submit"/>
+  <input name="new_account" id="new_account" value="New Account" type="submit"/>
   <ol id="devices">
   </ol>
   

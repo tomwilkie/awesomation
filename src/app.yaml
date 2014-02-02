@@ -5,27 +5,12 @@ api_version: 1
 threadsafe: true
 
 handlers:
-- url: /channel/.*
-  script: appengine.main.app
-  secure: always
-  login: required
-
-- url: /device.*
-  script: appengine.main.app
-  secure: always
-  login: required
-  
-- url: /user
+- url: /api(.*)
   script: appengine.main.app
   secure: always
     
-- url: /
+- url: /static
   static_dir: static
-  secure: always
-  
-- url: /
-  static_files: static/index\.html
-  upload: static/index\.html
   secure: always
 
 libraries:
