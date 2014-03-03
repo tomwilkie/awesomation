@@ -7,6 +7,14 @@ dist/static/%:  third_party/static/jquery/%
 	@mkdir -p $(@D)
 	cp $< $@
 
+dist/static/%:  third_party/static/snap.svg/%
+	@mkdir -p $(@D)
+	cp $< $@
+
+dist/static/%:  third_party/static/sprintf.js/src/%
+	@mkdir -p $(@D)
+	cp $< $@
+
 dist/static/%: src/static/%
 	@mkdir -p $(@D)
 	cp $< $@
@@ -39,7 +47,7 @@ third_party_files := $(patsubst %,dist/%,$(third_party_files))
 
 bootstap_files := $(shell find third_party/static/bootstrap -type file)
 bootstap_files := $(patsubst third_party/static/bootstrap/%,%,$(bootstap_files))
-static_files := $(patsubst %,dist/static/%,index.html jquery-2.0.3.js $(bootstap_files))
+static_files := $(patsubst %,dist/static/%,index.html css/screen.css jquery-2.0.3.js sprintf.js snap.svg-min.js $(bootstap_files))
 
 dist: dist/app.yaml $(py_files) $(static_files) $(third_party_files)
 
