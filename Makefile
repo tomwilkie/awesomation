@@ -1,4 +1,3 @@
-
 dist/static/%:  third_party/static/bootstrap/%
 	@mkdir -p $(@D)
 	cp $< $@
