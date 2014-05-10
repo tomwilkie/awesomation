@@ -29,6 +29,25 @@ dist/%.yaml: src/%.yaml
 clean:
 	rm -rf dist
 
+# rcswitch build instructions
+CXXFLAGS=-O2 -fPIC
+
+dist/rcswitch_wrap.cxx: third_party/rcswitch-pi/RCSwitch.h third_party/rcswitch-pi/rcswitch.i
+	@mkdir -p $(@D)
+	swig -c++ -python -o $@ third_party/rcswitch-pi/rcswitch.i
+
+dist/rcswitch_wrap.o: dist/rcswitch_wrap.cxx
+	$(CXX) $(CXXFLAGS) -c $+ -o $@ -I/usr/include/python2.7 -Ithird_party/rcswitch-pi
+
+dist/RCSwitch.o: third_party/rcswitch-pi/RCSwitch.cpp
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -c $+ -o $@
+
+dist/_rcswitch.so: dist/rcswitch_wrap.o dist/RCSwitch.o
+	$(CXX) -shared $(LDFLAGS) $+ -o $@ -lwiringPi
+
+# third party python
+
 define THIRD_PARTY_template
 dist/%.py: third_party/py/$(1)/%.py
 	@mkdir -p $$(@D)
@@ -44,7 +63,7 @@ third_party_files := $(shell find third_party/py -name *.py \
 	| egrep -v "^__init__.py" | tr "\\n" " ")
 third_party_files := $(patsubst %,dist/%,$(third_party_files))
 
-bootstap_files := $(shell find third_party/static/bootstrap -type file)
+bootstap_files := $(shell find third_party/static/bootstrap -type f)
 bootstap_files := $(patsubst third_party/static/bootstrap/%,%,$(bootstap_files))
 static_files := $(patsubst %,dist/static/%,index.html css/screen.css jquery-2.0.3.js sprintf.js snap.svg-min.js $(bootstap_files))
 
@@ -56,7 +75,7 @@ upload: dist
 devapp: dist
 	dev_appserver.py --use_mtime_file_watcher=true dist/app.yaml
 
-runpi: dist
+runpi: dist dist/_rcswitch.so
 	PYTHONPATH=${PYTHONPATH}:./dist python dist/pi/control.py
 
 dist/fswatch/fswatch: third_party/fswatch/fswatch.o

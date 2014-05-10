@@ -1,3 +1,7 @@
 [submodule "third_party/rcswitch-pi"]
 	path = third_party/rcswitch-pi
 	url = git@github.com:tomwilkie/rcswitch-pi.git
+[submodule "third_party/open-zwave"]
+	path = third_party/open-zwave
+	url = https://github.com/tomwilkie/open-zwave.git
+
