@@ -5,3 +5,6 @@
 	path = third_party/open-zwave
 	url = https://github.com/tomwilkie/open-zwave.git
 
+[submodule "third_party/python-openzwave"]
+	path = third_party/python-openzwave
+	url = https://github.com/tomwilkie/python-openzwave.git
