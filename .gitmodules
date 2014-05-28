@@ -31,3 +31,6 @@
 [submodule "third_party/py/phue"]
 	path = third_party/py/phue
 	url = https://github.com/studioimaginaire/phue.git
+[submodule "third_party/wiringPi"]
+	path = third_party/wiringPi
+	url = git://git.drogon.net/wiringPi
