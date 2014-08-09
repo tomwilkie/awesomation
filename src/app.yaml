@@ -5,12 +5,8 @@ api_version: 1
 threadsafe: true
 
 handlers:
-- url: /api(.*)
+- url: .*
   script: appengine.main.app
-  secure: always
-    
-- url: /static
-  static_dir: static
   secure: always
 
 libraries:

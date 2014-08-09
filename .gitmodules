@@ -7,3 +7,15 @@
 [submodule "third_party/py/flask"]
 	path = third_party/py/flask
 	url = https://github.com/mitsuhiko/flask.git
+[submodule "third_party/py/itsdangerous"]
+	path = third_party/py/itsdangerous
+	url = https://github.com/mitsuhiko/itsdangerous.git
+[submodule "third_party/py/jinja2"]
+	path = third_party/py/jinja2
+	url = https://github.com/mitsuhiko/jinja2.git
+[submodule "third_party/py/markupsafe"]
+	path = third_party/py/markupsafe
+	url = https://github.com/mitsuhiko/markupsafe.git
+[submodule "third_party/py/click"]
+	path = third_party/py/click
+	url = https://github.com/mitsuhiko/click.git
