@@ -1,0 +1,9 @@
+[submodule "third_party/py/PyAPNs"]
+	path = third_party/py/PyAPNs
+	url = https://github.com/djacobs/PyAPNs.git
+[submodule "third_party/py/werkzeug"]
+	path = third_party/py/werkzeug
+	url = https://github.com/mitsuhiko/werkzeug.git
+[submodule "third_party/py/flask"]
+	path = third_party/py/flask
+	url = https://github.com/mitsuhiko/flask.git
