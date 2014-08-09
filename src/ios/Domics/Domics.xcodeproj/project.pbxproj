@@ -442,6 +442,7 @@
 				C59DD4AA1904266D001658D0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C59DD4AB1904266D001658D0 /* Build configuration list for PBXNativeTarget "DomicsTests" */ = {
 			isa = XCConfigurationList;
@@ -450,6 +451,7 @@
 				C59DD4AD1904266D001658D0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

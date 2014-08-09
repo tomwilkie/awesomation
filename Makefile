@@ -27,6 +27,10 @@ dist/%.yaml: src/%.yaml
 	@mkdir -p $(@D)
 	cp $< $@
 
+dist/door/%.pem: src/ios/Keys/%.pem
+	@mkdir -p $(@D)
+	cp $< $@
+
 clean:
 	rm -rf dist
 
@@ -48,8 +52,9 @@ third_party_files := $(patsubst %,dist/%,$(third_party_files))
 bootstap_files := $(shell find third_party/static/bootstrap -type file)
 bootstap_files := $(patsubst third_party/static/bootstrap/%,%,$(bootstap_files))
 static_files := $(patsubst %,dist/static/%,index.html css/screen.css jquery-2.0.3.js sprintf.js snap.svg-min.js $(bootstap_files))
+key_files := dist/door/DomicsKey.pem dist/door/DomicsCert.pem
 
-dist: dist/app.yaml $(py_files) $(static_files) $(third_party_files)
+dist: dist/app.yaml $(py_files) $(static_files) $(third_party_files) $(key_files)
 
 upload: dist
 	appcfg.py --oauth2 update dist
@@ -59,6 +64,9 @@ devapp: dist
 
 runpi: dist
 	PYTHONPATH=${PYTHONPATH}:./dist python dist/pi/control.py
+
+rundoor: dist
+	PYTHONPATH=${PYTHONPATH}:./dist python dist/door/door.py
 
 dist/fswatch/fswatch: third_party/fswatch/fswatch.o
 	@mkdir -p $(@D)
