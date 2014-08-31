@@ -1,13 +1,17 @@
-import time
-import apns
+import uuid
 
-CERT_FILE='dist/door/DomicsCert.pem'
-KEY_FILE='dist/door/DomicsKey.pem'
-DEVICE_TOKEN='a6ad1275b3b8443aa9472244ae63c3826de937cd64c6e0ee837acaf7ccd6f91e'
+from common import client
 
-instance = apns.APNs(use_sandbox=True, cert_file=CERT_FILE, key_file=KEY_FILE)
 
-def SendNotification():
-  # Send a notification
-  payload = apns.Payload(alert="Hello World!", sound="default", badge=1)
-  instance.gateway_server.send_notification(DEVICE_TOKEN, payload)
+def main():
+  device_id = uuid.getnode()
+
+  # ensure the device exists on the server
+  client.AddDevice(device_id, name="Doorbell")
+  
+  # send an event
+  client.DeviceEvent(device_id, "Doorbell")
+  
+  
+if __name__ == '__main__':
+  main()

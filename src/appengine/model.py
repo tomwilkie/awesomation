@@ -18,6 +18,7 @@ class Device(polymodel.PolyModel):
   owner = db.StringProperty(required=True)
   name = db.StringProperty(required=False)
 
-
+  def Event(self, event):
+    pass
 
 
