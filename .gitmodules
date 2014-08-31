@@ -19,3 +19,15 @@
 [submodule "third_party/py/click"]
 	path = third_party/py/click
 	url = https://github.com/mitsuhiko/click.git
+[submodule "third_party/rcswitch-pi"]
+	path = third_party/rcswitch-pi
+	url = git@github.com:tomwilkie/rcswitch-pi.git
+[submodule "third_party/open-zwave"]
+	path = third_party/open-zwave
+	url = https://github.com/tomwilkie/open-zwave.git
+[submodule "third_party/python-openzwave"]
+	path = third_party/python-openzwave
+	url = https://github.com/tomwilkie/python-openzwave.git
+[submodule "third_party/py/phue"]
+	path = third_party/py/phue
+	url = https://github.com/studioimaginaire/phue.git

@@ -1,9 +1,12 @@
-import sys
-import urllib2
-import logging
+#!/usr/bin/python
+
 import json
+import logging
+import rcswitch
+import sys
 import time
 import traceback
+import urllib2
 
 from common import creds
 from pusherclient import Pusher
