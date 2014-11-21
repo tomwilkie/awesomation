@@ -83,6 +83,10 @@ devapp: dist
 runpi: dist
 	PYTHONPATH=${PYTHONPATH}:./dist:./dist/third_party python dist/pi/control.py
 
+runonpi: dist
+	rsync -arvz dist/ pi@domicspi.local:~/dist/
+	ssh pi@domicspi.local 'PYTHONPATH=$$\{PYTHONPATH\}:~/dist:~/dist/third_party python ~/dist/pi/control.py'
+
 rundoor: dist
 	PYTHONPATH=${PYTHONPATH}:./dist:./dist/third_party python dist/door/door.py
 
