@@ -7,7 +7,7 @@ class RF433(object):
     self._switch = rcswitch.RCSwitch()
     self._switch.enableTransmit(pin)
 
-  def HandleMessage(self, message):
+  def HandleEvent(self, message):
     system_code = message["system_code"]
     device_code = int(message["device_code"])
   
@@ -15,3 +15,6 @@ class RF433(object):
       self._switch.switchOn(system_code, device_code)
     else:
       self._switch.switchOff(system_code, device_code)
+
+  def Stop():
+    pass
