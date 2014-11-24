@@ -1,33 +1,38 @@
+"""Pusher intergration for messages from the cloud."""
+
 import json
 import logging
 import Queue
+import sys
 
 from common import creds
 from pusherclient import Pusher
 
 
 class PushRPC(object):
-  
+  """Wrapper for pusher integration."""
+
   def __init__(self):
     self._queue = Queue.Queue()
     self._pusher = Pusher(creds.pusher_key)
     self._pusher.connection.bind('pusher:connection_established',
-      self._ConnectHandler)
+      self._connect_handler)
     self._pusher.connect()
 
-  def _ConnectHandler(self, data):
+  def _connect_handler(self, _):
     channel = self._pusher.subscribe('test')
-    channel.bind('event', self._Callback)
-        
-  def _Callback(self, data):
+    channel.bind('event', self._callback_handler)
+
+  def _callback_handler(self, data):
+    """Callback for when messages are recieved from pusher."""
     try:
-      data = json.loads(data)            
-    except Exception, e:
-      logging.error('Error parsing message', e)
+      data = json.loads(data)
+    except ValueError:
+      logging.error('Error parsing message', exc_info=sys.exc_info())
       return
     self._queue.put(data)
-    
-  def Events(self):
+
+  def events(self):
     while True:
       yield self._queue.get(block=True)
 

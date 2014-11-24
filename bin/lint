@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -eu
+
+/usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=import-error src/pi
