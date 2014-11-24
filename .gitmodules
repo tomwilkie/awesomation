@@ -37,3 +37,6 @@
 [submodule "third_party/fswatch"]
 	path = third_party/fswatch
 	url = https://github.com/alandipert/fswatch.git
+[submodule "third_party/py/PythonPusherClient"]
+	path = third_party/py/PythonPusherClient
+	url = https://github.com/ekulyk/PythonPusherClient.git

@@ -8,6 +8,7 @@ from pi import pushrpc, rf433, zwave
 
 LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
 
+
 def main():
   """Main function."""
   logging.basicConfig(format=LOGFMT)
