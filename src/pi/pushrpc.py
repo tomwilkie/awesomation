@@ -34,5 +34,9 @@ class PushRPC(object):
 
   def events(self):
     while True:
-      yield self._queue.get(block=True)
+      # if we specify a timeout, queues become keyboard interruptable
+      try:
+        yield self._queue.get(block=True, timeout=1000)
+      except Queue.Empty:
+        pass
 
