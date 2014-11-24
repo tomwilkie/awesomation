@@ -43,4 +43,5 @@ class ZWave(object):
     pass
 
   def stop(self):
-    self._manager.stop()
+    self._manager.removeWatcher(self._callback)
+    self._manager.removeDriver(self._device)

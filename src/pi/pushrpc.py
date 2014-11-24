@@ -40,3 +40,6 @@ class PushRPC(object):
       except Queue.Empty:
         pass
 
+  def stop(self):
+    self._pusher.disconnect()
+

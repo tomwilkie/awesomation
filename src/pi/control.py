@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+import sys
 
 from pi import pushrpc, rf433, zwave
 
@@ -9,9 +10,21 @@ from pi import pushrpc, rf433, zwave
 LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
 
 
+def process_events(pusher):
+  for event in pusher.events():
+    logging.info('Processing Event - %s', event)
+    event_type = event.get('type')
+    event_data = event.get('data')
+
+    if event_type in proxies:
+      proxies[event_type].handle_event(event_data)
+    else:
+      logging.error('Event type \'%s\' unrecognised', event_type)
+
+
 def main():
   """Main function."""
-  logging.basicConfig(format=LOGFMT)
+  logging.basicConfig(format=LOGFMT, level=logging.INFO)
 
   parser = argparse.ArgumentParser()
   parser.add_argument('--zwave_device', default='/dev/ttyUSB0')
@@ -25,15 +38,14 @@ def main():
 
   pusher = pushrpc.PushRPC()
 
-  for event in pusher.events():
-    logging.info('Processing Event - %s', event)
-    event_type = event.get('type')
-    event_data = event.get('data')
+  try:
+    process_events(pusher)
+  except:
+    logging.error('Exception processing events', exc_info=sys.exc_info())
 
-    if event_type in proxies:
-      proxies[event_type].handle_event(event_data)
-    else:
-      logging.error('Event type \'%s\' unrecognised', event_type)
+  logging.info('Shutting down')
+
+  pusher.stop()
 
   for proxy in proxies.itervalues():
     proxy.stop()
