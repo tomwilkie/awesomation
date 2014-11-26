@@ -1,8 +1,10 @@
 import time
 
-import apns
+#import apns
 
-import appengine.model
+from google.appengine.ext import db
+
+from appengine import model
 
 CERT_FILE='dist/door/DomicsCert.pem'
 KEY_FILE='dist/door/DomicsKey.pem'
