@@ -50,7 +50,7 @@ class ZWave(object):
 
     elif notification_type in {'ValueAdded', 'ValueChanged', 'NodeNaming'}:
       #logging.info('%s', data)
-      self._callback('zwave-%d' % node_id, data)
+      self._callback('zwave', 'zwave-%d' % node_id, data)
 
   def handle_event(self, event):
     pass

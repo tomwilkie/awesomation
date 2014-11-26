@@ -59,7 +59,6 @@ def get_user_request():
 def post(chan_name):
   """Post events back to the pi."""
   event = json.loads(flask.request.body)
-  print event
   p = pusher.Pusher(app_id=creds.pusher_app_id,
     key=creds.pusher_key, secret=creds.pusher_secret)
   p[chan_name].trigger('event', event)
@@ -67,18 +66,45 @@ def post(chan_name):
 
 @app.route('/api/device/events', methods=['POST'])
 def device_events():
+  """Handle events from devices."""
+
   events = flask.request.get_json()
   logging.info(events)
+
+  for event in events:
+    device_type = event['device_type']
+    device_id = event['device_id']
+    event_body = event['event']
+
+    device = model.Device.get_by_key_name(device_id)
+    if not device:
+      device = devices.create_device(device_id, device_type)
+
+    device.event(event_body)
+    device.put()
+
   return ('', 204)
+
+
+@app.route('/api/device', methods=['GET'])
+def list_devices():
+  """Return json list of devices."""
+  device_list = model.Device.all().get()
+  if device_list is None:
+    device_list = []
+  device_list = [db.to_dict(device) for device in device_list]
+  return flask.jsonify(devices=devices)
 
 
 @app.route('/api/device/<int:device_id>', methods=['POST'])
 def create_update_device(device_id):
   """Using json body to create or update a device."""
-  body = json.loads(flask.request.data)
-  device = model.Device.get_by_id(device_id)
+  body = flask.request.get_json()
+  device = model.Device.get_by_key_name(device_id)
   if not device:
-    device = devices.CreateDevice(device_id, body)
+    device_type = body['type']
+    device = devices.create_device(
+        device_id, device_type=device_type, params=body)
   else:
     device.update(body)
   device.put()
@@ -86,18 +112,9 @@ def create_update_device(device_id):
 
 @app.route('/api/device/<int:device_id>', methods=['GET'])
 def get_device(device_id):
-  device = model.Device.get_by_id(device_id)
+  device = model.Device.get_by_key_name(device_id)
   if not device:
     flask.abort(404)
   return flask.jsonify(**db.to_dict(device))
 
-
-@app.route('/api/device/<int:device_id>/event')
-def device_event(device_id):
-  """Handle batch of events from devices."""
-  device = model.Device.get_by_id(device_id)
-  if not device:
-    flask.abort(404)
-  event = json.loads(flask.request.data)
-  device.Event(event)
 

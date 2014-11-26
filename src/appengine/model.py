@@ -1,3 +1,5 @@
+"""Base classes for my data model."""
+
 from google.appengine.ext import db
 from google.appengine.ext.db import polymodel
 
@@ -18,7 +20,5 @@ class Device(polymodel.PolyModel):
   owner = db.StringProperty(required=True)
   name = db.StringProperty(required=False)
 
-  def Event(self, event):
+  def event(self, event):
     pass
-
-
