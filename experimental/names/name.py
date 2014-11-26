@@ -7,16 +7,16 @@ API_KEY = 'AIzaSyAEXLea9UKrZ1UpJ2JJfVEUCN3IhBWnZsw'
 LANG_URL = 'https://www.googleapis.com/language/translate/v2/languages?key=%s'
 TRANS_URL = 'https://www.googleapis.com/language/translate/v2?key=%s&source=en&target=%s&q=%s'
 
-NAMES = ['home', 'house', 'thing', 'smart', 'nest', 'sense', 'sensor', 'magic']
+NAMES = ['home', 'house', 'thing', 'smart', 'nest', 'sense', 'sensor', 'magic', 'den']
 
 def main():
   result = urllib2.urlopen(LANG_URL % API_KEY).read()
   result = json.loads(result)
   languages = [l['language'] for l in result['data']['languages']]
   print len(languages)
-  
+
   names = NAMES + list(itertools.permutations(NAMES, 2))
-  
+
   for lang in languages:
     for name in names:
       try:
@@ -34,7 +34,7 @@ def munge():
   tlds = list(x.strip().lower() for x in open('tlds.txt'))
   print names
   print tlds
-  
+
   for name in names:
     for tld in tlds:
       if tld == name:
