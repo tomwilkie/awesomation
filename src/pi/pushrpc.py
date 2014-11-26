@@ -18,8 +18,8 @@ def _post_events_once(events):
   body = json.dumps(events)
   headers = {'Content-type': 'application/json',
              'Accept': 'text/plain'}
-  conn = httplib.HTTPConnection('%s.appspot.com' % creds.appengine_app_id)
-  conn.request('POST', 'api/device/events', body, headers)
+  conn = httplib.HTTPSConnection('%s.appspot.com' % creds.appengine_app_id)
+  conn.request('POST', '/api/device/events', body, headers)
   response = conn.getresponse()
   if response.status != 200:
     logging.error('Response %d from server - \'%s\'',
