@@ -38,9 +38,9 @@ class Control(object):
     else:
       logging.error('Event type \'%s\' unrecognised', event_type)
 
-  def _device_event_callback(self, driver, event):
+  def _device_event_callback(self, device_id, event):
     """Handle event from a device."""
-    self._pusher.send_event((driver, event))
+    self._pusher.send_event({'device_id': device_id, 'event': event})
 
 
 def main():

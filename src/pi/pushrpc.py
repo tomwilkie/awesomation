@@ -21,7 +21,7 @@ def _post_events_once(events):
   conn = httplib.HTTPSConnection('%s.appspot.com' % creds.appengine_app_id)
   conn.request('POST', '/api/device/events', body, headers)
   response = conn.getresponse()
-  if response.status != 200:
+  if not (200 <= response.status < 300):
     logging.error('Response %d from server - \'%s\'',
                   response.status, response.reason)
   conn.close()
