@@ -47,14 +47,14 @@ def get_user():
   assert user.email() is not None
 
   person = model.Person.get_or_insert(
-      key_name=user.user_id(), email=user.email())
-  return person.key().id_or_name()
+      user.user_id(), email=user.email())
+  return person.key.id()
 
 
 @app.route('/api/user', methods=['GET'])
 def get_user_request():
   user_id = get_user()
-  person = model.Person.get_by_key_name(user_id)
+  person = model.Person.get_by_id(user_id)
   return flask.jsonify(**person.to_dict())
 
 
@@ -80,7 +80,7 @@ def device_events():
     device_id = event['device_id']
     event_body = event['event']
 
-    device = model.Device.get_by_key_name(device_id)
+    device = model.Device.get_by_id(device_id)
     if not device:
       device = devices.create_device(device_id, device_type, user_id)
 
@@ -94,7 +94,7 @@ def device_events():
 def list_devices():
   """Return json list of devices."""
   user_id = get_user()
-  device_list = model.Device.all().filter('owner =', user_id).run()
+  device_list = model.Device.query(model.Device.owner == user_id).iter()
   if device_list is None:
     device_list = []
 
@@ -107,7 +107,7 @@ def create_update_device(device_id):
   """Using json body to create or update a device."""
   user_id = get_user()
   body = flask.request.get_json()
-  device = model.Device.get_by_key_name('%s-%s' % (user_id, device_id))
+  device = model.Device.get_by_id('%s-%s' % (user_id, device_id))
 
   if not device:
     device_type = body['type']
@@ -125,7 +125,7 @@ def create_update_device(device_id):
 def get_device(device_id):
   """Return json repr of given device."""
   user_id = get_user()
-  device = model.Device.get_by_key_name('%s-%s' % (user_id, device_id))
+  device = model.Device.get_by_id('%s-%s' % (user_id, device_id))
 
   if not device:
     flask.abort(404)

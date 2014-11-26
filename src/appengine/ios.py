@@ -2,7 +2,7 @@ import time
 
 #import apns
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 
 from appengine import model
 
@@ -11,7 +11,7 @@ KEY_FILE='dist/door/DomicsKey.pem'
 
 
 class IosDevice(model.Device):
-  push_token = db.StringProperty(required=False)
+  push_token = ndb.StringProperty(required=False)
 
   def __init__(self, **kwargs):
     self.apns = apns.APNs(use_sandbox=True, cert_file=CERT_FILE, key_file=KEY_FILE)

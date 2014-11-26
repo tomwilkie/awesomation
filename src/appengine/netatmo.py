@@ -13,7 +13,7 @@ class NetatmoAccount(model.Account):
   OAUTH_CLIENT_ID = "52daaaea187759c10c7b23fd"
   OAUTH_CLIENT_SECRET = "lfUPaKasvdnao2lHxpTI7kBbUvjN67wnxKCNje"
   API_URL = "http://api.netatmo.net/api/%(method)s?access_token=%(access_token)s"
-  
+
   def DoMethod(self, method_name, **kwargs):
     url = self.API_URL % {"method": method_name, "access_token": self.oauth_access_token}
     if kwargs:
@@ -24,7 +24,7 @@ class NetatmoAccount(model.Account):
     result = json.loads(response.read())
     assert result["status"] == "ok"
     return result["body"]
-  
+
   def SyncDevices(self):
     devices = self.DoMethod("devicelist")
     logging.info(devices)

@@ -2,15 +2,15 @@
 
 import logging
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 
 from appengine import model
 
 
 class ZWaveDevice(model.Device):
   """Generic Z Wave device driver."""
-  zwave_device_id = db.IntegerProperty(required=False)
-  zwave_home_id = db.IntegerProperty(required=False)
+  zwave_device_id = ndb.IntegerProperty(required=False)
+  zwave_home_id = ndb.IntegerProperty(required=False)
 
   def handle_event(self, event):
     """Handle an event form the zwave device."""

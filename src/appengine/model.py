@@ -1,32 +1,34 @@
 """Base classes for my data model."""
 
-from google.appengine.ext import db
-from google.appengine.ext.db import polymodel
+from google.appengine.ext import ndb
+from google.appengine.ext.ndb import polymodel
 
 
 class Base(polymodel.PolyModel):
 
   def to_dict(self):
-    result = db.to_dict(self)
-    result['id'] = self.key().id_or_name()
+    result = super(Base, self).to_dict()
+    result['id'] = self.key.id()
+    result['class'] = result['class_'][-1]
+    del result['class_']
     return result
 
 
 class Person(Base):
   # key_name is userid
-  email = db.StringProperty(required=False)
+  email = ndb.StringProperty(required=False)
 
 
 class Account(Base):
-  owner = db.StringProperty(required=True)
-  oauth_state = db.StringProperty(required=False)
-  oauth_access_token = db.StringProperty(required=False)
-  oauth_refresh_token = db.StringProperty(required=False)
+  owner = ndb.StringProperty(required=True)
+  oauth_state = ndb.StringProperty(required=False)
+  oauth_access_token = ndb.StringProperty(required=False)
+  oauth_refresh_token = ndb.StringProperty(required=False)
 
 
 class Device(Base):
-  owner = db.StringProperty(required=True)
-  name = db.StringProperty(required=False)
+  owner = ndb.StringProperty(required=True)
+  name = ndb.StringProperty(required=False)
 
   def event(self, event):
     pass
