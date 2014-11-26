@@ -7,6 +7,7 @@ from google.appengine.ext.ndb import polymodel
 class Base(polymodel.PolyModel):
 
   def to_dict(self):
+    """Convert this object to a python dict."""
     result = super(Base, self).to_dict()
     result['id'] = self.key.id()
     result['class'] = result['class_'][-1]
@@ -27,10 +28,11 @@ class Account(Base):
 
 
 class Device(Base):
+  """Base class for all device drivers."""
   owner = ndb.StringProperty(required=True)
   name = ndb.StringProperty(required=False)
 
-  def event(self, event):
+  def handle_event(self, event):
     pass
 
   def to_dict(self):

@@ -73,18 +73,26 @@ def device_events():
   """Handle events from devices."""
   user_id = '102063417381751091397'
   events = flask.request.get_json()
-  logging.info(events)
+  logging.info('Processing %d events', len(events))
+
+  device_cache = {}
 
   for event in events:
     device_type = event['device_type']
     device_id = event['device_id']
     event_body = event['event']
 
-    device = model.Device.get_by_id(device_id)
-    if not device:
-      device = devices.create_device(device_id, device_type, user_id)
+    if device_id in device_cache:
+      device = device_cache[device_id]
+    else:
+      device = model.Device.get_by_id('%s-%s' % (user_id, device_id))
+      if not device:
+        device = devices.create_device(device_id, device_type, user_id)
+      device_cache[device_id] = device
 
-    device.event(event_body)
+    device.handle_event(event_body)
+
+  for device in device_cache.itervalues():
     device.put()
 
   return ('', 204)

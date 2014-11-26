@@ -2,7 +2,7 @@
 
 set -eu
 
-PYLINT_DISABLE=import-error,locally-disabled,no-member,maybe-no-member,no-init,star-args
+PYLINT_DISABLE=import-error,locally-disabled,no-member,maybe-no-member,no-init,star-args,super-on-old-class
 
 #git stash -q --keep-index
 
