@@ -11,7 +11,7 @@ LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
 
 
 class Control(object):
-  """'Controller' class, ties proxies and rpc together."""
+  """'Controller class, ties proxies and rpc together."""
 
   def __init__(self, args):
     self._proxies = {
