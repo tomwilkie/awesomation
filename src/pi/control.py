@@ -46,6 +46,9 @@ class Control(object):
 def main():
   """Main function."""
   logging.basicConfig(format=LOGFMT, level=logging.INFO)
+  file_handler = logging.FileHandler('control.log')
+  file_handler.setFormatter(logging.Formatter(LOGFMT))
+  logging.getLogger().addHandler(file_handler)
 
   parser = argparse.ArgumentParser()
   parser.add_argument('--zwave_device', default='/dev/ttyUSB0')
