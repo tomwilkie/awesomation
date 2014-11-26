@@ -2,4 +2,15 @@
 
 set -eu
 
-/usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=import-error,locally-disabled src/pi
+#git stash -q --keep-index
+
+git diff --cached --name-only | while read filename; do
+	ext=${filename##*\.}
+	case "$ext" in
+		py) /usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=import-error,locally-disabled ${filename}
+		;;
+	esac
+done
+
+#git stash pop -q
+
