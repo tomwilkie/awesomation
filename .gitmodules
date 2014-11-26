@@ -40,3 +40,6 @@
 [submodule "third_party/py/PythonPusherClient"]
 	path = third_party/py/PythonPusherClient
 	url = https://github.com/tomwilkie/PythonPusherClient.git
+[submodule "third_party/py/pusher_client_python"]
+	path = third_party/py/pusher_client_python
+	url = https://github.com/pusher/pusher_client_python.git
