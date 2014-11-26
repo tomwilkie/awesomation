@@ -7,7 +7,7 @@ set -eu
 git diff --cached --name-only | while read filename; do
 	ext=${filename##*\.}
 	case "$ext" in
-		py) /usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=import-error,locally-disabled ${filename}
+		py) /usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=import-error,locally-disabled,no-member,maybe-no-member ${filename} | sort --key=2,5 -n
 		;;
 	esac
 done
