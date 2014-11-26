@@ -36,9 +36,9 @@ def Root():
 @app.before_request
 def BeforeRequest():
   user = users.get_current_user()
-  if not user and request.endpoint not in {'/'}:        
+  if not user and request.endpoint not in {'/'}:
     return flaskredirect(users.create_login_url(request.endpoint))
-  logging.info(user) 
+  logging.info(user)
   person = model.Person.get_or_insert(key_name=user.user_id())
 
 
@@ -58,9 +58,15 @@ def GetUserRequest():
 def post(chan_name):
   event = json.loads(self.request.body)
   print event
-  p = pusher.Pusher(app_id=creds.pusher_app_id, 
+  p = pusher.Pusher(app_id=creds.pusher_app_id,
     key=creds.pusher_key, secret=creds.pusher_secret)
   p[chan_name].trigger('event', event)
+
+
+@app.route('/api/device/events', methods=['POST'])
+def DeviceEvents():
+  body = json.loads(flask.request.data)
+  logging.info(body)
 
 
 @app.route('/api/device/<int:device_id>', methods=['POST'])
