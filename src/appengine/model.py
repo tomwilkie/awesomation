@@ -31,6 +31,7 @@ class Device(Base):
   """Base class for all device drivers."""
   owner = ndb.StringProperty(required=True)
   name = ndb.StringProperty(required=False)
+  last_update = ndb.DateTimeProperty(required=False, auto_now=True)
 
   def handle_event(self, event):
     pass

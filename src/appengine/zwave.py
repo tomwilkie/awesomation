@@ -29,7 +29,6 @@ class ZWaveDevice(model.Device):
 
   def __init__(self, **kwargs):
     super(ZWaveDevice, self).__init__(**kwargs)
-    self._command_class_index = {}
 
   def _command_class_value(self, command_class, index):
     """Find the given (command_class, index) or create a new one."""
@@ -42,6 +41,8 @@ class ZWaveDevice(model.Device):
 
   def handle_event(self, event):
     """Handle an event form the zwave device."""
+    super(ZWaveDevice, self).handle_event(event)
+
     notification_type = event['notificationType']
     self.zwave_home_id = event['homeId']
     self.zwave_node_id = event['nodeId']
@@ -64,5 +65,5 @@ class ZWaveDevice(model.Device):
                    command_class, index, value)
 
     elif notification_type == 'NodeNaming':
-      logging.info(value)
+      logging.info(event)
 
