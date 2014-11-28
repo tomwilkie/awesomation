@@ -6,7 +6,7 @@ import sys
 import libopenzwave
 
 
-CONFIG = '/usr/local/share/python-openzwave/config'
+CONFIG = '/usr/local/etc/openzwave'
 
 class ZWave(object):
   """ZWave proxy object."""
