@@ -18,8 +18,8 @@ class ZWave(object):
     self._options = libopenzwave.PyOptions()
     self._options.create(CONFIG, '/home/pi/openzwave', '')
     self._options.addOptionBool('ConsoleOutput', False)
-    self._options.addOptionInt('SaveLogLevel', 6) # INFO
-    self._options.addOptionInt('QueueLogLevel', 6) # INFO
+    self._options.addOptionInt('SaveLogLevel', 7) # INFO
+    self._options.addOptionInt('QueueLogLevel', 7) # INFO
     self._options.lock()
 
     self._manager = libopenzwave.PyManager()
