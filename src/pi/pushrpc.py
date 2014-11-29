@@ -21,7 +21,7 @@ def _post_events_once(events):
   conn = httplib.HTTPSConnection('%s.appspot.com' % creds.appengine_app_id)
   conn.request('POST', '/api/device/events', body, headers)
   response = conn.getresponse()
-  if not (200 <= response.status < 300):
+  if not 200 <= response.status < 300:
     logging.error('Response %d from server - \'%s\'',
                   response.status, response.reason)
   conn.close()
@@ -53,14 +53,14 @@ class PushRPC(object):
   def _callback_handler(self, data):
     """Callback for when messages are recieved from pusher."""
     try:
-      data = json.loads(data)
+      event = json.loads(data)
     except ValueError:
       logging.error('Error parsing message', exc_info=sys.exc_info())
       return
 
     # pylint: disable=broad-except
     try:
-      self._callback(data)
+      self._callback(event)
     except Exception:
       logging.error('Error running push callback', exc_info=sys.exc_info())
 

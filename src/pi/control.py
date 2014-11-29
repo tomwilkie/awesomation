@@ -4,7 +4,7 @@ import argparse
 import logging
 import time
 
-from pi import pushrpc, rf433, zwave
+from pi import pushrpc, rfswitch, zwave
 
 
 LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
@@ -15,7 +15,7 @@ class Control(object):
 
   def __init__(self, args):
     self._proxies = {
-        'rf433': rf433.RF433(args.rf433_pin),
+        'rfswitch': rfswitch.RFSwitch(args.rfswtich_pin),
         'zwave': zwave.ZWave(args.zwave_device, self._device_event_callback),
     }
 
@@ -30,11 +30,10 @@ class Control(object):
   def _push_event_callback(self, event):
     """Handle event from the cloud."""
     logging.info('Processing Event - %s', event)
-    event_type = event.get('type')
-    event_data = event.get('data')
+    event_type = event.pop('type')
 
     if event_type in self._proxies:
-      self._proxies[event_type].handle_event(event_data)
+      self._proxies[event_type].handle_event(event)
     else:
       logging.error('Event type \'%s\' unrecognised', event_type)
 
@@ -54,7 +53,7 @@ def main():
 
   parser = argparse.ArgumentParser()
   parser.add_argument('--zwave_device', default='/dev/ttyUSB0')
-  parser.add_argument('--rf433_pin', default=3)
+  parser.add_argument('--rfswtich_pin', default=3)
   args = parser.parse_args()
 
   control = Control(args)
