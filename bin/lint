@@ -7,6 +7,10 @@ PYLINT_DISABLE=import-error,locally-disabled,no-member,maybe-no-member,no-init,s
 #git stash -q --keep-index
 
 git diff --cached --name-only | while read filename; do
+	if [ ! -e "${filename}" ]; then
+		continue
+	fi
+
 	ext=${filename##*\.}
 	case "$ext" in
 		py) /usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=$PYLINT_DISABLE ${filename} | sort --key=2,5 -n
