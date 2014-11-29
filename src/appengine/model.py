@@ -36,6 +36,9 @@ class Device(Base):
   def handle_event(self, event):
     pass
 
+  def handle_command(self, command):
+    pass
+
   def to_dict(self):
     result = Base.to_dict(self)
     result['id'] = result['id'].split('-', 1)[1]

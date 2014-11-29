@@ -2,20 +2,18 @@
 
 import calendar
 import datetime
-import json
 import logging
 import os
 import sys
 
 from google.appengine.api import users
+from google.appengine.ext import db
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
 
 import flask
-import pusher
 
 from appengine import model, devices
-from common import creds
 
 
 def static_dir():
@@ -44,6 +42,11 @@ app.debug = True
 app.json_encoder = CustomJSONEncoder
 
 
+@app.errorhandler(400)
+def custom400(error):
+  return flask.jsonify({'message': error.description})
+
+
 @app.route('/')
 def root():
   return flask.send_from_directory(static_dir(), 'index.html')
@@ -52,7 +55,7 @@ def root():
 @app.before_request
 def before_request():
   """Ensure user is authenticated."""
-  if flask.request.endpoint in {'root', 'device_events'}:
+  if flask.request.endpoint in {'device_events'}:
     return
 
   user = users.get_current_user()
@@ -76,16 +79,6 @@ def get_user_request():
   user_id = get_user()
   person = model.Person.get_by_id(user_id)
   return flask.jsonify(**person.to_dict())
-
-
-@app.route('/api/channel')
-def post(chan_name):
-  """Post events back to the pi."""
-  event = json.loads(flask.request.body)
-  p = pusher.Pusher(
-      app_id=creds.pusher_app_id,
-      key=creds.pusher_key, secret=creds.pusher_secret)
-  p[chan_name].trigger('event', event)
 
 
 @app.route('/api/device/events', methods=['POST'])
@@ -135,18 +128,37 @@ def create_update_device(device_id):
   """Using json body to create or update a device."""
   user_id = get_user()
   body = flask.request.get_json()
+  if body is None:
+    flask.abort(400, 'JSON body and mime type required.')
+
   device = model.Device.get_by_id('%s-%s' % (user_id, device_id))
 
   if not device:
-    device_type = body['type']
+    device_type = body.pop('type', None)
+    if device_type is None:
+      flask.abort(400, '\'type\' field expected in body.')
+
     device = devices.create_device(
         device_id, device_type, user_id)
 
   elif device.owner != user_id:
     flask.abort(403)
 
-  device.update(body)
-  device.put()
+  # Update the object; abort with 400 on unknown field
+  try:
+    device.populate(**body)
+  except AttributeError, err:
+    logging.info(err.__dict__)
+    flask.abort(400)
+
+  # Put the object - BadValueError if there are uninitalised required fields
+  try:
+    device.put()
+  except db.BadValueError, err:
+    logging.info(err.__dict__)
+    flask.abort(400)
+
+  return flask.jsonify(**device.to_dict())
 
 
 @app.route('/api/device/<device_id>', methods=['GET'])
@@ -162,4 +174,23 @@ def get_device(device_id):
 
   return flask.jsonify(**device.to_dict())
 
+
+@app.route('/api/device/<device_id>/command', methods=['POST'])
+def device_command(device_id):
+  """Using json body to create or update a device."""
+  user_id = get_user()
+  body = flask.request.get_json()
+  if body is None:
+    flask.abort(400, 'JSON body and mime type required.')
+
+  device = model.Device.get_by_id('%s-%s' % (user_id, device_id))
+
+  if not device:
+    flask.abort(404)
+  elif device.owner != user_id:
+    flask.abort(403)
+
+  device.handle_command(body)
+
+  return ('', 204)
 
