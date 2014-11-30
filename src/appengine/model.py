@@ -39,7 +39,10 @@ class Device(Base):
   def handle_command(self, command):
     pass
 
+  def get_id(self):
+    return self.key.string_id().split('-', 1)[1]
+
   def to_dict(self):
     result = Base.to_dict(self)
-    result['id'] = result['id'].split('-', 1)[1]
+    result['id'] = self.get_id()
     return result

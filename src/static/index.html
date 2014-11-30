@@ -8,7 +8,7 @@
   <script src="/static/js/bootstrap.min.js"></script>
   <script src="/static/snap.svg-min.js"></script>
   <script src="/static/sprintf.js"></script>
-  <script><!--
+  <script>
 $(function() {
   $("input#new_account").click(function() {
     $.ajax("/api/account", {
@@ -16,7 +16,7 @@ $(function() {
       data: JSON.stringify({
         type: "netatmo"
       })
-    })
+    });
   });
 
   $("input#new_device").click(function() {
@@ -66,14 +66,38 @@ $(function() {
       })
     })
   });
+
+  $("input#hue_on").click(function() {
+    $.ajax(sprintf("/api/device/hue-001788fffe1502d9-1/command"), {
+      method: "post",
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify({
+        command: 'on',
+      })
+    })
+  });
+
+  $("input#hue_off").click(function() {
+    $.ajax(sprintf("/api/device/hue-001788fffe1502d9-1/command"), {
+      method: "post",
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify({
+        command: 'off',
+      })
+    })
+  });
 });
-  // --></script>
+  </script>
 </head>
 <body>
   <input id="new_account" value="New Account" type="submit"/>
 	<input id="new_device" value="New Device" type="submit"/>
 	<input id="lamp_on" value="Lamp On" type="submit"/>
 	<input id="lamp_off" value="Lamp Off" type="submit"/>
+
+	<br/>
 	<input id="hue_scan" value="Hue Scan" type="submit"/>
+	<input id="hue_on" value="Hue On" type="submit"/>
+	<input id="hue_off" value="Hue Off" type="submit"/>
 </body>
 </html>

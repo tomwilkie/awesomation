@@ -87,10 +87,7 @@ class Hue(object):
 
     bridge = self._bridges.get(bridge_id, None)
     light = bridge[device_id]
-    if mode:
-      light.on()
-    else:
-      light.off()
+    light.on = mode
 
   def handle_event(self, message):
     """Handle hue events - turn it on or off."""
