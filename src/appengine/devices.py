@@ -20,5 +20,8 @@ def create_device(device_id, device_type, user_id):
   elif device_type == 'hue_bridge':
     return hue.HueBridge(
         id='%s-%s' % (user_id, device_id), owner=user_id)
+  elif device_type == 'hue_light':
+    return hue.HueLight(
+        id='%s-%s' % (user_id, device_id), owner=user_id)
   else:
     assert False

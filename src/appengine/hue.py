@@ -28,4 +28,8 @@ class HueBridge(model.Device):
 
 
 class HueLight(model.Device):
-  pass
+  """A hue light."""
+
+  def handle_event(self, event):
+    """Handle a device update event."""
+    logging.info(event)

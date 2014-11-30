@@ -26,6 +26,7 @@ class Hue(object):
 
   def _bridge_scan(self):
     while not self._exiting:
+      # We always do a scan on start up.
       try:
         self._bridge_scan_once()
       except:
@@ -34,7 +35,8 @@ class Hue(object):
       with self._bridge_scan_thread_condition:
         self._bridge_scan_thread_condition.wait()
         if self._exiting:
-          return
+          break
+    logging.info('Exiting scan thread')
 
   def _bridge_scan_once(self):
     """Find hue hubs on the network and tell appengine about them."""
@@ -62,6 +64,16 @@ class Hue(object):
 
       self._callback('hue_bridge', 'hue-%s' % bridge_id, event)
 
+    # Now find all the lights
+    for bridge_id, bridge in self._bridges.iteritems():
+      lights_by_id = bridge.get_light_objects(mode='id')
+      for light_id, light in lights_by_id.iteritems():
+        event = bridge.get_light(light_id)
+        logging.info('Hue light %d (\'%s\') found on bridge \'%s\'',
+                     light_id, event['name'], bridge_id)
+
+        light_id = 'hue-%s-%d' % (bridge_id, light_id)
+        self._callback('hue_light', light_id, event)
 
   def _set_light(self, message):
     """Turn a light on or off."""
