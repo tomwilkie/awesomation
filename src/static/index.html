@@ -56,13 +56,24 @@ $(function() {
       })
     })
   });
+
+  $("input#hue_scan").click(function() {
+    $.ajax(sprintf("/api/device/hue-001788fffe1502d9/command"), {
+      method: "post",
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify({
+        command: 'scan',
+      })
+    })
+  });
 });
   // --></script>
 </head>
 <body>
-  <input name="new_account" id="new_account" value="New Account" type="submit"/>
-	<input name="new_device" id="new_device" value="New Device" type="submit"/>
-	<input name="lamp_on" id="lamp_on" value="Lamp On" type="submit"/>
-	<input name="lamp_off" id="lamp_off" value="Lamp Off" type="submit"/>
+  <input id="new_account" value="New Account" type="submit"/>
+	<input id="new_device" value="New Device" type="submit"/>
+	<input id="lamp_on" value="Lamp On" type="submit"/>
+	<input id="lamp_off" value="Lamp Off" type="submit"/>
+	<input id="hue_scan" value="Hue Scan" type="submit"/>
 </body>
 </html>
