@@ -4,7 +4,7 @@ import argparse
 import logging
 import time
 
-from pi import pushrpc, rfswitch, zwave
+from pi import hue, pushrpc, rfswitch, zwave
 
 
 LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
@@ -17,6 +17,7 @@ class Control(object):
     self._proxies = {
         'rfswitch': rfswitch.RFSwitch(args.rfswtich_pin),
         'zwave': zwave.ZWave(args.zwave_device, self._device_event_callback),
+        'hue': hue.Hue(self._device_event_callback),
     }
 
     self._pusher = pushrpc.PushRPC(self._push_event_callback)
