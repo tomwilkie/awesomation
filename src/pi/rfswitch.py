@@ -18,9 +18,8 @@ class RFSwitch(object):
     device_code = int(message["device_code"])
     mode = message["mode"]
 
-    logging.info('system_code = %s (%s), device_code = %s (%s), mode = %s',
-                 system_code, type(system_code), device_code,
-                 type(device_code), mode)
+    logging.info('system_code = %s, device_code = %s, mode = %s',
+                 system_code, device_code, mode)
 
     if mode:
       self._switch.switchOn(system_code, device_code)
