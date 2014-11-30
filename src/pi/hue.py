@@ -10,7 +10,8 @@ import phue
 class Hue(object):
   """Hue proxy object."""
 
-  def __init__(self, callback):
+  def __init__(self, refresh_period, callback):
+    self._refresh_period = refresh_period
     self._callback = callback
     self._bridges = {}
 
@@ -33,7 +34,7 @@ class Hue(object):
         logging.error('Error during bridge scan', exc_info=sys.exc_info())
 
       with self._bridge_scan_thread_condition:
-        self._bridge_scan_thread_condition.wait()
+        self._bridge_scan_thread_condition.wait(self._refresh_period)
         if self._exiting:
           break
     logging.info('Exiting scan thread')
