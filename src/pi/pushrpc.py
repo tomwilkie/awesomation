@@ -9,22 +9,21 @@ import threading
 
 from common import creds
 from pusherclient import Pusher
+import requests
+
+EVENT_URL = 'https://%s.appspot.com/api/device/events' % creds.appengine_app_id
 
 
 def _post_events_once(events):
   """Send list of events to server."""
   logging.info('Posting %d events to server', len(events))
 
-  body = json.dumps(events)
-  headers = {'Content-type': 'application/json',
-             'Accept': 'text/plain'}
-  conn = httplib.HTTPSConnection('%s.appspot.com' % creds.appengine_app_id)
-  conn.request('POST', '/api/device/events', body, headers)
-  response = conn.getresponse()
-  if not 200 <= response.status < 300:
-    logging.error('Response %d from server - \'%s\'',
-                  response.status, response.reason)
-  conn.close()
+  response = requests.post(EVENT_URL, data=json.dumps(events),
+                       headers={'content-type': 'application/json'})
+  try:
+    response.raise_for_status()
+  except:
+    logging.error('Posting events failed', exc_info=sys.exc_info())
 
 
 class PushRPC(object):

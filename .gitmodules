@@ -43,3 +43,6 @@
 [submodule "third_party/py/pusher_client_python"]
 	path = third_party/py/pusher_client_python
 	url = https://github.com/pusher/pusher_client_python.git
+[submodule "third_party/py/requests"]
+	path = third_party/py/requests
+	url = https://github.com/kennethreitz/requests.git
