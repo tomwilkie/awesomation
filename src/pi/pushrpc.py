@@ -66,13 +66,14 @@ class PushRPC(object):
   def send_event(self, event):
     self._events.put(event)
 
-  def _get_batch_of_events(self):
+  def _get_batch_of_events(self, max_size=20):
     """Retrieve as many events from queue as possible without blocking."""
     events = []
-    while True:
+    while len(events) < max_size:
       try:
         # First time round we should wait (when list is empty)
-        event = self._events.get(len(events) == 0)
+        block = len(events) == 0
+        event = self._events.get(block)
 
         # To break out of this thread, we inject a None event in stop()
         if event is None:
