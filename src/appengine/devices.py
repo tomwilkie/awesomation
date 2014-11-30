@@ -1,6 +1,6 @@
 """Factory for creating devices."""
 
-from appengine import door, ios, rfswitch, zwave
+from appengine import door, hue, ios, rfswitch, zwave
 
 
 def create_device(device_id, device_type, user_id):
@@ -16,6 +16,9 @@ def create_device(device_id, device_type, user_id):
         id='%s-%s' % (user_id, device_id), owner=user_id)
   elif device_type == 'rfswitch':
     return rfswitch.RFSwitch(
+        id='%s-%s' % (user_id, device_id), owner=user_id)
+  elif device_type == 'hue_bridge':
+    return hue.HueBridge(
         id='%s-%s' % (user_id, device_id), owner=user_id)
   else:
     assert False
