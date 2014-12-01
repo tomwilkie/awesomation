@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
 import flask
 
 from appengine import device, room, user
+from appengine.devices import *
 
 
 def static_dir():

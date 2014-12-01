@@ -3,27 +3,88 @@ import logging
 
 from google.appengine.api import namespace_manager
 from google.appengine.ext import db
+from google.appengine.ext import ndb
 
 import flask
 
-from appengine import model, hue, rfswitch, user, zwave
+from appengine import model, user
+from appengine import room as room_module
 
-# pylint: disable=invalid-name
-blueprint = flask.Blueprint('device', __name__)
+
+DEVICE_TYPES = {}
+
+
+def command(func):
+  """Device command decorator - automatically dispatches methods."""
+  func.is_command = True
+  return func
+
+
+def register(device_type):
+  """Decorator to cause device types to be registered."""
+  def class_rebuilder(cls):
+    DEVICE_TYPES[device_type] = cls
+    return cls
+  return class_rebuilder
 
 
 def create_device(device_id, device_type, user_id):
   """Factory for creating new devices."""
-  if device_type == 'zwave':
-    return zwave.ZWaveDevice(id=device_id, owner=user_id)
-  elif device_type == 'rfswitch':
-    return rfswitch.RFSwitch(id=device_id, owner=user_id)
-  elif device_type == 'hue_bridge':
-    return hue.HueBridge(id=device_id, owner=user_id)
-  elif device_type == 'hue_light':
-    return hue.HueLight(id=device_id, owner=user_id)
-  else:
-    assert False
+  constructor = DEVICE_TYPES.get(device_type, None)
+  if constructor is None:
+    flask.abort(400)
+  return constructor(id=device_id, owner=user_id)
+
+
+class Device(model.Base):
+  """Base class for all device drivers."""
+  owner = ndb.StringProperty(required=True)
+  name = ndb.StringProperty(required=False)
+  last_update = ndb.DateTimeProperty(required=False, auto_now=True)
+  room = ndb.KeyProperty()
+
+  def handle_event(self, event):
+    pass
+
+  def handle_command(self, command_dict):
+    """Dispatch command to appropriate handler."""
+    logging.info(command_dict)
+    func_name = command_dict.pop('command', None)
+    func = getattr(self, func_name, None)
+    if func is None or not func.is_command:
+      logging.error('Command %s does not exist or is not a command',
+                    func_name)
+      flask.abort(400)
+    func(**command_dict)
+
+  @command
+  def set_room(self, room_id):
+    """Change the room associated with this device."""
+    room = room_module.Room.get_by_id(room_id)
+    if not room:
+      flask.abort(404)
+    room.devices.append(self.key)
+    room.put()
+
+    self.room = room.key
+    self.put()
+
+
+class Switch(Device):
+  """A swtich."""
+  state = ndb.BooleanProperty()
+
+  @command
+  def turn_on(self):
+    pass
+
+  @command
+  def turn_off(self):
+    pass
+
+
+# pylint: disable=invalid-name
+blueprint = flask.Blueprint('device', __name__)
 
 
 @blueprint.route('/events', methods=['POST'])
@@ -45,7 +106,7 @@ def handle_events():
     if device_id in device_cache:
       device = device_cache[device_id]
     else:
-      device = model.Device.get_by_id(device_id)
+      device = Device.get_by_id(device_id)
       if not device:
         device = create_device(device_id, device_type, user_id)
       device_cache[device_id] = device
@@ -61,7 +122,7 @@ def handle_events():
 @blueprint.route('/', methods=['GET'])
 def list_devices():
   """Return json list of devices."""
-  device_list = model.Device.query().iter()
+  device_list = Device.query().iter()
   if device_list is None:
     device_list = []
 
@@ -77,7 +138,7 @@ def create_update_device(device_id):
   if body is None:
     flask.abort(400, 'JSON body and mime type required.')
 
-  device = model.Device.get_by_id(device_id)
+  device = Device.get_by_id(device_id)
 
   if not device:
     device_type = body.pop('type', None)
@@ -109,7 +170,7 @@ def create_update_device(device_id):
 def get_device(device_id):
   """Return json repr of given device."""
   user_id = user.get_user()
-  device = model.Device.get_by_id(device_id)
+  device = Device.get_by_id(device_id)
 
   if not device:
     flask.abort(404)
@@ -127,7 +188,7 @@ def device_command(device_id):
   if body is None:
     flask.abort(400, 'JSON body and mime type required.')
 
-  device = model.Device.get_by_id(device_id)
+  device = Device.get_by_id(device_id)
 
   if not device:
     flask.abort(404)
@@ -137,3 +198,4 @@ def device_command(device_id):
   device.handle_command(body)
 
   return ('', 204)
+

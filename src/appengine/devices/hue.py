@@ -5,14 +5,15 @@ import re
 
 from google.appengine.ext import ndb
 
-from appengine import model, pushrpc
+from appengine import device, pushrpc
 
 
-class HueBridge(model.Device):
+@device.register('hue_bridge')
+class HueBridge(device.Device):
   """A hue bridge."""
   linked = ndb.BooleanProperty(required=True)
 
-  @model.Command
+  @device.command
   def scan(self):
     event = {'type': 'hue', 'command': 'scan'}
     pushrpc.send_event(self.owner, event)
@@ -29,17 +30,18 @@ class HueBridge(model.Device):
 LIGHT_ID_RE = re.compile(r'hue-([0-9a-f]+)-([0-9]+)')
 
 
-class HueLight(model.Switch):
+@device.register('hue_light')
+class HueLight(device.Switch):
   """A hue light."""
   hue_type = ndb.StringProperty()
   hue_model_id = ndb.StringProperty()
 
-  @model.Command
+  @device.command
   def turn_on(self):
     self.state = True
     self._set_state(True)
 
-  @model.Command
+  @device.command
   def turn_off(self):
     self.state = False
     self._set_state(False)

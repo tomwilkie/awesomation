@@ -1,10 +1,18 @@
 """ROOMs"""
 
 from google.appengine.ext import db
+from google.appengine.ext import ndb
 
 import flask
 
 from appengine import user, model
+
+
+class Room(model.Base):
+  """A room in a property."""
+  owner = ndb.StringProperty(required=True)
+  name = ndb.StringProperty(required=False)
+  devices = ndb.KeyProperty(repeated=True)
 
 
 # pylint: disable=invalid-name
@@ -13,7 +21,7 @@ blueprint = flask.Blueprint('room', __name__)
 @blueprint.route('/', methods=['GET'])
 def get_rooms():
   """Return json list of devices."""
-  room_list = model.Room.query().iter()
+  room_list = Room.query().iter()
   if room_list is None:
     room_list = []
 
@@ -29,10 +37,10 @@ def create_update_room(room_id):
   if body is None:
     flask.abort(400, 'JSON body and mime type required.')
 
-  room = model.Room.get_by_id(room_id)
+  room = Room.get_by_id(room_id)
 
   if not room:
-    room = model.Room(id=room_id, owner=user_id)
+    room = Room(id=room_id, owner=user_id)
 
   elif room.owner != user_id:
     flask.abort(403)

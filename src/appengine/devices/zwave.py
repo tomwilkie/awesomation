@@ -4,7 +4,7 @@ import logging
 
 from google.appengine.ext import ndb
 
-from appengine import model
+from appengine import device
 
 
 class CommandClassValue(ndb.Model):
@@ -20,7 +20,8 @@ class CommandClassValue(ndb.Model):
   type = ndb.StringProperty()
 
 
-class ZWaveDevice(model.Device):
+@device.register('zwave')
+class ZWaveDevice(device.Device):
   """Generic Z Wave device driver."""
   zwave_node_id = ndb.IntegerProperty(required=False)
   zwave_home_id = ndb.IntegerProperty(required=False)
@@ -70,14 +71,15 @@ class ZWaveDevice(model.Device):
     elif notification_type == 'NodeNaming':
       logging.info(event)
 
-  @model.Command
+  @device.command
   def lights(self, state):
     """Turn the lights on/off in the room this sensor is in."""
     room_key = self.room
     if not room_key:
       return
 
-    switches = model.Switch.query().filter(model.Device.room == room_key).iter()
+    switches = device.Switch.query().filter(
+        device.Device.room == room_key).iter()
     for switch in switches:
       if state:
         switch.turn_on()

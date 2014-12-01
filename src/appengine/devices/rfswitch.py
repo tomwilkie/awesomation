@@ -2,10 +2,11 @@
 
 from google.appengine.ext import ndb
 
-from appengine import model, pushrpc
+from appengine import device, pushrpc
 
 
-class RFSwitch(model.Switch):
+@device.register('rfswitch')
+class RFSwitch(device.Switch):
   """A 433mhz rf switch."""
   system_code = ndb.StringProperty(required=True)
   device_code = ndb.IntegerProperty(required=True)
@@ -15,12 +16,12 @@ class RFSwitch(model.Switch):
              'device_code': self.device_code, 'mode': value}
     pushrpc.send_event(self.owner, event)
 
-  @model.Command
+  @device.command
   def turn_on(self):
     self.state = True
     self._set_value(True)
 
-  @model.Command
+  @device.command
   def turn_off(self):
     self.state = False
     self._set_value(False)
