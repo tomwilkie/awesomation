@@ -46,7 +46,7 @@ class HueLight(model.Switch):
 
   def _set_state(self, state):
     """Update the state of a light."""
-    match = LIGHT_ID_RE.match(self.get_id())
+    match = LIGHT_ID_RE.match(self.key.id())
     bridge_id = match.group(1)
     device_id = match.group(2)
 

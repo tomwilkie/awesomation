@@ -13,8 +13,7 @@ blueprint = flask.Blueprint('room', __name__)
 @blueprint.route('/', methods=['GET'])
 def get_rooms():
   """Return json list of devices."""
-  user_id = user.get_user()
-  room_list = model.Room.query(model.Room.owner == user_id).iter()
+  room_list = model.Room.query().iter()
   if room_list is None:
     room_list = []
 
@@ -30,10 +29,10 @@ def create_update_room(room_id):
   if body is None:
     flask.abort(400, 'JSON body and mime type required.')
 
-  room = model.Room.get_by_id('%s-%s' % (user_id, room_id))
+  room = model.Room.get_by_id(room_id)
 
   if not room:
-    room = model.Room(id='%s-%s' % (user_id, room_id), owner=user_id)
+    room = model.Room(id=room_id, owner=user_id)
 
   elif room.owner != user_id:
     flask.abort(403)

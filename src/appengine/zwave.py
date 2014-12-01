@@ -5,7 +5,6 @@ import logging
 from google.appengine.ext import ndb
 
 from appengine import model
-from appengine import rfswitch
 
 
 class CommandClassValue(ndb.Model):
@@ -66,14 +65,21 @@ class ZWaveDevice(model.Device):
                    command_class, index, value)
 
       if command_class == 'COMMAND_CLASS_SENSOR_BINARY':
-        switches = rfswitch.RFSwitch.query(
-            model.Device.owner == self.owner).iter()
-        for switch in switches:
-          if value['value']:
-            switch.turn_on()
-          else:
-            switch.turn_off()
+        self.lights(value['value'])
 
     elif notification_type == 'NodeNaming':
       logging.info(event)
 
+  @model.Command
+  def lights(self, state):
+    """Turn the lights on/off in the room this sensor is in."""
+    room_key = self.room
+    if not room_key:
+      return
+
+    switches = model.Switch.query().filter(model.Device.room == room_key).iter()
+    for switch in switches:
+      if state:
+        switch.turn_on()
+      else:
+        switch.turn_off()

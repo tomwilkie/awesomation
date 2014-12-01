@@ -5,7 +5,7 @@ import datetime
 import os
 import sys
 
-from google.appengine.api import users
+from google.appengine.api import namespace_manager, users
 from google.appengine.ext import ndb
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
@@ -64,5 +64,8 @@ def before_request():
   if flask.request.endpoint in {'device.handle_events'}:
     return
 
-  if not users.get_current_user():
+  user_object = users.get_current_user()
+  if not user_object:
     return flask.redirect(users.create_login_url(flask.request.url))
+
+  namespace_manager.set_namespace(user_object.user_id())

@@ -1,6 +1,5 @@
 """Base classes for my data model."""
 
-import functools
 import logging
 
 from google.appengine.ext import ndb
@@ -39,15 +38,10 @@ class Room(Base):
   devices = ndb.KeyProperty(repeated=True)
 
 
-class Command(object):
+def Command(func):
   """Device command decorator - automatically dispatches methods."""
-
-  def __init__(self, wrapped):
-    self.wrapped = wrapped
-    functools.update_wrapper(self, wrapped)
-
-  def __call__(self, *args, **kwargs):
-    return self.wrapped(*args, **kwargs)
+  func.is_command = True
+  return func
 
 
 class Device(Base):
@@ -65,24 +59,16 @@ class Device(Base):
     logging.info(command)
     func_name = command.pop('command', None)
     func = getattr(self, func_name, None)
-    if func is None or not isinstance(func, Command):
+    if func is None or not func.is_command:
       logging.error('Command %s does not exist or is not a command',
                     func_name)
       flask.abort(400)
-    func(self, **command)
-
-  def get_id(self):
-    return self.key.string_id().split('-', 1)[1]
-
-  def to_dict(self):
-    result = Base.to_dict(self)
-    result['id'] = self.get_id()
-    return result
+    func(**command)
 
   @Command
   def set_room(self, room_id):
     """Change the room associated with this device."""
-    room = Room.get_by_id('%s-%s' % (self.owner, room_id))
+    room = Room.get_by_id(room_id)
     if not room:
       flask.abort(404)
     room.devices.append(self.key)

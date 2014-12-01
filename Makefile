@@ -62,7 +62,7 @@ third_party := $(shell find third_party/py/* -maxdepth 0 -type d | sed 's,^[^/]*
 $(foreach dir,$(third_party),$(eval $(call THIRD_PARTY_template,$(dir))))
 py_files := $(patsubst src/%,dist/%,$(shell find src -name *.py))
 third_party_files := $(shell find third_party/py -name *.py \
-	| egrep -v "example|doc|setup|testsuite|tests"		\
+	| egrep -v "example|doc|setup|testsuite"		\
 	| sed 's,^third_party/[^/]*/[^/]*/,,'				\
 	| egrep -v "^__init__.py" | tr "\\n" " ")
 third_party_files := $(patsubst %,dist/third_party/%,$(third_party_files))

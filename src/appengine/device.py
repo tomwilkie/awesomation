@@ -1,6 +1,7 @@
 """Factory for creating devices."""
 import logging
 
+from google.appengine.api import namespace_manager
 from google.appengine.ext import db
 
 import flask
@@ -14,17 +15,13 @@ blueprint = flask.Blueprint('device', __name__)
 def create_device(device_id, device_type, user_id):
   """Factory for creating new devices."""
   if device_type == 'zwave':
-    return zwave.ZWaveDevice(
-        id='%s-%s' % (user_id, device_id), owner=user_id)
+    return zwave.ZWaveDevice(id=device_id, owner=user_id)
   elif device_type == 'rfswitch':
-    return rfswitch.RFSwitch(
-        id='%s-%s' % (user_id, device_id), owner=user_id)
+    return rfswitch.RFSwitch(id=device_id, owner=user_id)
   elif device_type == 'hue_bridge':
-    return hue.HueBridge(
-        id='%s-%s' % (user_id, device_id), owner=user_id)
+    return hue.HueBridge(id=device_id, owner=user_id)
   elif device_type == 'hue_light':
-    return hue.HueLight(
-        id='%s-%s' % (user_id, device_id), owner=user_id)
+    return hue.HueLight(id=device_id, owner=user_id)
   else:
     assert False
 
@@ -33,6 +30,8 @@ def create_device(device_id, device_type, user_id):
 def handle_events():
   """Handle events from devices."""
   user_id = '102063417381751091397'
+  namespace_manager.set_namespace(user_id)
+
   events = flask.request.get_json()
   logging.info('Processing %d events', len(events))
 
@@ -46,7 +45,7 @@ def handle_events():
     if device_id in device_cache:
       device = device_cache[device_id]
     else:
-      device = model.Device.get_by_id('%s-%s' % (user_id, device_id))
+      device = model.Device.get_by_id(device_id)
       if not device:
         device = create_device(device_id, device_type, user_id)
       device_cache[device_id] = device
@@ -62,8 +61,7 @@ def handle_events():
 @blueprint.route('/', methods=['GET'])
 def list_devices():
   """Return json list of devices."""
-  user_id = user.get_user()
-  device_list = model.Device.query(model.Device.owner == user_id).iter()
+  device_list = model.Device.query().iter()
   if device_list is None:
     device_list = []
 
@@ -79,7 +77,7 @@ def create_update_device(device_id):
   if body is None:
     flask.abort(400, 'JSON body and mime type required.')
 
-  device = model.Device.get_by_id('%s-%s' % (user_id, device_id))
+  device = model.Device.get_by_id(device_id)
 
   if not device:
     device_type = body.pop('type', None)
@@ -111,7 +109,7 @@ def create_update_device(device_id):
 def get_device(device_id):
   """Return json repr of given device."""
   user_id = user.get_user()
-  device = model.Device.get_by_id('%s-%s' % (user_id, device_id))
+  device = model.Device.get_by_id(device_id)
 
   if not device:
     flask.abort(404)
@@ -129,7 +127,7 @@ def device_command(device_id):
   if body is None:
     flask.abort(400, 'JSON body and mime type required.')
 
-  device = model.Device.get_by_id('%s-%s' % (user_id, device_id))
+  device = model.Device.get_by_id(device_id)
 
   if not device:
     flask.abort(404)
