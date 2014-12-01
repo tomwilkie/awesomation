@@ -32,6 +32,13 @@ class Account(Base):
   oauth_refresh_token = ndb.StringProperty(required=False)
 
 
+class Room(Base):
+  """A room in a property."""
+  owner = ndb.StringProperty(required=True)
+  name = ndb.StringProperty(required=False)
+  devices = ndb.KeyProperty(repeated=True)
+
+
 class Command(object):
   """Device command decorator - automatically dispatches methods."""
 
@@ -48,6 +55,7 @@ class Device(Base):
   owner = ndb.StringProperty(required=True)
   name = ndb.StringProperty(required=False)
   last_update = ndb.DateTimeProperty(required=False, auto_now=True)
+  room = ndb.KeyProperty()
 
   def handle_event(self, event):
     pass
@@ -55,13 +63,13 @@ class Device(Base):
   def handle_command(self, command):
     """Dispatch command to appropriate handler."""
     logging.info(command)
-    func_name = command.get('command', None)
+    func_name = command.pop('command', None)
     func = getattr(self, func_name, None)
     if func is None or not isinstance(func, Command):
       logging.error('Command %s does not exist or is not a command',
                     func_name)
       flask.abort(400)
-    func(self)
+    func(self, **command)
 
   def get_id(self):
     return self.key.string_id().split('-', 1)[1]
@@ -70,6 +78,18 @@ class Device(Base):
     result = Base.to_dict(self)
     result['id'] = self.get_id()
     return result
+
+  @Command
+  def set_room(self, room_id):
+    """Change the room associated with this device."""
+    room = Room.get_by_id('%s-%s' % (self.owner, room_id))
+    if not room:
+      flask.abort(404)
+    room.devices.append(self.key)
+    room.put()
+
+    self.room = room.key
+    self.put()
 
 
 class Switch(Device):

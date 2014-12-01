@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
 
 import flask
 
-from appengine import devices, user
+from appengine import devices, room, user
 
 
 def static_dir():
@@ -40,6 +40,7 @@ app.debug = True
 app.json_encoder = CustomJSONEncoder
 app.register_blueprint(user.blueprint, url_prefix='/api/user')
 app.register_blueprint(devices.blueprint, url_prefix='/api/device')
+app.register_blueprint(room.blueprint, url_prefix='/api/room')
 
 
 @app.errorhandler(400)

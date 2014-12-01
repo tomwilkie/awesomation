@@ -102,14 +102,12 @@ def create_update_device(device_id):
   try:
     device.populate(**body)
   except AttributeError, err:
-    logging.info(err.__dict__)
     flask.abort(400)
 
   # Put the object - BadValueError if there are uninitalised required fields
   try:
     device.put()
   except db.BadValueError, err:
-    logging.info(err.__dict__)
     flask.abort(400)
 
   return flask.jsonify(**device.to_dict())

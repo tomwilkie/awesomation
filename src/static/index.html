@@ -10,27 +10,22 @@
   <script src="/static/sprintf.js"></script>
   <script>
 $(function() {
-  $("input#new_account").click(function() {
-    $.ajax("/api/account", {
+  function send_json(url, body) {
+    $.ajax(url, {
       method: "post",
-      data: JSON.stringify({
-        type: "netatmo"
-      })
-    });
-  });
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(body)
+    })
+  }
 
   $("input#new_device").click(function() {
     var device_id = "office_lamp_1";
-
-    $.ajax(sprintf("/api/device/%s", device_id), {
-      method: "post",
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify({
+    send_json(sprintf("/api/device/%s", device_id),
+      {
         type: "rfswitch",
         system_code: "01010",
         device_code: 1
-      })
-    })
+      });
   });
 
   $("input#lamp_on").click(function() {
@@ -86,11 +81,32 @@ $(function() {
       })
     })
   });
+
+  $("input#new_room1").click(function() {
+    send_json(sprintf("/api/room/office"),
+      {
+        name: "Office",
+      });
+  });
+
+  $("input#new_room2").click(function() {
+    send_json(sprintf("/api/room/cinema"),
+      {
+        name: "Home Cinema",
+      });
+  });
+
+
+  $("input#new_room2").click(function() {
+    send_json(sprintf("/api/room/cinema"),
+      {
+        name: "Home Cinema",
+      });
+  });
 });
   </script>
 </head>
 <body>
-  <input id="new_account" value="New Account" type="submit"/>
 	<input id="new_device" value="New Device" type="submit"/>
 	<input id="lamp_on" value="Lamp On" type="submit"/>
 	<input id="lamp_off" value="Lamp Off" type="submit"/>
@@ -99,5 +115,9 @@ $(function() {
 	<input id="hue_scan" value="Hue Scan" type="submit"/>
 	<input id="hue_on" value="Hue On" type="submit"/>
 	<input id="hue_off" value="Hue Off" type="submit"/>
+
+  <br/>
+  <input id="new_room1" value="Create Office Room" type="submit"/>
+  <input id="new_room2" value="Create Home Cinema Room" type="submit"/>
 </body>
 </html>
