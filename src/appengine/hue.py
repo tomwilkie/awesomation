@@ -12,12 +12,10 @@ class HueBridge(model.Device):
   """A hue bridge."""
   linked = ndb.BooleanProperty(required=True)
 
-  def handle_command(self, command):
-    if command['command'] == 'scan':
-      event = {'type': 'hue', 'command': 'scan'}
-      pushrpc.send_event(self.owner, event)
-    else:
-      logging.error('Unknown command %s', command['type'])
+  @model.Command
+  def scan(self):
+    event = {'type': 'hue', 'command': 'scan'}
+    pushrpc.send_event(self.owner, event)
 
   def handle_event(self, event):
     """Handle a device update event."""
@@ -31,13 +29,23 @@ class HueBridge(model.Device):
 LIGHT_ID_RE = re.compile(r'hue-([0-9a-f]+)-([0-9]+)')
 
 
-class HueLight(model.Device):
+class HueLight(model.Switch):
   """A hue light."""
-  state = ndb.BooleanProperty()
   hue_type = ndb.StringProperty()
   hue_model_id = ndb.StringProperty()
 
-  def handle_command(self, command):
+  @model.Command
+  def turn_on(self):
+    self.state = True
+    self._set_state(True)
+
+  @model.Command
+  def turn_off(self):
+    self.state = False
+    self._set_state(False)
+
+  def _set_state(self, state):
+    """Update the state of a light."""
     match = LIGHT_ID_RE.match(self.get_id())
     bridge_id = match.group(1)
     device_id = match.group(2)
@@ -46,7 +54,7 @@ class HueLight(model.Device):
              'command': 'light',
              'bridge_id': bridge_id,
              'device_id': device_id,
-             'mode': command['command'] == 'on'}
+             'mode': state}
     pushrpc.send_event(self.owner, event)
 
   def handle_event(self, event):

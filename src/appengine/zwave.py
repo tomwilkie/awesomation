@@ -69,7 +69,10 @@ class ZWaveDevice(model.Device):
         switches = rfswitch.RFSwitch.query(
             model.Device.owner == self.owner).iter()
         for switch in switches:
-          switch.set_value(value['value'])
+          if value['value']:
+            switch.turn_on()
+          else:
+            switch.turn_off()
 
     elif notification_type == 'NodeNaming':
       logging.info(event)

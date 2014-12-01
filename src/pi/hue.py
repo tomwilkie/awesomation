@@ -26,6 +26,7 @@ class Hue(object):
       self._bridge_scan_thread_condition.notify()
 
   def _bridge_scan(self):
+    """Loop thread for scanning."""
     while not self._exiting:
       # We always do a scan on start up.
       try:
@@ -41,7 +42,6 @@ class Hue(object):
 
   def _bridge_scan_once(self):
     """Find hue hubs on the network and tell appengine about them."""
-    # pylint: disable=bare-except
     logging.info('Starting hue bridge scan')
     response = requests.get('https://www.meethue.com/api/nupnp')
     assert response.status_code == 200, response.status_code
@@ -68,10 +68,10 @@ class Hue(object):
     # Now find all the lights
     for bridge_id, bridge in self._bridges.iteritems():
       lights_by_id = bridge.get_light_objects(mode='id')
-      for light_id, light in lights_by_id.iteritems():
+      for light_id in lights_by_id.iterkeys():
         event = bridge.get_light(light_id)
-        logging.info('Hue light %d (\'%s\') found on bridge \'%s\'',
-                     light_id, event['name'], bridge_id)
+        logging.info('Hue light %d (\'%s\') found on bridge \'%s\', on=%s',
+                     light_id, event['name'], bridge_id, event['state']['on'])
 
         light_id = 'hue-%s-%d' % (bridge_id, light_id)
         self._callback('hue_light', light_id, event)
@@ -83,7 +83,7 @@ class Hue(object):
     mode = message["mode"]
 
     logging.info('bridge_id = %s, device_id = %s, mode = %s',
-                  bridge_id, device_id, mode)
+                 bridge_id, device_id, mode)
 
     bridge = self._bridges.get(bridge_id, None)
     light = bridge[device_id]
@@ -98,7 +98,7 @@ class Hue(object):
     elif command == 'scan':
       self._trigger_bridge_scan()
     else:
-      logging.info('Unhandled message type \'%s\'', message_type)
+      logging.info('Unhandled message type \'%s\'', command)
 
   def stop(self):
     self._exiting = True
