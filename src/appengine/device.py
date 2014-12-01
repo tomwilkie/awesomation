@@ -5,21 +5,15 @@ from google.appengine.ext import db
 
 import flask
 
-from appengine import model, door, hue, ios, rfswitch, user, zwave
+from appengine import model, hue, rfswitch, user, zwave
 
 # pylint: disable=invalid-name
-blueprint = flask.Blueprint('devices', __name__)
+blueprint = flask.Blueprint('device', __name__)
 
 
 def create_device(device_id, device_type, user_id):
-
-  if device_type == 'ios':
-    return ios.IosDevice(
-        id='%s-%s' % (user_id, device_id), owner=user_id)
-  elif device_type == 'door':
-    return door.Door(
-        id='%s-%s' % (user_id, device_id), owner=user_id)
-  elif device_type == 'zwave':
+  """Factory for creating new devices."""
+  if device_type == 'zwave':
     return zwave.ZWaveDevice(
         id='%s-%s' % (user_id, device_id), owner=user_id)
   elif device_type == 'rfswitch':
@@ -36,7 +30,7 @@ def create_device(device_id, device_type, user_id):
 
 
 @blueprint.route('/events', methods=['POST'])
-def device_events():
+def handle_events():
   """Handle events from devices."""
   user_id = '102063417381751091397'
   events = flask.request.get_json()

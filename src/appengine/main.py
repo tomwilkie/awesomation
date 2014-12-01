@@ -6,12 +6,13 @@ import os
 import sys
 
 from google.appengine.api import users
+from google.appengine.ext import ndb
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
 
 import flask
 
-from appengine import devices, room, user
+from appengine import device, room, user
 
 
 def static_dir():
@@ -30,6 +31,10 @@ class CustomJSONEncoder(flask.json.JSONEncoder):
           obj.microsecond / 1000)
 
       return millis
+
+    elif isinstance(obj, ndb.Key):
+      return obj.string_id()
+
     else:
       return flask.json.JSONEncoder.default(self, obj)
 
@@ -39,7 +44,7 @@ app = flask.Flask('domics', static_folder=static_dir())
 app.debug = True
 app.json_encoder = CustomJSONEncoder
 app.register_blueprint(user.blueprint, url_prefix='/api/user')
-app.register_blueprint(devices.blueprint, url_prefix='/api/device')
+app.register_blueprint(device.blueprint, url_prefix='/api/device')
 app.register_blueprint(room.blueprint, url_prefix='/api/room')
 
 
@@ -56,9 +61,8 @@ def root():
 @app.before_request
 def before_request():
   """Ensure user is authenticated."""
-  if flask.request.endpoint in {'device_events'}:
+  if flask.request.endpoint in {'device.handle_events'}:
     return
 
   if not users.get_current_user():
     return flask.redirect(users.create_login_url(flask.request.url))
-
