@@ -8,9 +8,10 @@ import rcswitch
 class RFSwitch(object):
   """433mhz RF Switch proxy implementation."""
 
-  def __init__(self, pin):
+  def __init__(self, pin, repeats=5):
     self._switch = rcswitch.RCSwitch()
     self._switch.enableTransmit(pin)
+    self._repeats = repeats
 
   def handle_event(self, message):
     """Handle rf swtich events - turn it on or off."""
@@ -21,10 +22,11 @@ class RFSwitch(object):
     logging.info('system_code = %s, device_code = %s, mode = %s',
                  system_code, device_code, mode)
 
-    if mode:
-      self._switch.switchOn(system_code, device_code)
-    else:
-      self._switch.switchOff(system_code, device_code)
+    for _ in xrange(self._repeats):
+      if mode:
+        self._switch.switchOn(system_code, device_code)
+      else:
+        self._switch.switchOff(system_code, device_code)
 
   def stop(self):
     pass
