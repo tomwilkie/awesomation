@@ -49,3 +49,6 @@
 [submodule "third_party/py/ouimeaux"]
 	path = third_party/py/ouimeaux
 	url = https://github.com/iancmcc/ouimeaux.git
+[submodule "third_party/static/bootstrap"]
+	path = third_party/static/bootstrap
+	url = https://github.com/twbs/bootstrap.git
