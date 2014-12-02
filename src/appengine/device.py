@@ -32,6 +32,7 @@ def create_device(device_id, device_type, user_id):
   """Factory for creating new devices."""
   constructor = DEVICE_TYPES.get(device_type, None)
   if constructor is None:
+    logging.error('No device type \'%s\'', device_type)
     flask.abort(400)
   return constructor(id=device_id, owner=user_id)
 
@@ -137,6 +138,7 @@ def create_update_device(device_id):
   body = flask.request.get_json()
   if body is None:
     flask.abort(400, 'JSON body and mime type required.')
+  logging.info("Creating (or updating) device - %s", body)
 
   device = Device.get_by_id(device_id)
 

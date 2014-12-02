@@ -49,9 +49,9 @@ app.register_blueprint(device.blueprint, url_prefix='/api/device')
 app.register_blueprint(room.blueprint, url_prefix='/api/room')
 
 
-@app.errorhandler(400)
-def custom400(error):
-  return flask.jsonify({'message': error.description})
+#@app.errorhandler(400)
+#def custom400(error):
+#  return flask.jsonify({'message': error.description})
 
 
 @app.route('/')
