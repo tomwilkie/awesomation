@@ -14,6 +14,7 @@ class Hue(object):
     self._refresh_period = refresh_period
     self._callback = callback
     self._bridges = {}
+    self._lights = {}
 
     self._exiting = False
     self._bridge_scan_thread_condition = threading.Condition()
@@ -53,28 +54,37 @@ class Hue(object):
 
       # Event explicity doesn't contain ip (it might change)
       # or id (its in the device path)
-      event = {'name': bridge_name}
+      event = None
       try:
-        self._bridges[bridge_id] = phue.Bridge(ip=bridge_ip)
-        event['linked'] = True
+        bridge = phue.Bridge(ip=bridge_ip)
+
+        if bridge_id not in self._bridges:
+          self._bridges[bridge_id] = bridge
+          event = {'name': bridge_name, 'linked': True}
       except phue.PhueRegistrationException:
-        event['linked'] = False
+        if bridge_id in self._bridges:
+          del self._bridges[bridge_id]
+          event = {'name': bridge_name, 'linked': False}
 
-      logging.info('Hue bridge \'%s\' (%s) found at %s - linked=%s',
-                   bridge_name, bridge_id, bridge_ip, event['linked'])
+      if event is not None:
+        logging.debug('Hue bridge \'%s\' (%s) found at %s - linked=%s',
+                      bridge_name, bridge_id, bridge_ip, event['linked'])
 
-      self._callback('hue_bridge', 'hue-%s' % bridge_id, event)
+        self._callback('hue_bridge', 'hue-%s' % bridge_id, event)
 
     # Now find all the lights
     for bridge_id, bridge in self._bridges.iteritems():
       lights_by_id = bridge.get_light_objects(mode='id')
       for light_id in lights_by_id.iterkeys():
-        event = bridge.get_light(light_id)
-        logging.info('Hue light %d (\'%s\') found on bridge \'%s\', on=%s',
-                     light_id, event['name'], bridge_id, event['state']['on'])
+        light_details = bridge.get_light(light_id)
+        logging.debug('Hue light %d (\'%s\') found on bridge \'%s\', on=%s',
+                      light_id, light_details['name'], bridge_id,
+                      light_details['state']['on'])
 
         light_id = 'hue-%s-%d' % (bridge_id, light_id)
-        self._callback('hue_light', light_id, event)
+        if self._lights.get(light_id, None) != light_details:
+          self._callback('hue_light', light_id, light_details)
+          self._lights[light_id] = light_details
 
   def _set_light(self, message):
     """Turn a light on or off."""
