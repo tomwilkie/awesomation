@@ -46,9 +46,10 @@
 [submodule "third_party/py/requests"]
 	path = third_party/py/requests
 	url = https://github.com/kennethreitz/requests.git
-[submodule "third_party/py/ouimeaux"]
-	path = third_party/py/ouimeaux
-	url = https://github.com/iancmcc/ouimeaux.git
 [submodule "third_party/static/bootstrap"]
 	path = third_party/static/bootstrap
 	url = https://github.com/twbs/bootstrap.git
+[submodule "third_party/py/wemo"]
+	path = third_party/py/wemo
+	url = https://github.com/iancmcc/wemo.git
+

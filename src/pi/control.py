@@ -4,7 +4,7 @@ import argparse
 import logging
 import time
 
-from pi import hue, pushrpc, rfswitch, zwave
+from pi import hue, pushrpc, rfswitch, wemo_proxy, zwave
 
 
 LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
@@ -19,6 +19,8 @@ class Control(object):
         'zwave': zwave.ZWave(args.zwave_device, self._device_event_callback),
         'hue': hue.Hue(args.hue_scan_interval_secs,
                        self._device_event_callback),
+        'wemo': wemo_proxy.Wemo(args.hue_scan_interval_secs,
+                                self._device_event_callback)
     }
 
     self._pusher = pushrpc.PushRPC(self._push_event_callback)
