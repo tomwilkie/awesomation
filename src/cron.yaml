@@ -1,0 +1,4 @@
+cron:
+- description: 5 minute update cycle
+  url: /tasks/update
+  schedule: every 5 minutes

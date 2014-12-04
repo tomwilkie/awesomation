@@ -9,6 +9,10 @@ handlers:
   script: appengine.main.app
   secure: always
 
+- url: /tasks/update
+  script: appengine.main.app
+  login: admin
+
 libraries:
 - name: webapp2
   version: latest

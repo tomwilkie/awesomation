@@ -47,6 +47,7 @@ app.json_encoder = CustomJSONEncoder
 app.register_blueprint(user.blueprint, url_prefix='/api/user')
 app.register_blueprint(device.blueprint, url_prefix='/api/device')
 app.register_blueprint(room.blueprint, url_prefix='/api/room')
+app.register_blueprint(tasks.blueprint, url_prefix='/tasks')
 
 
 #@app.errorhandler(400)
@@ -63,6 +64,12 @@ def root():
 def before_request():
   """Ensure user is authenticated."""
   if flask.request.endpoint in {'device.handle_events'}:
+    return
+
+  if flask.request.endpoint in {'tasks.update'}:
+    logging.info(flask.request.headers)
+    if flask.request.headers.get('X-AppEngine-Cron', None) != 'true':
+      flask.abort(401)
     return
 
   user_object = users.get_current_user()
