@@ -67,7 +67,6 @@ def before_request():
     return
 
   if flask.request.endpoint in {'tasks.update'}:
-    logging.info(flask.request.headers)
     if flask.request.headers.get('X-AppEngine-Cron', None) != 'true':
       flask.abort(401)
     return

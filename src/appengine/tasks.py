@@ -12,3 +12,4 @@ blueprint = flask.Blueprint('tasks', __name__)
 @blueprint.route('/update', methods=['GET'])
 def update():
   logging.info('Update task.')
+  return ('', 204)
