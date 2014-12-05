@@ -87,7 +87,7 @@ key_files := dist/door/DomicsKey.pem dist/door/DomicsCert.pem
 
 dist/static: $(static_files) $(static_js) $(third_party_js_files) $(third_party_css_files)
 
-dist: dist/app.yaml $(py_files) $(third_party_pyfiles) $(key_files) dist/static
+dist: dist/app.yaml dist/cron.yaml $(py_files) $(third_party_pyfiles) $(key_files) dist/static
 
 upload: dist
 	appcfg.py --oauth2 update dist
