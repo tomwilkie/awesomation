@@ -60,7 +60,7 @@ class ZWave(object):
     else: #if notification_type in {'NodeEvent'}:
       logging.info(data)
 
-  def handle_event(self, event):
+  def handle_events(self, events):
     pass
 
   def stop(self):

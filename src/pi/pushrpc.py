@@ -47,19 +47,19 @@ class PushRPC(object):
 
   def _connect_handler(self, _):
     channel = self._pusher.subscribe('test')
-    channel.bind('event', self._callback_handler)
+    channel.bind('events', self._callback_handler)
 
   def _callback_handler(self, data):
     """Callback for when messages are recieved from pusher."""
     try:
-      event = json.loads(data)
+      events = json.loads(data)
     except ValueError:
       logging.error('Error parsing message', exc_info=sys.exc_info())
       return
 
     # pylint: disable=broad-except
     try:
-      self._callback(event)
+      self._callback(events)
     except Exception:
       logging.error('Error running push callback', exc_info=sys.exc_info())
 

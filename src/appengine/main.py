@@ -12,7 +12,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
 
 import flask
 
-from appengine import device, room, tasks, user
+from appengine import device, pushrpc, room, tasks, user
+# This has the side effect of registering devices
+# pylint: disable=unused-wildcard-import,wildcard-import
 from appengine.devices import *
 
 
@@ -76,3 +78,9 @@ def before_request():
     return flask.redirect(users.create_login_url(flask.request.url))
 
   namespace_manager.set_namespace(user_object.user_id())
+
+
+@app.after_request
+def after_request(response):
+  pushrpc.push_batch()
+  return response

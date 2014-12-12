@@ -99,16 +99,17 @@ class Hue(object):
     light = bridge[device_id]
     light.on = mode
 
-  def handle_event(self, message):
+  def handle_events(self, messages):
     """Handle hue events - turn it on or off."""
-    command = message.pop('command')
+    for message in messages:
+      command = message.pop('command')
 
-    if command == 'light':
-      self._set_light(message)
-    elif command == 'scan':
-      self._trigger_bridge_scan()
-    else:
-      logging.info('Unhandled message type \'%s\'', command)
+      if command == 'light':
+        self._set_light(message)
+      elif command == 'scan':
+        self._trigger_bridge_scan()
+      else:
+        logging.info('Unhandled message type \'%s\'', command)
 
   def stop(self):
     self._exiting = True

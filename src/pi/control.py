@@ -1,6 +1,7 @@
 """Main entry point for code running on the raspberry pi."""
 
 import argparse
+import collections
 import logging
 import time
 
@@ -31,15 +32,21 @@ class Control(object):
     for proxy in self._proxies.itervalues():
       proxy.stop()
 
-  def _push_event_callback(self, event):
+  def _push_event_callback(self, events):
     """Handle event from the cloud."""
-    logging.info('Processing Event - %s', event)
-    event_type = event.pop('type')
+    logging.info('Processing %d events', len(events))
 
-    if event_type in self._proxies:
-      self._proxies[event_type].handle_event(event)
-    else:
-      logging.error('Event type \'%s\' unrecognised', event_type)
+    events_by_type = collections.defaultdict(list)
+    for event in events:
+      events_by_type[event.pop('type')].append(event)
+
+    for event_type, events in events_by_type.iteritems():
+      if event_type not in self._proxies:
+        logging.error('Event type \'%s\' unrecognised', event_type)
+        continue
+
+      self._proxies[event_type].handle_events(events)
+
 
   def _device_event_callback(self, device_type, device_id, event_body):
     """Handle event from a device."""

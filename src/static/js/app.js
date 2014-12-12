@@ -110,4 +110,21 @@ $(function() {
         name: "Home Cinema",
       });
   });
+
+
+  $("input#zwave_lights_on").click(function() {
+    send_json(sprintf("/api/device/zwave-3/command"),
+      {
+        command: "lights",
+        state: true
+      });
+  });
+
+  $("input#zwave_lights_off").click(function() {
+    send_json(sprintf("/api/device/zwave-3/command"),
+      {
+        command: "lights",
+        state: false
+      });
+  });
 });
