@@ -4,7 +4,7 @@ import logging
 
 from google.appengine.ext import ndb
 
-from appengine import device
+from appengine import device, pushrpc
 
 
 class CommandClassValue(ndb.Model):
@@ -85,3 +85,9 @@ class ZWaveDevice(device.Device):
         switch.turn_on()
       else:
         switch.turn_off()
+
+  @classmethod
+  @device.static_command
+  def heal(cls, user_id):
+    event = {'type': 'zwave', 'command': 'heal'}
+    pushrpc.send_event(user_id, event)

@@ -111,6 +111,12 @@ $(function() {
       });
   });
 
+  $("input#zwave_heal").click(function() {
+    send_json(sprintf("/api/driver/zwave/command"),
+      {
+        command: "heal"
+      });
+  });
 
   $("input#zwave_lights_on").click(function() {
     send_json(sprintf("/api/device/zwave-3/command"),

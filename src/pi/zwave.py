@@ -60,8 +60,12 @@ class ZWave(object):
     else: #if notification_type in {'NodeEvent'}:
       logging.info(data)
 
-  def handle_events(self, events):
-    pass
+  def handle_events(self, messages):
+    for message in messages:
+      command = message.pop('command')
+      if command == 'heal':
+        self._manager.softResetController(self._home_id)
+        self._manager.healNetwork(self._home_id)
 
   def stop(self):
     if self._home_id is not None:
