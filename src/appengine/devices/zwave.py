@@ -68,8 +68,8 @@ class ZWaveDevice(device.Device):
       if command_class == 'COMMAND_CLASS_SENSOR_BINARY':
         self.lights(value['value'])
 
-    elif notification_type == 'NodeNaming':
-      logging.info(event)
+    else:
+      logging.info("Unknown event: %s", event)
 
   @device.command
   def lights(self, state):
@@ -91,3 +91,8 @@ class ZWaveDevice(device.Device):
   def heal(cls, user_id):
     event = {'type': 'zwave', 'command': 'heal'}
     pushrpc.send_event(user_id, event)
+
+  @device.command
+  def heal_node(self):
+    event = {'type': 'zwave', 'command': 'heal_node', 'node_id': self.zwave_node_id}
+    pushrpc.send_event(self.owner, event)

@@ -42,8 +42,6 @@ class ZWave(object):
     self._home_id = data['homeId']
     node_id = data['nodeId']
 
-    logging.info('ZWave callback - %d %s', node_id, notification_type)
-
     if node_id in {1, 255}:
       return
 
@@ -52,13 +50,14 @@ class ZWave(object):
       self._manager.refreshNodeInfo(self._home_id, node_id)
       self._manager.requestNodeState(self._home_id, node_id)
       self._manager.requestNodeDynamic(self._home_id, node_id)
+      self._callback('zwave', 'zwave-%d' % node_id, data)
 
     elif notification_type in {'ValueAdded', 'ValueChanged', 'NodeNaming'}:
       #logging.info('%s', data)
       self._callback('zwave', 'zwave-%d' % node_id, data)
 
-    else: #if notification_type in {'NodeEvent'}:
-      logging.info(data)
+    else:
+      logging.info('ZWave callback - %d %s', node_id, notification_type)
 
   def handle_events(self, messages):
     for message in messages:
@@ -66,6 +65,9 @@ class ZWave(object):
       if command == 'heal':
         self._manager.softResetController(self._home_id)
         self._manager.healNetwork(self._home_id, upNodeRoute=True)
+      elif command == 'heal_node':
+        self._manager.healNetworkNode(self._home_id, message['node_id'],
+                                      upNodeRoute=True)
 
   def stop(self):
     if self._home_id is not None:
