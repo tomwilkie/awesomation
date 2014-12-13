@@ -65,7 +65,7 @@ class ZWave(object):
       command = message.pop('command')
       if command == 'heal':
         self._manager.softResetController(self._home_id)
-        self._manager.healNetwork(self._home_id)
+        self._manager.healNetwork(self._home_id, upNodeRoute=True)
 
   def stop(self):
     if self._home_id is not None:
