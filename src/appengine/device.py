@@ -16,7 +16,14 @@ DEVICE_TYPES = {}
 
 def command(func):
   """Device command decorator - automatically dispatches methods."""
-  func.is_command = True
+  setattr(func, 'is_command', True)
+  return func
+
+
+def static_command(func):
+  """Device command decorator - automatically dispatches methods."""
+  setattr(func, 'is_command', True)
+  setattr(func, 'is_static', True)
   return func
 
 
@@ -52,11 +59,25 @@ class Device(model.Base):
     logging.info(command_dict)
     func_name = command_dict.pop('command', None)
     func = getattr(self, func_name, None)
+    logging.info('%s %s %s', func, type(func), func.is_command)
     if func is None or not func.is_command:
       logging.error('Command %s does not exist or is not a command',
                     func_name)
       flask.abort(400)
     func(**command_dict)
+
+  @classmethod
+  def handle_static_command(cls, user_id, command_dict):
+    """Dispatch command to appropriate handler."""
+    logging.info(command_dict)
+    func_name = command_dict.pop('command', None)
+    func = getattr(cls, func_name, None)
+    logging.info('%s %s %s', func, type(func), func.is_command)
+    if func is None or not func.is_command or not func.is_static:
+      logging.error('Command %s does not exist or is not a command',
+                    func_name)
+      flask.abort(400)
+    func(user_id, **command_dict)
 
   @command
   def set_room(self, room_id):
@@ -69,6 +90,17 @@ class Device(model.Base):
 
     self.room = room.key
     self.put()
+
+  def list_commands(self):
+    """List commands on this device."""
+    methods = (getattr(self, method)
+               for method in dir(self))
+    methods = (method for method in methods
+               if callable(method)
+               and method.is_command)
+    methods = [{'name': method.__name__}
+               for method in methods]
+    return methods
 
 
 class Switch(Device):

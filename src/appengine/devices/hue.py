@@ -13,10 +13,11 @@ class HueBridge(device.Device):
   """A hue bridge."""
   linked = ndb.BooleanProperty(required=True)
 
-  @device.command
-  def scan(self):
+  @classmethod
+  @device.static_command
+  def scan(cls, user_id):
     event = {'type': 'hue', 'command': 'scan'}
-    pushrpc.send_event(self.owner, event)
+    pushrpc.send_event(user_id, event)
 
   def handle_event(self, event):
     """Handle a device update event."""

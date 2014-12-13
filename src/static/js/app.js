@@ -60,7 +60,7 @@ $(function() {
   });
 
   $("input#hue_scan").click(function() {
-    $.ajax(sprintf("/api/device/hue-001788fffe1502d9/command"), {
+    $.ajax(sprintf("/api/driver/hue_bridge/command"), {
       method: "post",
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify({
