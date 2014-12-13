@@ -17,6 +17,7 @@ class CommandClassValue(ndb.Model):
   units = ndb.StringProperty()
   genre = ndb.StringProperty()
   label = ndb.StringProperty()
+  value_id = ndb.IntegerProperty()
   type = ndb.StringProperty()
 
 
@@ -52,12 +53,11 @@ class ZWaveDevice(device.Device):
       value = event['valueId']
       command_class = value.pop('commandClass')
       index = value.pop('index')
-      value['read_only'] = value['readOnly']
+      value['read_only'] = value.pop('readOnly')
+      value['value_id'] = value.pop('id')
       del value['homeId']
       del value['nodeId']
-      del value['readOnly']
       del value['instance']
-      del value['id']
 
       ccv = self._command_class_value(command_class, index)
       ccv.populate(**value)
