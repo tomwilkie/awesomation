@@ -1,47 +1,24 @@
 """Philips hue proxy code."""
 
 import logging
-import sys
-import threading
 
 import requests
 import phue
 
-class Hue(object):
+from pi import scanning_proxy
+
+
+class Hue(scanning_proxy.ScanningProxy):
   """Hue proxy object."""
 
   def __init__(self, refresh_period, callback):
-    self._refresh_period = refresh_period
+    super(Hue, self).__init__(refresh_period)
+
     self._callback = callback
     self._bridges = {}
     self._lights = {}
 
-    self._exiting = False
-    self._bridge_scan_thread_condition = threading.Condition()
-    self._bridge_scan_thread = threading.Thread(target=self._bridge_scan)
-    self._bridge_scan_thread.daemon = True
-    self._bridge_scan_thread.start()
-
-  def _trigger_bridge_scan(self):
-    with self._bridge_scan_thread_condition:
-      self._bridge_scan_thread_condition.notify()
-
-  def _bridge_scan(self):
-    """Loop thread for scanning."""
-    while not self._exiting:
-      # We always do a scan on start up.
-      try:
-        self._bridge_scan_once()
-      except:
-        logging.error('Error during bridge scan', exc_info=sys.exc_info())
-
-      with self._bridge_scan_thread_condition:
-        self._bridge_scan_thread_condition.wait(self._refresh_period)
-        if self._exiting:
-          break
-    logging.info('Exiting scan thread')
-
-  def _bridge_scan_once(self):
+  def _scan_once(self):
     """Find hue hubs on the network and tell appengine about them."""
     logging.info('Starting hue bridge scan')
     response = requests.get('https://www.meethue.com/api/nupnp')
@@ -102,16 +79,9 @@ class Hue(object):
   def handle_events(self, messages):
     """Handle hue events - turn it on or off."""
     for message in messages:
-      command = message.pop('command')
+      command = message['command']
 
       if command == 'light':
         self._set_light(message)
-      elif command == 'scan':
-        self._trigger_bridge_scan()
       else:
-        logging.info('Unhandled message type \'%s\'', command)
-
-  def stop(self):
-    self._exiting = True
-    self._trigger_bridge_scan()
-    self._bridge_scan_thread.join()
+        super(Hue, self).handle_events([message])
