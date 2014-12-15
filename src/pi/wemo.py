@@ -16,7 +16,7 @@ class Wemo(scanning_proxy.ScanningProxy):
     self._callback = callback
     self._devices = {}
 
-  def _scan(self):
+  def _scan_once(self):
     devices = pywemo.discover_devices()
 
     logging.info('Found %d wemo devices.', len(devices))

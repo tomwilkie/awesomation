@@ -20,7 +20,7 @@ class Control(object):
         'zwave': zwave.ZWave(args.zwave_device, self._device_event_callback),
         'hue': hue.Hue(args.hue_scan_interval_secs,
                        self._device_event_callback),
-        'wemo': wemo_proxy.Wemo(args.hue_scan_interval_secs,
+        'wemo': wemo.Wemo(args.hue_scan_interval_secs,
                                 self._device_event_callback)
     }
 

@@ -28,13 +28,14 @@ class ScanningProxy(object):
       try:
         self._scan_once()
       except:
-        logging.error('Error during scan', exc_info=sys.exc_info())
+        logging.error('Error during %s scan', self.__class__.__name__,
+                      exc_info=sys.exc_info())
 
       with self._scan_thread_condition:
         self._scan_thread_condition.wait(self._refresh_period)
         if self._exiting:
           break
-    logging.info('Exiting scan thread')
+    logging.info('Exiting %s scan thread', self.__class__.__name__)
 
   def _bridge_scan_once(self):
     pass
