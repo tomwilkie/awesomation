@@ -4,7 +4,8 @@ import logging
 import sys
 import threading
 
-#from wemo import upnp
+import pywemo
+
 
 class Wemo(object):
   """Hue proxy object."""

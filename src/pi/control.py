@@ -5,7 +5,7 @@ import collections
 import logging
 import time
 
-from pi import hue, pushrpc, rfswitch, wemo_proxy, zwave
+from pi import hue, pushrpc, rfswitch, wemo, zwave
 
 
 LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
