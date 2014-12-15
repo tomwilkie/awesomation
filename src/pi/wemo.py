@@ -26,7 +26,16 @@ class Wemo(scanning_proxy.ScanningProxy):
         continue
 
       self._devices[device.serialnumber] = device
-      #self._callback('wemo', 'wemo-%s' % device.serialnumber, ))
+
+      details = {
+        'serialnumber': device.serialnumber,
+        'model': device.model,
+        'name': device.name,
+        'state': device.get_state()
+      }
+      logging.info(details)
+
+      #self._callback('wemo', 'wemo-%s' % device.serialnumber, details))
 
   def handle_events(self, messages):
     """Handle hue events - turn it on or off."""
