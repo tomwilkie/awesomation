@@ -51,4 +51,4 @@
 	url = https://github.com/twbs/bootstrap.git
 [submodule "third_party/py/pywemo"]
 	path = third_party/py/pywemo
-	url = https://github.com/balloob/pywemo.git
+	url = https://github.com/twilkie/pywemo.git
