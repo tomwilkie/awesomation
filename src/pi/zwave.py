@@ -68,6 +68,10 @@ class ZWave(object):
       elif command == 'heal_node':
         self._manager.healNetworkNode(self._home_id, message['node_id'],
                                       upNodeRoute=True)
+      elif command == 'set_value':
+        value_id = message.pop('value_id')
+        value = message.pop('value')
+        self._manager.setValue(value_id, value)
 
   def stop(self):
     if self._home_id is not None:
