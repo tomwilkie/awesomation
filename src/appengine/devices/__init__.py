@@ -1,1 +1,1 @@
-__all__ = ["hue", "rfswitch", "zwave"]
+__all__ = ["hue", "rfswitch", "wemo", "zwave"]

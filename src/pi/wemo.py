@@ -15,6 +15,7 @@ class Wemo(scanning_proxy.ScanningProxy):
 
     self._callback = callback
     self._devices = {}
+    self._state_cache = {}
 
   def _scan_once(self):
     devices = pywemo.discover_devices()
@@ -22,20 +23,23 @@ class Wemo(scanning_proxy.ScanningProxy):
     logging.info('Found %d wemo devices.', len(devices))
 
     for device in devices:
-      if device.serialnumber in self._devices:
-        continue
-
+      device_exists = device.serialnumber in self._devices
       self._devices[device.serialnumber] = device
 
+      state = device.get_state()
+      serialnumber = device.serialnumber
+      state_changed = state != self._state_cache.get(serialnumber, None)
+      self._state_cache[serialnumber] = state
+
       details = {
-        'serialnumber': device.serialnumber,
+        'serial_number': serialnumber,
         'model': device.model,
         'name': device.name,
-        'state': device.get_state()
+        'state': state
       }
-      logging.info(details)
 
-      #self._callback('wemo', 'wemo-%s' % device.serialnumber, details))
+      if not device_exists or state_changed:
+        self._callback('wemo', 'wemo-%s' % device.serialnumber, details)
 
   def handle_events(self, messages):
     """Handle hue events - turn it on or off."""
