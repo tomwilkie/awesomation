@@ -1,6 +1,6 @@
 dist/static/%: src/static/%
 	@mkdir -p $(@D)
-	cp $< $@
+	ln $< $@
 
 dist/%.py: src/%.py
 	@mkdir -p $(@D)

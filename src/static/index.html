@@ -1,34 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>Domics Awesomation</title>
   <link href="/static/css/bootstrap.css" rel="stylesheet">
   <link href="/static/css/screen.css" rel="stylesheet">
   <script src="/static/js/jquery.js"></script>
   <script src="/static/js/sprintf.js"></script>
+  <script src="/static/js/handlebars.js"></script>
   <script src="/static/js/app.js"></script>
 </head>
 <body>
-	<input id="new_device" value="New Device" type="submit"/>
-	<input id="lamp_on" value="Lamp On" type="submit"/>
-	<input id="lamp_off" value="Lamp Off" type="submit"/>
+  <script type="text/x-handlebars-template" id="devices-template">
+    <h1 class="page-header">Devices by room</h1>
+    {{#rooms}}
+    <h2>{{name}}</h2>
 
-	<br/>
-	<input id="hue_scan" value="Hue Scan" type="submit"/>
-	<input id="hue_on" value="Hue On" type="submit"/>
-	<input id="hue_off" value="Hue Off" type="submit"/>
+    <div class="row placeholders">
+    {{#devices}}
+      <div class="col-xs-6 col-sm-3 placeholder">
+        <h4>{{name}}</h4>
+      </div>
+    {{/devices}}
+    </div>
+    {{/rooms}}
+  </script>
 
-  <br/>
-  <input id="new_room1" value="Create Office Room" type="submit"/>
-  <input id="new_room2" value="Create Home Cinema Room" type="submit"/>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-3 col-md-2 sidebar">
+        <ul class="nav nav-sidebar">
+          <li class="active"><a href="#">Devices <span class="sr-only">(current)</span></a></li>
+        </ul>
+      </div>
 
-  <br/>
-  <input id="zwave_heal" value="ZWave heal" type="submit"/>
-  <input id="zwave_lights_on" value="ZWave lights on" type="submit"/>
-  <input id="zwave_lights_off" value="ZWave lights off" type="submit"/>
-
-  <br/>
-  <input id="wemo_on" value="Wemo lights on" type="submit"/>
-  <input id="wemo_off" value="Wemo lights off" type="submit"/>
+      <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+      </div>
+    </div>
+  </div>
 </body>
 </html>
