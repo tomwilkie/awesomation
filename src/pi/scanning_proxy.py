@@ -1,12 +1,17 @@
 """Philips hue proxy code."""
 
+import abc
 import logging
 import sys
 import threading
 
 
-class ScanningProxy(object):
+from pi import proxy
+
+
+class ScanningProxy(proxy.Proxy):
   """A proxy object with a background scan thread."""
+  __metaclass__ = abc.ABCMeta
 
   def __init__(self, refresh_period):
     self._refresh_period = refresh_period
@@ -17,7 +22,8 @@ class ScanningProxy(object):
     self._scan_thread.daemon = True
     self._scan_thread.start()
 
-  def _trigger_scan(self):
+  @proxy.command
+  def scan(self):
     with self._scan_thread_condition:
       self._scan_thread_condition.notify()
 
@@ -37,20 +43,11 @@ class ScanningProxy(object):
           break
     logging.info('Exiting %s scan thread', self.__class__.__name__)
 
-  def _bridge_scan_once(self):
+  @abc.abstractmethod
+  def _scan_once(self):
     pass
-
-  def handle_events(self, messages):
-    """Handle hue events - turn it on or off."""
-    for message in messages:
-      command = message.pop('command')
-
-      if command == 'scan':
-        self._trigger_bridge_scan()
-      else:
-        logging.info('Unhandled message type \'%s\'', command)
 
   def stop(self):
     self._exiting = True
-    self._trigger_scan()
+    self.scan()
     self._scan_thread.join()

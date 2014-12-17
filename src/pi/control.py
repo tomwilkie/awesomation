@@ -1,8 +1,8 @@
 """Main entry point for code running on the raspberry pi."""
 
 import argparse
-import collections
 import logging
+import sys
 import time
 
 from pi import hue, pushrpc, rfswitch, wemo, zwave
@@ -32,21 +32,20 @@ class Control(object):
     for proxy in self._proxies.itervalues():
       proxy.stop()
 
-  def _push_event_callback(self, events):
+  def _push_event_callback(self, commands):
     """Handle event from the cloud."""
-    logging.info('Processing %d events', len(events))
+    logging.info('Processing %d commands', len(commands))
 
-    events_by_type = collections.defaultdict(list)
-    for event in events:
-      events_by_type[event.pop('type')].append(event)
+    for command in commands:
+      command_type = command.pop('type', None)
+      proxy = self._proxies.get(command_type, None)
+      if proxy is None:
+        logging.error('Proxy type \'%s\' unrecognised', command_type)
 
-    for event_type, events in events_by_type.iteritems():
-      if event_type not in self._proxies:
-        logging.error('Event type \'%s\' unrecognised', event_type)
-        continue
-
-      self._proxies[event_type].handle_events(events)
-
+      try:
+        proxy.handle_command(command)
+      except:
+        logging.error('Error handling command.', exc_info=sys.exc_info())
 
   def _device_event_callback(self, device_type, device_id, event_body):
     """Handle event from a device."""

@@ -51,10 +51,10 @@ class HueLight(device.Switch):
     """Update the state of a light."""
     match = LIGHT_ID_RE.match(self.key.id())
     bridge_id = match.group(1)
-    device_id = match.group(2)
+    device_id = int(match.group(2))
 
     event = {'type': 'hue',
-             'command': 'light',
+             'command': 'set_state',
              'bridge_id': bridge_id,
              'device_id': device_id,
              'mode': state}

@@ -12,7 +12,8 @@ class RFSwitch(device.Switch):
   device_code = ndb.IntegerProperty(required=True)
 
   def _set_value(self, value):
-    event = {'type': 'rfswitch', 'system_code': self.system_code,
+    event = {'type': 'rfswitch', 'command': 'set_state',
+             'system_code': self.system_code,
              'device_code': self.device_code, 'mode': value}
     pushrpc.send_event(self.owner, event)
 

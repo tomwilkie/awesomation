@@ -4,8 +4,10 @@ import logging
 
 import rcswitch
 
+from pi import proxy
 
-class RFSwitch(object):
+
+class RFSwitch(proxy.Proxy):
   """433mhz RF Switch proxy implementation."""
 
   def __init__(self, pin, repeats=5):
@@ -13,20 +15,19 @@ class RFSwitch(object):
     self._switch.enableTransmit(pin)
     self._repeats = repeats
 
-  def handle_events(self, messages):
+  @proxy.command
+  def set_state(self, system_code, device_code, mode):
     """Handle rf swtich events - turn it on or off."""
-    for _ in xrange(self._repeats):
-      for message in messages:
-        system_code = str(message["system_code"])
-        device_code = int(message["device_code"])
-        mode = message["mode"]
+    system_code = str(system_code)
+    device_code = int(device_code)
+    logging.info('system_code = %s, device_code = %s, mode = %s',
+                 system_code, device_code, mode)
 
-        logging.info('system_code = %s, device_code = %s, mode = %s',
-                     system_code, device_code, mode)
-        if mode:
-          self._switch.switchOn(system_code, device_code)
-        else:
-          self._switch.switchOff(system_code, device_code)
+    for _ in xrange(self._repeats):
+      if mode:
+        self._switch.switchOn(system_code, device_code)
+      else:
+        self._switch.switchOff(system_code, device_code)
 
   def stop(self):
     pass

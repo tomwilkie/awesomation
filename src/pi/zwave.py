@@ -5,10 +5,13 @@ import sys
 
 import libopenzwave
 
+from pi import proxy
+
 
 CONFIG = '/usr/local/etc/openzwave'
 
-class ZWave(object):
+
+class ZWave(proxy.Proxy):
   """ZWave proxy object."""
 
   def __init__(self, device, callback):
@@ -59,19 +62,19 @@ class ZWave(object):
     else:
       logging.info('ZWave callback - %d %s', node_id, notification_type)
 
-  def handle_events(self, messages):
-    for message in messages:
-      command = message.pop('command')
-      if command == 'heal':
-        self._manager.softResetController(self._home_id)
-        self._manager.healNetwork(self._home_id, upNodeRoute=True)
-      elif command == 'heal_node':
-        self._manager.healNetworkNode(self._home_id, message['node_id'],
-                                      upNodeRoute=True)
-      elif command == 'set_value':
-        value_id = message.pop('value_id')
-        value = message.pop('value')
-        self._manager.setValue(value_id, value)
+  @proxy.command
+  def heal(self):
+    self._manager.softResetController(self._home_id)
+    self._manager.healNetwork(self._home_id, upNodeRoute=True)
+
+  @proxy.command
+  def heal_node(self, node_id):
+    self._manager.healNetworkNode(self._home_id, node_id,
+                                  upNodeRoute=True)
+
+  @proxy.command
+  def set_value(self, value_id, value):
+    self._manager.setValue(value_id, value)
 
   def stop(self):
     if self._home_id is not None:

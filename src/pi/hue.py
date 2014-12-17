@@ -5,7 +5,7 @@ import logging
 import requests
 import phue
 
-from pi import scanning_proxy
+from pi import proxy, scanning_proxy
 
 
 class Hue(scanning_proxy.ScanningProxy):
@@ -63,25 +63,12 @@ class Hue(scanning_proxy.ScanningProxy):
           self._callback('hue_light', light_id, light_details)
           self._lights[light_id] = light_details
 
-  def _set_light(self, message):
+  @proxy.command
+  def set_state(self, bridge_id, device_id, mode):
     """Turn a light on or off."""
-    bridge_id = str(message["bridge_id"])
-    device_id = int(message["device_id"])
-    mode = message["mode"]
-
-    logging.info('bridge_id = %s, device_id = %s, mode = %s',
+    logging.info('bridge_id = %s, device_id = %d, mode = %s',
                  bridge_id, device_id, mode)
 
     bridge = self._bridges.get(bridge_id, None)
     light = bridge[device_id]
     light.on = mode
-
-  def handle_events(self, messages):
-    """Handle hue events - turn it on or off."""
-    for message in messages:
-      command = message['command']
-
-      if command == 'light':
-        self._set_light(message)
-      else:
-        super(Hue, self).handle_events([message])
