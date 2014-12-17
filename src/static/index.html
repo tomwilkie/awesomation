@@ -11,14 +11,14 @@
 </head>
 <body>
   <script type="text/x-handlebars-template" id="devices-template">
-    <h1 class="page-header">Devices by room</h1>
+    <h2 class="page-header">Devices by room</h2>
     {{#each rooms}}
-    <h2>{{name}}</h2>
+    <h3>{{name}}</h3>
 
     <div class="row placeholders" data-room-id="{{@key}}">
     {{#devices}}
       <div class="col-xs-6 col-sm-3 placeholder">
-        <h4>{{name}}</h4>
+        <h5>{{name}}</h5>
       </div>
     {{/devices}}
     </div>
