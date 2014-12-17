@@ -1,7 +1,3 @@
-dist/static/%: src/static/%
-	@mkdir -p $(@D)
-	ln $< $@
-
 dist/%.py: src/%.py
 	@mkdir -p $(@D)
 	ln $< $@
@@ -58,7 +54,11 @@ third_party_pyfiles := $(shell find third_party/py -name *.py \
 	| egrep -v "^__init__.py" | tr "\\n" " ")
 third_party_pyfiles := $(patsubst %,dist/third_party/%,$(third_party_pyfiles))
 
-# UI targets
+# Static targets
+dist/static/%: src/static/%
+	@mkdir -p $(@D)
+	ln $< $@
+
 dist/static/css/bootstrap.css: third_party/static/bootstrap/dist/css/bootstrap.css
 	@mkdir -p $(@D)
 	cp $< $@
@@ -81,11 +81,11 @@ dist/static/js/handlebars.js: third_party/static/handlebars/handlebars-v2.0.0.js
 
 # final actual targets
 py_files := $(patsubst src/%,dist/%,$(shell find src -name *.py))
-static_js = $(patsubst %,dist/static/%,js/jquery.js js/app.js js/sprintf.js js/handlebars.js)
-static_files := $(patsubst %,dist/static/%,index.html css/screen.css css/bootstrap.css css/bootstrap.css.map)
+static_files := $(patsubst src/static/%,dist/static/%,$(shell find src/static -type f))
+static_third_party = $(patsubst %,dist/static/%,js/jquery.js js/sprintf.js js/handlebars.js css/bootstrap.css css/bootstrap.css.map)
 key_files := dist/door/DomicsKey.pem dist/door/DomicsCert.pem
 
-dist/static: $(static_files) $(static_js) $(third_party_js_files) $(third_party_css_files)
+dist/static: $(static_files) $(static_third_party)
 
 dist: dist/app.yaml dist/cron.yaml $(py_files) $(third_party_pyfiles) $(key_files) dist/static
 
