@@ -4,7 +4,7 @@ import logging
 
 import pywemo
 
-from pi import scanning_proxy
+from pi import proxy, scanning_proxy
 
 
 class Wemo(scanning_proxy.ScanningProxy):
@@ -40,3 +40,7 @@ class Wemo(scanning_proxy.ScanningProxy):
 
       if not device_exists or state_changed:
         self._callback('wemo', 'wemo-%s' % device.serialnumber, details)
+
+  @proxy.command
+  def set_state(self, serial_number, state):
+    self._devices[serial_number].set_state(state)

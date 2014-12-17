@@ -1,8 +1,5 @@
 """Philips hue integration."""
 
-import logging
-import re
-
 from google.appengine.ext import ndb
 
 from appengine import device, pushrpc
@@ -34,9 +31,9 @@ class WemoDevice(device.Switch):
   def _set_state(self, state):
     """Update the state of a light."""
     event = {'type': 'wemo',
-             'command': 'light',
+             'command': 'set_state',
              'serial_number': self.serial_number,
-             'mode': 1 if state else 0}
+             'state': 1 if state else 0}
     pushrpc.send_event(self.owner, event)
 
   def handle_event(self, event):

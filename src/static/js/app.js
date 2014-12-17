@@ -133,4 +133,18 @@ $(function() {
         state: false
       });
   });
+
+  $("input#wemo_on").click(function() {
+    send_json(sprintf("/api/device/wemo-221412K11013E1/command"),
+      {
+        command: "turn_on",
+      });
+  });
+
+  $("input#wemo_off").click(function() {
+    send_json(sprintf("/api/device/wemo-221412K11013E1/command"),
+      {
+        command: "turn_off",
+      });
+  });
 });
