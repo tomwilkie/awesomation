@@ -15,9 +15,9 @@ class HueBridge(device.Device):
 
   @classmethod
   @device.static_command
-  def scan(cls, user_id):
+  def scan(cls):
     event = {'type': 'hue', 'command': 'scan'}
-    pushrpc.send_event(user_id, event)
+    pushrpc.send_event(event)
 
   def handle_event(self, event):
     """Handle a device update event."""
@@ -58,7 +58,7 @@ class HueLight(device.Switch):
              'bridge_id': bridge_id,
              'device_id': device_id,
              'mode': state}
-    pushrpc.send_event(self.owner, event)
+    pushrpc.send_event(event)
 
   def handle_event(self, event):
     """Handle a device update event."""

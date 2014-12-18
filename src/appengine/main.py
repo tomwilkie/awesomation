@@ -50,8 +50,8 @@ app.register_blueprint(user.blueprint, url_prefix='/api/user')
 app.register_blueprint(device.blueprint, url_prefix='/api/device')
 app.register_blueprint(driver.blueprint, url_prefix='/api/driver')
 app.register_blueprint(room.blueprint, url_prefix='/api/room')
+app.register_blueprint(pushrpc.blueprint, url_prefix='/api/proxy')
 app.register_blueprint(tasks.blueprint, url_prefix='/tasks')
-app.register_blueprint(pushrpc.blueprint, url_prefix='/proxy')
 
 
 @app.route('/')
@@ -75,7 +75,7 @@ def before_request():
     # namespace_manager.set_namespace(proxy.owner)
     return
 
-  # Cron jobs are handled as a special case
+  # Cron jobs are authenticated as a special case
   if flask.request.endpoint in {'tasks.update'}:
     if flask.request.headers.get('X-AppEngine-Cron', None) != 'true':
       flask.abort(401)

@@ -37,15 +37,21 @@ def authenticate():
   """Check this request comes from a valid proxy."""
   assert namespace_manager.get_namespace() == ''
 
-  if flask.request.headers.get('awesomation-proxy', None) != 'true':
+  header = flask.request.headers.get('awesomation-proxy', None)
+  if header != 'true':
+    logging.error('Incorrent header for proxy auth - '
+                  'awesomation-proxy = \'%s\'', header)
     return None
 
   if flask.request.endpoint not in {'device.handle_events',
                                     'pushrpc.pusher_client_auth_callback'}:
+    logging.error('Endpoint not allowed for proxy auth - '
+                  '\'%s\'', flask.request.endpoint)
     return None
 
   auth = flask.request.authorization
   if not auth:
+    logging.error('Proxy auth requires basic auth!')
     return None
 
   proxy = Proxy.get_or_insert(
@@ -54,13 +60,14 @@ def authenticate():
   # if we fetched the proxy,
   # need to check the secret.
   if proxy.secret != auth.password:
+    logging.error('Incorrect secret for proxy auth!')
     return None
 
   return proxy
 
 
-# Step 1(b). Users need to claim a proxy:
-@blueprint.route('/claim/<proxy_id>')
+# Step 1(b). Users need to claim a proxy from the UI
+@blueprint.route('/claim/<proxy_id>', methods=['GET'])
 def claim_proxy(proxy_id):
   """Claim the given proxy id for the current user."""
 
@@ -85,12 +92,12 @@ def claim_proxy(proxy_id):
   return ('', 201)
 
 
-# Step 2. Proxy call /pusher/auth with its id & secret
-#         channel name == private-id.
+# Step 2. Proxy call /api/proxy/channel_auth with its
+#         (id & secret) auth and channel name == private-id.
 #         pusher client library makes a callback
 #         to this end point to check the client
 #         can use said channel.
-@blueprint.route('/channel_auth')
+@blueprint.route('/channel_auth', methods=['GET'])
 def pusher_client_auth_callback():
   """Authenticate a given socket for a given channel."""
 
@@ -99,9 +106,10 @@ def pusher_client_auth_callback():
   if proxy is None:
     flask.abort(401)
 
-  socket_id = flask.request.get('socket_id')
-  channel_name = flask.request.get('channel_name')
-  if channel_name != 'private-%s' % proxy.key:
+  socket_id = flask.request.args.get('socket_id')
+  channel_name = flask.request.args.get('channel_name')
+  if channel_name != 'private-%s' % proxy.key.string_id():
+    logging.error('Proxy %s is not allowed channel %s!', proxy, channel_name)
     flask.abort(401)
 
   pusher_client = pusher.Pusher(
@@ -112,28 +120,42 @@ def pusher_client_auth_callback():
   return flask.jsonify(**auth)
 
 
+def send_event(event):
+  """Post events back to the pi."""
+  logging.info('Sending event %s', event)
+  batch = flask.g.get('events', None)
+  if batch is None:
+    batch = []
+    setattr(flask.g, 'events', batch)
+  batch.append(event)
+
+
 def push_batch():
   """Push all the events that have been caused by this request."""
   batch = flask.g.get('events', None)
   if batch is None:
     return
 
-  logging.info('Pushing %d events', len(batch))
   pusher_client = pusher.Pusher(
       app_id=creds.pusher_app_id,
       key=creds.pusher_key, secret=creds.pusher_secret)
 
+  # Now figure out what channel to post these to.
+  # Can't use user.get_user as we might not be in
+  # a user's request (might be a device update
+  # from the proxy).  So we use the namespace
+  # instead.  Horrid.
+  assert namespace_manager.get_namespace() != ''
 
-  # TODO what channel to send this to?
-  pusher_client['test'].trigger('events', batch)
-
-
-def send_event(user_id, event):
-  """Post events back to the pi."""
-  logging.info('%s <- %s', user_id, event)
-  batch = flask.g.get('events', None)
-  if batch is None:
-    batch = []
-    setattr(flask.g, 'events', batch)
-  batch.append(event)
+  # We need to reset the namespace to access the proxies
+  user_id = namespace_manager.get_namespace()
+  try:
+    namespace_manager.set_namespace(None)
+    proxies = Proxy.query(Proxy.owner == user_id).iter()
+    for proxy in proxies:
+      channel_id = 'private-%s' % proxy.key.string_id()
+      logging.info('Pushing %d events to channel %s', len(batch), channel_id)
+      pusher_client[channel_id].trigger('events', batch)
+  finally:
+    namespace_manager.set_namespace(user_id)
 

@@ -67,7 +67,7 @@ class Device(model.Base):
     func(**command_dict)
 
   @classmethod
-  def handle_static_command(cls, user_id, command_dict):
+  def handle_static_command(cls, command_dict):
     """Dispatch command to appropriate handler."""
     logging.info(command_dict)
     func_name = command_dict.pop('command', None)
@@ -77,7 +77,7 @@ class Device(model.Base):
       logging.error('Command %s does not exist or is not a command',
                     func_name)
       flask.abort(400)
-    func(user_id, **command_dict)
+    func(**command_dict)
 
   @command
   def set_room(self, room_id):

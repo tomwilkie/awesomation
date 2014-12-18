@@ -24,9 +24,9 @@ class WemoDevice(device.Switch):
 
   @classmethod
   @device.static_command
-  def scan(cls, user_id):
+  def scan(cls):
     event = {'type': 'wemo', 'command': 'scan'}
-    pushrpc.send_event(user_id, event)
+    pushrpc.send_event(event)
 
   def _set_state(self, state):
     """Update the state of a light."""
@@ -34,7 +34,7 @@ class WemoDevice(device.Switch):
              'command': 'set_state',
              'serial_number': self.serial_number,
              'state': 1 if state else 0}
-    pushrpc.send_event(self.owner, event)
+    pushrpc.send_event(event)
 
   def handle_event(self, event):
     """Handle a device update event."""

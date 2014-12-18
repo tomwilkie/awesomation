@@ -15,7 +15,7 @@ class RFSwitch(device.Switch):
     event = {'type': 'rfswitch', 'command': 'set_state',
              'system_code': self.system_code,
              'device_code': self.device_code, 'mode': value}
-    pushrpc.send_event(self.owner, event)
+    pushrpc.send_event(event)
 
   @device.command
   def turn_on(self):

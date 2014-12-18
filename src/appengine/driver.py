@@ -18,7 +18,6 @@ def list_drivers():
 @blueprint.route('/<driver>/command', methods=['POST'])
 def driver_command(driver):
   """Using json body to send command to driver."""
-  user_id = user.get_user()
   body = flask.request.get_json()
   if body is None:
     flask.abort(400, 'JSON body and mime type required.')
@@ -28,7 +27,7 @@ def driver_command(driver):
   if not driver:
     flask.abort(404)
 
-  driver.handle_static_command(user_id, body)
+  driver.handle_static_command(body)
 
   return ('', 204)
 

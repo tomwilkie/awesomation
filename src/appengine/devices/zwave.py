@@ -88,11 +88,11 @@ class ZWaveDevice(device.Device):
 
   @classmethod
   @device.static_command
-  def heal(cls, user_id):
+  def heal(cls):
     event = {'type': 'zwave', 'command': 'heal'}
-    pushrpc.send_event(user_id, event)
+    pushrpc.send_event(event)
 
   @device.command
   def heal_node(self):
     event = {'type': 'zwave', 'command': 'heal_node', 'node_id': self.zwave_node_id}
-    pushrpc.send_event(self.owner, event)
+    pushrpc.send_event(event)

@@ -14,6 +14,8 @@ import requests
 
 CONFIG_FILE = 'proxy.cfg'
 EVENT_URL = 'https://%s.appspot.com/api/device/events' % creds.appengine_app_id
+AUTH_URL = ('https://%s.appspot.com/api/proxy/channel_auth'
+            % creds.appengine_app_id)
 
 
 def read_or_make_config():
@@ -45,14 +47,33 @@ class PushRPC(object):
 
     self._callback = callback
 
-    self._pusher = Pusher(creds.pusher_key)
+    self._pusher = Pusher(creds.pusher_key,
+                          auth_callback=self._pusher_auth_callback)
     self._pusher.connection.bind(
         'pusher:connection_established',
         self._connect_handler)
     self._pusher.connect()
 
+  def _pusher_auth_callback(self, socket_id, channel_name):
+    params = {'socket_id': socket_id, 'channel_name': channel_name}
+    response = self._make_request(AUTH_URL, params=params)
+    response = response.json()
+    return response['auth']
+
+  def _make_request(self, url, method='GET', **kwargs):
+    """Make a request to the server with this proxy's auth."""
+    response = requests.request(
+        method, url,
+        auth=(self._proxy_id, self._proxy_secret),
+        headers={'content-type': 'application/json',
+                 'awesomation-proxy': 'true'},
+        **kwargs)
+    response.raise_for_status()
+    return response
+
   def _connect_handler(self, _):
-    channel = self._pusher.subscribe('test')
+    channel_name = 'private-%s' % self._proxy_id
+    channel = self._pusher.subscribe(channel_name)
     channel.bind('events', self._callback_handler)
 
   def _callback_handler(self, data):
@@ -112,14 +133,8 @@ class PushRPC(object):
     """Send list of events to server."""
     logging.info('Posting %d events to server', len(events))
 
-    response = requests.post(
-        EVENT_URL, data=json.dumps(events),
-        auth=(self._proxy_id, self._proxy_secret),
-        headers={'content-type': 'application/json',
-                 'awesomation-proxy': 'true'})
-
     try:
-      response.raise_for_status()
+      self._make_request(EVENT_URL, method='POST', data=json.dumps(events))
     except:
       logging.error('Posting events failed', exc_info=sys.exc_info())
 
