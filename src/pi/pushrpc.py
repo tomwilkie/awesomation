@@ -1,35 +1,41 @@
 """Pusher intergration for messages from the cloud."""
 
-import httplib
 import json
 import logging
 import Queue
 import sys
 import threading
+import uuid
 
 from common import creds
 from pusherclient import Pusher
 import requests
 
+
+CONFIG_FILE = 'proxy.cfg'
 EVENT_URL = 'https://%s.appspot.com/api/device/events' % creds.appengine_app_id
 
 
-def _post_events_once(events):
-  """Send list of events to server."""
-  logging.info('Posting %d events to server', len(events))
-
-  response = requests.post(EVENT_URL, data=json.dumps(events),
-                       headers={'content-type': 'application/json'})
+def read_or_make_config():
+  """Read proxy id and secret from file, or make new one."""
   try:
-    response.raise_for_status()
+    with open(CONFIG_FILE) as config_file:
+      return config_file.read().split(',')
   except:
-    logging.error('Posting events failed', exc_info=sys.exc_info())
+    proxy_id = str(uuid.uuid4().get_hex())
+    proxy_secret = str(uuid.uuid4().get_hex())
+    with open(CONFIG_FILE, 'w') as config_file:
+      config_file.write('%s,%s' % (proxy_id, proxy_secret))
+    return (proxy_id, proxy_secret)
 
 
 class PushRPC(object):
   """Wrapper for pusher integration."""
 
   def __init__(self, callback):
+    self._proxy_id, self._proxy_secret = read_or_make_config()
+    logging.info('I am proxy \'%s\'', self._proxy_id)
+
     self._exiting = False
 
     self._events = Queue.Queue()
@@ -96,11 +102,26 @@ class PushRPC(object):
 
       # pylint: disable=broad-except
       try:
-        _post_events_once(events)
+        self._post_events_once(events)
       except Exception:
         logging.error('Exception sending events to server',
                       exc_info=sys.exc_info())
     logging.info('Exiting events thread.')
+
+  def _post_events_once(self, events):
+    """Send list of events to server."""
+    logging.info('Posting %d events to server', len(events))
+
+    response = requests.post(
+        EVENT_URL, data=json.dumps(events),
+        auth=(self._proxy_id, self._proxy_secret),
+        headers={'content-type': 'application/json',
+                 'awesomation-proxy': 'true'})
+
+    try:
+      response.raise_for_status()
+    except:
+      logging.error('Posting events failed', exc_info=sys.exc_info())
 
   def stop(self):
     """Stop various threads and connections."""

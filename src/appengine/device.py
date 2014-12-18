@@ -7,7 +7,7 @@ from google.appengine.ext import ndb
 
 import flask
 
-from appengine import model, user
+from appengine import model, pushrpc, user
 from appengine import room as room_module
 
 
@@ -123,8 +123,17 @@ blueprint = flask.Blueprint('device', __name__)
 @blueprint.route('/events', methods=['POST'])
 def handle_events():
   """Handle events from devices."""
-  user_id = '102063417381751091397'
-  namespace_manager.set_namespace(user_id)
+  proxy = pushrpc.authenticate()
+  if proxy is None:
+    flask.abort(401)
+
+  # If proxy hasn't been claimed, not much we can do.
+  if proxy.owner is None:
+    logging.info('Dropping events as this proxy is not claimed')
+    return ('', 204)
+
+  # We need to set namespace - not done by main.py
+  namespace_manager.set_namespace(proxy.owner)
 
   events = flask.request.get_json()
   logging.info('Processing %d events', len(events))
@@ -141,7 +150,7 @@ def handle_events():
     else:
       device = Device.get_by_id(device_id)
       if not device:
-        device = create_device(device_id, device_type, user_id)
+        device = create_device(device_id, device_type, proxy.owner)
       device_cache[device_id] = device
 
     device.handle_event(event_body)
@@ -188,13 +197,13 @@ def create_update_device(device_id):
   # Update the object; abort with 400 on unknown field
   try:
     device.populate(**body)
-  except AttributeError, err:
+  except AttributeError:
     flask.abort(400)
 
   # Put the object - BadValueError if there are uninitalised required fields
   try:
     device.put()
-  except db.BadValueError, err:
+  except db.BadValueError:
     flask.abort(400)
 
   return flask.jsonify(**device.to_dict())

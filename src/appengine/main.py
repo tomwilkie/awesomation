@@ -51,11 +51,7 @@ app.register_blueprint(device.blueprint, url_prefix='/api/device')
 app.register_blueprint(driver.blueprint, url_prefix='/api/driver')
 app.register_blueprint(room.blueprint, url_prefix='/api/room')
 app.register_blueprint(tasks.blueprint, url_prefix='/tasks')
-
-
-#@app.errorhandler(400)
-#def custom400(error):
-#  return flask.jsonify({'message': error.description})
+app.register_blueprint(pushrpc.blueprint, url_prefix='/proxy')
 
 
 @app.route('/')
@@ -66,14 +62,26 @@ def root():
 @app.before_request
 def before_request():
   """Ensure user is authenticated."""
-  if flask.request.endpoint in {'device.handle_events'}:
+
+  # Proxies use basic authentication, and are only allowed a few endpoints
+  if flask.request.headers.get('awesomation-proxy', None) == 'true':
+    proxy = pushrpc.authenticate()
+    if proxy is None:
+      flask.abort(401)
+
+    # we don't set the namespace to the owner,
+    # as we need to authenticate proxy requests
+    # before owner is set (ie proxies are unclaimed)
+    # namespace_manager.set_namespace(proxy.owner)
     return
 
+  # Cron jobs are handled as a special case
   if flask.request.endpoint in {'tasks.update'}:
     if flask.request.headers.get('X-AppEngine-Cron', None) != 'true':
       flask.abort(401)
     return
 
+  # Otherwise, we just use good-ole google authentication
   user_object = users.get_current_user()
   if not user_object:
     return flask.redirect(users.create_login_url(flask.request.url))
