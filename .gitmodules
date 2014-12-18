@@ -52,3 +52,6 @@
 [submodule "third_party/py/pywemo"]
 	path = third_party/py/pywemo
 	url = https://github.com/tomwilkie/pywemo.git
+[submodule "src/common/creds"]
+	path = src/common/creds
+	url = https://github.com/tomwilkie/creds.git
