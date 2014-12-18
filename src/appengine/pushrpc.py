@@ -9,6 +9,7 @@ from google.appengine.api import namespace_manager
 from google.appengine.ext import ndb
 
 from common import creds
+from common import public_creds
 from appengine import user
 
 
@@ -114,7 +115,7 @@ def pusher_client_auth_callback():
 
   pusher_client = pusher.Pusher(
       app_id=creds.pusher_app_id,
-      key=creds.pusher_key, secret=creds.pusher_secret)
+      key=public_creds.pusher_key, secret=creds.pusher_secret)
   auth = pusher_client[channel_name].authenticate(socket_id)
 
   return flask.jsonify(**auth)
@@ -138,7 +139,7 @@ def push_batch():
 
   pusher_client = pusher.Pusher(
       app_id=creds.pusher_app_id,
-      key=creds.pusher_key, secret=creds.pusher_secret)
+      key=public_creds.pusher_key, secret=creds.pusher_secret)
 
   # Now figure out what channel to post these to.
   # Can't use user.get_user as we might not be in

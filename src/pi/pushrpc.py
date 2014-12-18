@@ -7,15 +7,16 @@ import sys
 import threading
 import uuid
 
-from common import creds
+from common import public_creds
 from pusherclient import Pusher
 import requests
 
 
 CONFIG_FILE = 'proxy.cfg'
-EVENT_URL = 'https://%s.appspot.com/api/device/events' % creds.appengine_app_id
+EVENT_URL = ('https://%s.appspot.com/api/device/events'
+             % public_creds.appengine_app_id)
 AUTH_URL = ('https://%s.appspot.com/api/proxy/channel_auth'
-            % creds.appengine_app_id)
+            % public_creds.appengine_app_id)
 
 
 def read_or_make_config():
@@ -47,7 +48,7 @@ class PushRPC(object):
 
     self._callback = callback
 
-    self._pusher = Pusher(creds.pusher_key,
+    self._pusher = Pusher(public_creds.pusher_key,
                           auth_callback=self._pusher_auth_callback)
     self._pusher.connection.bind(
         'pusher:connection_established',
