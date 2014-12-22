@@ -8,7 +8,6 @@ from google.appengine.ext import ndb
 import flask
 
 from appengine import model, pushrpc, user
-from appengine import room as room_module
 
 
 DEVICE_TYPES = {}
@@ -49,7 +48,7 @@ class Device(model.Base):
   owner = ndb.StringProperty(required=True)
   name = ndb.StringProperty(required=False)
   last_update = ndb.DateTimeProperty(required=False, auto_now=True)
-  room = ndb.KeyProperty()
+  room = ndb.KeyProperty('room')
 
   def handle_event(self, event):
     pass
@@ -82,6 +81,7 @@ class Device(model.Base):
   @command
   def set_room(self, room_id):
     """Change the room associated with this device."""
+    from appengine import room as room_module
     room = room_module.Room.get_by_id(room_id)
     if not room:
       flask.abort(404)
