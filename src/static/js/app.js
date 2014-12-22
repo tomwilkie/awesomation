@@ -43,13 +43,32 @@ var DOMICS = (function() {
     });
   }
 
-  $(fetch);
+  $(function () {
+    fetch();
 
-  $("input#wemo_on").click(function() {
-    send_json(sprintf("/api/device/wemo-221412K11013E1/command"),
-      {
-        command: "turn_on",
-      });
+    $('div.main').on('click', 'div.room button.all-on', function() {
+      var room_id = $(this).closest('div.room').data('room-id');
+
+      post(sprintf('/api/room/%s/command', room_id), {
+          command: "all_on",
+        });
+    });
+
+    $('div.main').on('click', 'div.room button.all-off', function() {
+      var room_id = $(this).closest('div.room').data('room-id');
+
+      post(sprintf('/api/room/%s/command', room_id), {
+          command: "all_off",
+        });
+    });
+
+    $("input#wemo_on").click(function() {
+      send_json(sprintf("/api/device/wemo-221412K11013E1/command"),
+        {
+          command: "turn_on",
+        });
+    });
+
   });
 
   return {
