@@ -89,17 +89,18 @@ body {
  * Placeholder dashboard ideas
  */
 
-.placeholders {
+.devices {
   margin-bottom: 30px;
   text-align: center;
 }
-.placeholders h4 {
+.devices h4 {
   margin-bottom: 0;
 }
-.placeholder {
+.device {
   margin-bottom: 20px;
 }
-.placeholder img {
+.device .glyphicon-cog {
   display: inline-block;
+  float: right;
   border-radius: 50%;
 }

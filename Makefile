@@ -59,11 +59,7 @@ dist/static/%: src/static/%
 	@mkdir -p $(@D)
 	ln $< $@
 
-dist/static/css/bootstrap.css: third_party/static/bootstrap/dist/css/bootstrap.css
-	@mkdir -p $(@D)
-	cp $< $@
-
-dist/static/css/bootstrap.css.map: third_party/static/bootstrap/dist/css/bootstrap.css.map
+dist/static/%: third_party/static/bootstrap/dist/%
 	@mkdir -p $(@D)
 	cp $< $@
 
@@ -82,7 +78,7 @@ dist/static/js/handlebars.js: third_party/static/handlebars/handlebars-v2.0.0.js
 # final actual targets
 py_files := $(patsubst src/%,dist/%,$(shell find src -name *.py))
 static_files := $(patsubst src/static/%,dist/static/%,$(shell find src/static -type f))
-static_third_party = $(patsubst %,dist/static/%,js/jquery.js js/sprintf.js js/handlebars.js css/bootstrap.css css/bootstrap.css.map)
+static_third_party = $(patsubst %,dist/static/%,js/jquery.js js/sprintf.js js/handlebars.js css/bootstrap.css css/bootstrap.css.map fonts/glyphicons-halflings-regular.eot fonts/glyphicons-halflings-regular.svg fonts/glyphicons-halflings-regular.ttf fonts/glyphicons-halflings-regular.woff)
 key_files := dist/door/DomicsKey.pem dist/door/DomicsCert.pem
 
 dist/static: $(static_files) $(static_third_party)

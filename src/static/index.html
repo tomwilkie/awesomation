@@ -17,14 +17,18 @@
     <div class="room" data-room-id="{{@key}}">
       <h3>{{#if name}}{{name}}{{else}}{{@key}}{{/if}}</h3>
 
-      <div class="btn-group-xs" role="group" aria-label="...">
-        <button type="button" class="btn btn-default all-on">All on</button>
-        <button type="button" class="btn btn-default all-off">All off</button>
+      <div class="btn-group btn-group-xs" role="group" aria-label="...">
+        <button type="button" class="btn btn-default all-on">
+          <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+          All on
+        </button>
+        <button type="button" class="btn btn-default all-off">off</button>
       </div>
 
-      <div class="row placeholders">
+      <div class="row devices">
       {{#devices}}
-        <div class="col-xs-6 col-sm-3 placeholder">
+        <div class="col-xs-6 col-sm-3 device">
+          <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
           <h5>{{#if name}}{{name}}{{else}}{{id}}{{/if}}</h5>
         </div>
       {{/devices}}
