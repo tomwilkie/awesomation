@@ -83,6 +83,9 @@ body {
 .main .page-header {
   margin-top: 0;
 }
+.main h3 div.btn-group {
+  float: right;
+}
 
 
 /*

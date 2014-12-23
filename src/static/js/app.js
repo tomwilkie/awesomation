@@ -46,7 +46,7 @@ var DOMICS = (function() {
   $(function () {
     fetch();
 
-    $('div.main').on('click', 'div.room button.all-on', function() {
+    $('div.main').on('click', 'div.room .all-on', function() {
       var room_id = $(this).closest('div.room').data('room-id');
 
       post(sprintf('/api/room/%s/command', room_id), {
@@ -54,11 +54,27 @@ var DOMICS = (function() {
         });
     });
 
-    $('div.main').on('click', 'div.room button.all-off', function() {
+    $('div.main').on('click', 'div.room .all-off', function() {
       var room_id = $(this).closest('div.room').data('room-id');
 
       post(sprintf('/api/room/%s/command', room_id), {
           command: "all_off",
+        });
+    });
+
+    $('div.main').on('click', 'div.device .device-on', function() {
+      var device_id = $(this).closest('div.device').data('device-id');
+
+      post(sprintf('/api/device/%s/command', device_id), {
+          command: "turn_on",
+        });
+    });
+
+    $('div.main').on('click', 'div.device .device-off', function() {
+      var device_id = $(this).closest('div.device').data('device-id');
+
+      post(sprintf('/api/device/%s/command', device_id), {
+          command: "turn_off",
         });
     });
 
