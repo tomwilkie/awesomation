@@ -99,8 +99,3 @@ body {
 .device {
   margin-bottom: 20px;
 }
-.device .glyphicon-cog {
-  display: inline-block;
-  float: right;
-  border-radius: 50%;
-}

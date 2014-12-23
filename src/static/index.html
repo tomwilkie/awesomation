@@ -7,6 +7,7 @@
   <script src="/static/js/jquery.js"></script>
   <script src="/static/js/sprintf.js"></script>
   <script src="/static/js/handlebars.js"></script>
+  <script src="/static/js/bootstrap.js"></script>
   <script src="/static/js/app.js"></script>
 </head>
 <body>
@@ -28,7 +29,22 @@
       <div class="row devices">
       {{#devices}}
         <div class="col-xs-6 col-sm-3 device">
-          <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+
+          <div class="input-group">
+            <div class="input-group-btn">
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Turn on</a></li>
+                <li><a href="#">Turn off</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Set room</a></li>
+                <li><a href="#">Change name</a></li>
+              </ul>
+            </div><!-- /btn-group -->
+          </div><!-- /input-group -->
+
           <h5>{{#if name}}{{name}}{{else}}{{id}}{{/if}}</h5>
         </div>
       {{/devices}}
