@@ -12,26 +12,23 @@
 <body>
   <script type="text/x-handlebars-template" id="devices-template">
     <h2 class="page-header">Devices by room</h2>
-    <div class="btn-group-xs" role="group" aria-label="...">
-      <button type="button" class="btn btn-default">All on</button>
-      <button type="button" class="btn btn-default">All off</button>
-    </div>
 
     {{#each rooms}}
     <div class="room" data-room-id="{{@key}}">
-    <h3>{{name}}</h3>
+      <h3>{{#if name}}{{name}}{{else}}{{@key}}{{/if}}</h3>
 
-    <div class="btn-group-xs" role="group" aria-label="...">
-      <button type="button" class="btn btn-default all-on">All on</button>
-      <button type="button" class="btn btn-default all-off">All off</button>
-    </div>
-
-    <div class="row placeholders">
-    {{#devices}}
-      <div class="col-xs-6 col-sm-3 placeholder">
-        <h5>{{name}}</h5>
+      <div class="btn-group-xs" role="group" aria-label="...">
+        <button type="button" class="btn btn-default all-on">All on</button>
+        <button type="button" class="btn btn-default all-off">All off</button>
       </div>
-    {{/devices}}
+
+      <div class="row placeholders">
+      {{#devices}}
+        <div class="col-xs-6 col-sm-3 placeholder">
+          <h5>{{#if name}}{{name}}{{else}}{{id}}{{/if}}</h5>
+        </div>
+      {{/devices}}
+      </div>
     </div>
     {{/each}}
   </script>
