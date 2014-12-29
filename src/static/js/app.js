@@ -78,7 +78,7 @@ var DOMICS = (function() {
         });
     });
 
-    // Dialogs
+    // Dialog: change room name
 
     $('div.main').on('click', 'div.room .room-change-name', function() {
       var room_id = $(this).closest('div.room').data('room-id');
@@ -92,13 +92,34 @@ var DOMICS = (function() {
 
     $('.modal#room_change_name button.btn-primary').on('click', function() {
       var room_id = $('.modal#room_change_name').data('for-room');
-      var room_name = $('.dialog#room_change_name input.room-name').val();
+      var room_name = $('.modal#room_change_name input#room-name').val();
 
       post(sprintf('/api/room/%s', room_id), {
           name: room_name,
         });
 
-      $('.modal#room_change_name').modal({show: false});
+      $('.modal#room_change_name').modal('hide');
+    });
+
+    // Dialog: create new room
+
+    function random_id() {
+      return ("0000" + (Math.random() * Math.pow(36,4) << 0).toString(36)).slice(-4)
+    }
+
+    $('div.main').on('click', 'a.create-new-room', function() {
+      $('.modal#create-new-room-dialog').modal({show: true});
+    });
+
+    $('.modal#create-new-room-dialog button.btn-primary').on('click', function() {
+      var room_id = random_id();
+      var room_name = $('.modal#create-new-room-dialog input#room-name').val();
+
+      post(sprintf('/api/room/%s', room_id), {
+          name: room_name,
+        });
+
+      $('.modal#create-new-room-dialog').modal('hide');
     });
   });
 
