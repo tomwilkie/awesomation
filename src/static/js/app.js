@@ -14,6 +14,12 @@ var DOMICS = (function() {
     })
   }
 
+  function del(url) {
+    $.ajax(url, {
+      method: 'delete',
+    })
+  }
+
   var rooms = {
     'unknown': {name: 'Unknown', devices: []}
   };
@@ -78,27 +84,41 @@ var DOMICS = (function() {
         });
     });
 
+    // Dialogs
+
+    $('div.modal#main_modal').modal({show: false});
+
+    function dialog(name, obj, f) {
+      var template = Handlebars.compile($(name).text());
+      var rendered = template(obj);
+      var modal = $('div.modal#main_modal');
+
+      modal.html(rendered);
+      modal.modal();
+      modal.on('success', f);
+      modal.modal('show');
+    }
+
+    $('.modal#main_modal').on('click', '.btn-primary', function() {
+      $('.modal#main_modal')
+        .trigger('success')
+        .html('')
+        .off('success')
+        .modal('hide');
+    });
+
     // Dialog: change room name
 
     $('div.main').on('click', 'div.room .room-change-name', function() {
       var room_id = $(this).closest('div.room').data('room-id');
       var room = rooms[room_id];
 
-      $('.modal#room_change_name input#room-name').val(room.name);
-      $('.modal#room_change_name')
-          .data('for-room', room_id)
-          .modal({show: true});
-    });
-
-    $('.modal#room_change_name button.btn-primary').on('click', function() {
-      var room_id = $('.modal#room_change_name').data('for-room');
-      var room_name = $('.modal#room_change_name input#room-name').val();
-
-      post(sprintf('/api/room/%s', room_id), {
-          name: room_name,
-        });
-
-      $('.modal#room_change_name').modal('hide');
+      dialog('script#room-change-name-dialog-template', room, function() {
+        var room_name = $(this).find('input#room-name').val();
+        post(sprintf('/api/room/%s', room_id), {
+            name: room_name,
+          });
+      });
     });
 
     // Dialog: create new room
@@ -108,19 +128,27 @@ var DOMICS = (function() {
     }
 
     $('div.main').on('click', 'a.create-new-room', function() {
-      $('.modal#create-new-room-dialog').modal({show: true});
+      dialog('script#create-new-room-dialog-template', {}, function() {
+        var room_id = random_id();
+        var room_name = $(this).find('input#room-name').val();
+
+        post(sprintf('/api/room/%s', room_id), {
+            name: room_name,
+          });
+      });
     });
 
-    $('.modal#create-new-room-dialog button.btn-primary').on('click', function() {
-      var room_id = random_id();
-      var room_name = $('.modal#create-new-room-dialog input#room-name').val();
+    // Dialog: delete room
 
-      post(sprintf('/api/room/%s', room_id), {
-          name: room_name,
-        });
+    $('div.main').on('click', 'div.room .room-delete', function() {
+      var room_id = $(this).closest('div.room').data('room-id');
+      var room = rooms[room_id];
 
-      $('.modal#create-new-room-dialog').modal('hide');
+      dialog('script#delete-room-dialog-template', room, function() {
+        del(sprintf('/api/room/%s', room_id));
+      });
     });
+
   });
 
   return {
