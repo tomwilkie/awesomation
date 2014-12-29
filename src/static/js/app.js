@@ -78,13 +78,28 @@ var DOMICS = (function() {
         });
     });
 
-    $("input#wemo_on").click(function() {
-      send_json(sprintf("/api/device/wemo-221412K11013E1/command"),
-        {
-          command: "turn_on",
-        });
+    // Dialogs
+
+    $('div.main').on('click', 'div.room .room-change-name', function() {
+      var room_id = $(this).closest('div.room').data('room-id');
+      var room = rooms[room_id];
+
+      $('.modal#room_change_name input#room-name').val(room.name);
+      $('.modal#room_change_name')
+          .data('for-room', room_id)
+          .modal({show: true});
     });
 
+    $('.modal#room_change_name button.btn-primary').on('click', function() {
+      var room_id = $('.modal#room_change_name').data('for-room');
+      var room_name = $('.dialog#room_change_name input.room-name').val();
+
+      post(sprintf('/api/room/%s', room_id), {
+          name: room_name,
+        });
+
+      $('.modal#room_change_name').modal({show: false});
+    });
   });
 
   return {
