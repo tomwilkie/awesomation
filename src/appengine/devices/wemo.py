@@ -2,7 +2,7 @@
 
 from google.appengine.ext import ndb
 
-from appengine import device, pushrpc
+from appengine import device, pushrpc, rest
 
 
 @device.register('wemo')
@@ -12,12 +12,12 @@ class WemoDevice(device.Switch):
   model = ndb.StringProperty()
   state = ndb.IntegerProperty()
 
-  @device.command
+  @rest.command
   def turn_on(self):
     self.state = 1
     self._set_state(1)
 
-  @device.command
+  @rest.command
   def turn_off(self):
     self.state = 0
     self._set_state(0)

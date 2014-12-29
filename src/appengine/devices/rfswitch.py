@@ -2,7 +2,7 @@
 
 from google.appengine.ext import ndb
 
-from appengine import device, pushrpc
+from appengine import device, pushrpc, rest
 
 
 @device.register('rfswitch')
@@ -17,12 +17,12 @@ class RFSwitch(device.Switch):
              'device_code': self.device_code, 'mode': value}
     pushrpc.send_event(event)
 
-  @device.command
+  @rest.command
   def turn_on(self):
     self.state = True
     self._set_value(True)
 
-  @device.command
+  @rest.command
   def turn_off(self):
     self.state = False
     self._set_value(False)

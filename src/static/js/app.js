@@ -33,13 +33,13 @@ var DOMICS = (function() {
 
   function fetch() {
     get('/api/room', function(result) {
-      $.each(result.rooms, function(i, room) {
+      $.each(result.objects, function(i, room) {
         rooms[room.id] = room;
         rooms[room.id].devices = [];
       });
 
       get('/api/device', function(result) {
-        $.each(result.devices, function(i, device) {
+        $.each(result.objects, function(i, device) {
           var room_id = device.room in rooms ? device.room : 'unknown';
           rooms[room_id].devices.push(device);
         });

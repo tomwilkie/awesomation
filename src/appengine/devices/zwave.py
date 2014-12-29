@@ -4,7 +4,7 @@ import logging
 
 from google.appengine.ext import ndb
 
-from appengine import device, pushrpc
+from appengine import device, pushrpc, rest
 
 
 class CommandClassValue(ndb.Model):
@@ -71,7 +71,7 @@ class ZWaveDevice(device.Device):
     else:
       logging.info("Unknown event: %s", event)
 
-  @device.command
+  @rest.command
   def lights(self, state):
     """Turn the lights on/off in the room this sensor is in."""
     room_key = self.room
@@ -92,7 +92,8 @@ class ZWaveDevice(device.Device):
     event = {'type': 'zwave', 'command': 'heal'}
     pushrpc.send_event(event)
 
-  @device.command
+  @rest.command
   def heal_node(self):
-    event = {'type': 'zwave', 'command': 'heal_node', 'node_id': self.zwave_node_id}
+    event = {'type': 'zwave', 'command': 'heal_node',
+             'node_id': self.zwave_node_id}
     pushrpc.send_event(event)

@@ -2,21 +2,14 @@
 import logging
 
 from google.appengine.api import namespace_manager
-from google.appengine.ext import db
 from google.appengine.ext import ndb
 
 import flask
 
-from appengine import model, pushrpc, user
+from appengine import model, pushrpc, rest
 
 
 DEVICE_TYPES = {}
-
-
-def command(func):
-  """Device command decorator - automatically dispatches methods."""
-  setattr(func, 'is_command', True)
-  return func
 
 
 def static_command(func):
@@ -34,8 +27,12 @@ def register(device_type):
   return class_rebuilder
 
 
-def create_device(device_id, device_type, user_id):
+def create_device(device_id, user_id, body):
   """Factory for creating new devices."""
+  device_type = body.pop('type', None)
+  if device_type is None:
+    flask.abort(400, '\'type\' field expected in body.')
+
   constructor = DEVICE_TYPES.get(device_type, None)
   if constructor is None:
     logging.error('No device type \'%s\'', device_type)
@@ -53,18 +50,6 @@ class Device(model.Base):
   def handle_event(self, event):
     pass
 
-  def handle_command(self, command_dict):
-    """Dispatch command to appropriate handler."""
-    logging.info(command_dict)
-    func_name = command_dict.pop('command', None)
-    func = getattr(self, func_name, None)
-    logging.info('%s %s %s', func, type(func), func.is_command)
-    if func is None or not func.is_command:
-      logging.error('Command %s does not exist or is not a command',
-                    func_name)
-      flask.abort(400)
-    func(**command_dict)
-
   @classmethod
   def handle_static_command(cls, command_dict):
     """Dispatch command to appropriate handler."""
@@ -78,7 +63,7 @@ class Device(model.Base):
       flask.abort(400)
     func(**command_dict)
 
-  @command
+  @rest.command
   def set_room(self, room_id):
     """Change the room associated with this device."""
     from appengine import room as room_module
@@ -107,17 +92,18 @@ class Switch(Device):
   """A swtich."""
   state = ndb.BooleanProperty()
 
-  @command
+  @rest.command
   def turn_on(self):
     pass
 
-  @command
+  @rest.command
   def turn_off(self):
     pass
 
 
 # pylint: disable=invalid-name
 blueprint = flask.Blueprint('device', __name__)
+rest.register_class(blueprint, Device, create_device)
 
 
 @blueprint.route('/events', methods=['POST'])
@@ -160,85 +146,4 @@ def handle_events():
 
   return ('', 204)
 
-
-@blueprint.route('/', methods=['GET'])
-def list_devices():
-  """Return json list of devices."""
-  device_list = Device.query().iter()
-  if device_list is None:
-    device_list = []
-
-  device_list = [device.to_dict() for device in device_list]
-  return flask.jsonify(devices=device_list)
-
-
-@blueprint.route('/<device_id>', methods=['POST'])
-def create_update_device(device_id):
-  """Using json body to create or update a device."""
-  user_id = user.get_user()
-  body = flask.request.get_json()
-  if body is None:
-    flask.abort(400, 'JSON body and mime type required.')
-  logging.info("Creating (or updating) device - %s", body)
-
-  device = Device.get_by_id(device_id)
-
-  if not device:
-    device_type = body.pop('type', None)
-    if device_type is None:
-      flask.abort(400, '\'type\' field expected in body.')
-
-    device = create_device(
-        device_id, device_type, user_id)
-
-  elif device.owner != user_id:
-    flask.abort(403)
-
-  # Update the object; abort with 400 on unknown field
-  try:
-    device.populate(**body)
-  except AttributeError:
-    flask.abort(400)
-
-  # Put the object - BadValueError if there are uninitalised required fields
-  try:
-    device.put()
-  except db.BadValueError:
-    flask.abort(400)
-
-  return flask.jsonify(**device.to_dict())
-
-
-@blueprint.route('/<device_id>', methods=['GET'])
-def get_device(device_id):
-  """Return json repr of given device."""
-  user_id = user.get_user()
-  device = Device.get_by_id(device_id)
-
-  if not device:
-    flask.abort(404)
-  elif device.owner != user_id:
-    flask.abort(403)
-
-  return flask.jsonify(**device.to_dict())
-
-
-@blueprint.route('/<device_id>/command', methods=['POST'])
-def device_command(device_id):
-  """Using json body to create or update a device."""
-  user_id = user.get_user()
-  body = flask.request.get_json()
-  if body is None:
-    flask.abort(400, 'JSON body and mime type required.')
-
-  device = Device.get_by_id(device_id)
-
-  if not device:
-    flask.abort(404)
-  elif device.owner != user_id:
-    flask.abort(403)
-
-  device.handle_command(body)
-
-  return ('', 204)
 
