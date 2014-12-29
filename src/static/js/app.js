@@ -149,6 +149,17 @@ var DOMICS = (function() {
       });
     });
 
+    // Dialog: device change room
+
+    $('div.main').on('click', 'div.device .device-change-room', function() {
+      var device_id = $(this).closest('div.device').data('device-id');
+      var state = {rooms: rooms};
+
+      dialog('script#device-change-room-dialog-template', state, function() {
+
+      });
+    });
+
   });
 
   return {

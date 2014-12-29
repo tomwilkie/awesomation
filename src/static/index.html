@@ -69,6 +69,29 @@
     </div>
   </script>
 
+  <script type="text/x-handlebars-template" id="device-change-room-dialog-template">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="room" class="control-label">Room:</label>
+              <select id="room" class="form-control">
+                {{#each rooms}}
+                <option value="{{id}}">{{name}}</option>
+                {{/each}}
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary">Create new room</button>
+        </div>
+      </div>
+    </div>
+  </script>
+
   <script type="text/x-handlebars-template" id="devices-template">
     <h2 class="page-header">
       Devices by room
@@ -123,8 +146,8 @@
                   <li><a href="#" class="device-on">Turn on</a></li>
                   <li><a href="#" class="device-off">Turn off</a></li>
                   <li class="divider"></li>
-                  <li><a href="#">Set room</a></li>
-                  <li><a href="#">Change name</a></li>
+                  <li><a href="#" class='device-change-room'>Change room</a></li>
+                  <li><a href="#" class='device-change-name'>Change name</a></li>
                 </ul>
               </div>
             </div>
