@@ -175,6 +175,20 @@ var DOMICS = (function() {
       });
     });
 
+    // Dialog: change device name
+
+    $('div.main').on('click', 'div.device .device-change-name', function() {
+      var device_id = $(this).closest('div.device').data('device-id');
+      var device = devices[device_id];
+
+      dialog('script#device-change-name-dialog-template', device, function() {
+        var device_name = $(this).find('input#device-name').val();
+        post(sprintf('/api/device/%s', device_id), {
+            name: device_name,
+          });
+      });
+    });
+
   });
 
   return {
