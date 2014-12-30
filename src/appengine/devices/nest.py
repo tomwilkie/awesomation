@@ -52,7 +52,7 @@ class NestAccount(ndb.Model):
     result = json.load(result)
     logging.info(result)
 
-    user_id = user.get_user()
+    user_id = user.get_user_from_namespace()
 
     for protect_id, protect_info in result['smoke_co_alarms'].iteritems():
       key = 'nest-protect-%s' % protect_id

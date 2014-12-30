@@ -1,4 +1,5 @@
 """Handle user related queries."""
+from google.appengine.api import namespace_manager
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
@@ -14,6 +15,9 @@ class Person(model.Base):
   # key_name is userid
   email = ndb.StringProperty(required=False)
 
+
+def get_user_from_namespace():
+  return namespace_manager.get_namespace()
 
 def get_user():
   """Return the user_id for the current logged in user."""
