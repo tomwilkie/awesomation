@@ -13,6 +13,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
 import flask
 
 from appengine import device, driver, pushrpc, room, tasks, user
+from appengine.devices import nest
+
 # This has the side effect of registering devices
 # pylint: disable=unused-wildcard-import,wildcard-import
 from appengine.devices import *
@@ -52,6 +54,7 @@ app.register_blueprint(driver.blueprint, url_prefix='/api/driver')
 app.register_blueprint(room.blueprint, url_prefix='/api/room')
 app.register_blueprint(pushrpc.blueprint, url_prefix='/api/proxy')
 app.register_blueprint(tasks.blueprint, url_prefix='/tasks')
+app.register_blueprint(nest.blueprint, url_prefix='/api/nest')
 
 
 @app.route('/')
