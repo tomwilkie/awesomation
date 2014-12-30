@@ -111,6 +111,20 @@
     </div>
   </script>
 
+  <script type="text/x-handlebars-template" id="delete-device-dialog-template">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <p>Are you sure you want to delete device '{{name}}'?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary">Delete device</button>
+        </div>
+      </div>
+    </div>
+  </script>
+
   <script type="text/x-handlebars-template" id="devices-template">
     <h2 class="page-header">
       Devices by room
@@ -167,6 +181,7 @@
                   <li class="divider"></li>
                   <li><a href="#" class='device-change-room'>Change room</a></li>
                   <li><a href="#" class='device-change-name'>Change name</a></li>
+                  <li><a href="#" class='device-delete'>Delete</a></li>
                 </ul>
               </div>
             </div>

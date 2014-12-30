@@ -87,6 +87,7 @@ class ClassView(flask.views.MethodView):
       flask.abort(403)
 
     obj.key.delete()
+    return ('', 204)
 
 
 class CommandView(flask.views.MethodView):

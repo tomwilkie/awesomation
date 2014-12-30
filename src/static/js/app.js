@@ -189,6 +189,17 @@ var DOMICS = (function() {
       });
     });
 
+    // Dialog: delete device
+
+    $('div.main').on('click', 'div.device .device-delete', function() {
+      var device_id = $(this).closest('div.device').data('device-id');
+      var device = devices[device_id];
+
+      dialog('script#delete-device-dialog-template', device, function() {
+        del(sprintf('/api/device/%s', device_id));
+      });
+    });
+
   });
 
   return {
