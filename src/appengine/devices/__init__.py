@@ -1,1 +1,4 @@
-__all__ = ["hue", "rfswitch", "wemo", "zwave"]
+"""Device-specific code."""
+
+# This makes the import * in main.py work.
+__all__ = ["hue", "nest", "rfswitch", "wemo", "zwave"]
