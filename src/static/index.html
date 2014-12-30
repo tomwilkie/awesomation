@@ -78,7 +78,7 @@
               <label for="room" class="control-label">Room:</label>
               <select id="room" class="form-control">
                 {{#each rooms}}
-                <option value="{{id}}">{{name}}</option>
+                <option value="{{id}}"{{#IfEquals ../device.room id}} selected{{/IfEquals}}>{{name}}</option>
                 {{/each}}
               </select>
             </div>
@@ -86,7 +86,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary">Create new room</button>
+          <button type="button" class="btn btn-primary">Change room</button>
         </div>
       </div>
     </div>

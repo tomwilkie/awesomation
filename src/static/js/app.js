@@ -20,9 +20,19 @@ var DOMICS = (function() {
     })
   }
 
+  Handlebars.registerHelper('IfEquals', function(a, b, options) {
+    if (a === b) {
+      return options.fn(this);
+    } else {
+      return options.inverse(this);
+    }
+  });
+
   var rooms = {
     'unknown': {name: 'Unknown', devices: []}
   };
+
+  var devices = {};
 
   function render() {
     var template = $('script#devices-template').text();
@@ -42,6 +52,7 @@ var DOMICS = (function() {
         $.each(result.objects, function(i, device) {
           var room_id = device.room in rooms ? device.room : 'unknown';
           rooms[room_id].devices.push(device);
+          devices[device.id] = device;
         });
 
         render();
@@ -153,10 +164,14 @@ var DOMICS = (function() {
 
     $('div.main').on('click', 'div.device .device-change-room', function() {
       var device_id = $(this).closest('div.device').data('device-id');
-      var state = {rooms: rooms};
+      var state = {rooms: rooms, device: devices[device_id]};
 
       dialog('script#device-change-room-dialog-template', state, function() {
-
+        var room_id = $(this).find('select#room').val();
+        post(sprintf('/api/device/%s/command', device_id), {
+            command: 'set_room',
+            room_id: room_id
+          });
       });
     });
 
