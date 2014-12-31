@@ -12,6 +12,10 @@ class WemoDevice(device.Switch):
   model = ndb.StringProperty()
   state = ndb.IntegerProperty()
 
+  def __init__(self, **kwargs):
+    super(WemoDevice, self).__init__(**kwargs)
+    self.capabilities = ['SWITCH']
+
   @rest.command
   def turn_on(self):
     self.state = 1

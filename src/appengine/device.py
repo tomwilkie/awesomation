@@ -46,6 +46,7 @@ class Device(model.Base):
   name = ndb.StringProperty(required=False)
   last_update = ndb.DateTimeProperty(required=False, auto_now=True)
   room = ndb.KeyProperty('room')
+  capabilities = ndb.StringProperty(repeated=True)
 
   def handle_event(self, event):
     pass
