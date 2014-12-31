@@ -33,6 +33,7 @@ var DOMICS = (function() {
   };
 
   var devices = {};
+  var accounts = {};
 
   function render() {
     var template = $('script#devices-template').text();
@@ -42,6 +43,12 @@ var DOMICS = (function() {
   }
 
   function fetch() {
+    get('/api/account', function(result) {
+      $.each(result.objects, function(i, account) {
+        accounts[account.id] = account;
+      });
+    });
+
     get('/api/room', function(result) {
       $.each(result.objects, function(i, room) {
         rooms[room.id] = room;
@@ -203,6 +210,8 @@ var DOMICS = (function() {
   });
 
   return {
-    'rooms': rooms
+    'rooms': rooms,
+    'devices': devices,
+    'accounts': accounts
   }
 })();
