@@ -9,6 +9,8 @@ Currently supports the following devices:
 * Philips Hue lights
 * Wemo switches
 * 433Mhz RF Switches (testing with [Brennenstuhl remote control mains sockets](http://www.amazon.co.uk/dp/B003BIFLSY))
+* Nest Thermostats and Protects
+* Netatmo weather stations
 
 The server-side logic has the concept of rooms, and when motion is sensed in a room the lights in that room are turned on.
 
