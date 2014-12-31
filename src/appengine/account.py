@@ -12,6 +12,7 @@ import flask
 from appengine import model, rest, user
 
 
+REDIRECT_URL = 'https://homeawesomation.appspot.com/api/account/redirect'
 ACCOUNT_TYPES = {}
 
 
@@ -34,6 +35,9 @@ class Account(model.Base):
   access_token = ndb.StringProperty(required=False)
   owner = ndb.StringProperty(required=True)
 
+  def _get_refresh_data(self):
+    return ''
+
   @rest.command
   def refresh_access_token(self):
     """For a given account, refresh the access token."""
@@ -42,11 +46,12 @@ class Account(model.Base):
                   'client_secret': self.CLIENT_SECRET,
                   'grant_type': 'authorization_code'}
     url = self.ACCESS_TOKEN_URL % parameters
-    logging.info(url)
+    data = self._get_refresh_data()
+    logging.info('url: %s, data: %s', url, data)
 
     try:
       # empty data to trigger a post
-      result = urllib2.urlopen(url, '')
+      result = urllib2.urlopen(url, data)
       result = json.load(result)
     except urllib2.HTTPError, err:
       result = json.load(err)
