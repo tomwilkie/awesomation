@@ -18,6 +18,8 @@ class NetatmoAccount(account.Account):
               'client_id=%(client_id)s&state=%(state)s')
   ACCESS_TOKEN_URL = 'https://api.netatmo.net/oauth2/token'
   SCOPES = 'read_station read_thermostat write_thermostat'
+  API_URL = ('https://api.netatmo.net/api/devicelist?'
+             'access_token=%(access_token)s')
 
   CLIENT_ID = creds.NETATMO_CLIENT_ID
   CLIENT_SECRET = creds.NETATMO_CLIENT_SECRET
@@ -35,4 +37,9 @@ class NetatmoAccount(account.Account):
     if self.access_token is None:
       logging.info('No access token, skipping.')
       return
+
+    url = self.API_URL % {'access_token': self.access_token}
+    result = urllib2.urlopen(url)
+    result = json.load(result)
+    logging.info(result)
 
