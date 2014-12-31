@@ -1,5 +1,6 @@
 """A generic rest serving layer for NDB models."""
 import logging
+import sys
 
 from google.appengine.ext import db
 
@@ -56,7 +57,9 @@ class ClassView(flask.views.MethodView):
 
     obj = self._cls.get_by_id(object_id)
 
-    if not obj:
+    if not obj and self._create_callback is None:
+      flask.abort(403)
+    elif not obj:
       obj = self._create_callback(object_id, user_id, body)
 
     elif obj.owner != user_id:
@@ -65,13 +68,15 @@ class ClassView(flask.views.MethodView):
     # Update the object; abort with 400 on unknown field
     try:
       obj.populate(**body)
-    except AttributeError:
+    except AttributeError, err:
+      logging.error('Exception populating object', exc_info=sys.exc_info())
       flask.abort(400)
 
     # Put the object - BadValueError if there are uninitalised required fields
     try:
       obj.put()
     except db.BadValueError:
+      logging.error('Exception saving object', exc_info=sys.exc_info())
       flask.abort(400)
 
     return flask.jsonify(**obj.to_dict())
@@ -133,9 +138,9 @@ def register_class(blueprint, cls, create_callback):
   class_view_func = ClassView.as_view('%s_crud' % cls.__name__,
                                       cls, create_callback)
   blueprint.add_url_rule('/', defaults={'object_id': None},
-                   view_func=class_view_func, methods=['GET',])
+                         view_func=class_view_func, methods=['GET',])
   blueprint.add_url_rule('/<object_id>', view_func=class_view_func,
-                   methods=['GET', 'POST', 'DELETE'])
+                         methods=['GET', 'POST', 'DELETE'])
 
   command_view_func = CommandView.as_view('%s_command' % cls.__name__, cls)
   blueprint.add_url_rule('/<object_id>/command', methods=['POST'],

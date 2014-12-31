@@ -6,19 +6,8 @@ import urllib2
 
 from google.appengine.ext import ndb
 
-import flask
-
-from appengine import device, user
+from appengine import account, device, rest, user
 from common import creds
-
-
-AUTH_URL = ('https://home.nest.com/login/oauth2?client_id=%s&state=STATE'
-            % creds.NEST_CLIENT_ID)
-ACCESS_TOKEN_URL = ('https://api.home.nest.com/oauth2/access_token?'
-                    'client_id=%(client_id)s&code=%(auth_code)s&'
-                    'client_secret=%(client_secret)s&'
-                    'grant_type=authorization_code')
-API_URL = 'https://developer-api.nest.com/devices.json?auth=%(access_token)s'
 
 
 class NestThermostat(device.Device):
@@ -29,25 +18,39 @@ class NestThermostat(device.Device):
   def update(self, info):
     self.humidity = info['humidity']
     self.temperature = info['ambient_temperature_c']
-    self.name = info['name']
+    self.name = info['name_long']
 
 
 class NestProtect(device.Device):
   """Class represents a Nest protect (smoke alarm)."""
+
   def update(self, info):
-    self.name = info['name']
+    self.name = info['name_long']
 
 
-class NestAccount(ndb.Model):
+@account.register('nest')
+class NestAccount(account.Account):
   """Class represents a Nest account."""
+  AUTH_URL = ('https://home.nest.com/login/oauth2?'
+              'client_id=%(client_id)s&state=%(state)s')
+  ACCESS_TOKEN_URL = ('https://api.home.nest.com/oauth2/access_token?'
+                      'client_id=%(client_id)s&code=%(auth_code)s&'
+                      'client_secret=%(client_secret)s&'
+                      'grant_type=authorization_code')
+  API_URL = 'https://developer-api.nest.com/devices.json?auth=%(access_token)s'
+  CLIENT_ID = creds.NEST_CLIENT_ID
+  CLIENT_SECRET = creds.NEST_CLIENT_SECRET
 
-  auth_code = ndb.StringProperty(required=True)
-  access_token = ndb.StringProperty(required=False)
   thermostats = ndb.KeyProperty(repeated=True)
   protects = ndb.KeyProperty(repeated=True)
 
+  @rest.command
   def refresh_devices(self):
-    url = API_URL % {'access_token': self.access_token}
+    if self.access_token is None:
+      logging.info('No access token, skipping.')
+      return
+
+    url = self.API_URL % {'access_token': self.access_token}
     result = urllib2.urlopen(url)
     result = json.load(result)
     logging.info(result)
@@ -76,52 +79,3 @@ class NestAccount(ndb.Model):
       thermostat.update(thermostat_info)
       thermostat.put()
 
-
-
-def refresh_access_token(account):
-  """For a given account, refresh the access token."""
-  parameters = {'client_id': creds.NEST_CLIENT_ID,
-                'auth_code': account.auth_code,
-                'client_secret': creds.NEST_CLIENT_SECRET,
-                'grant_type': 'authorization_code'}
-  url = ACCESS_TOKEN_URL % parameters
-  logging.info(url)
-
-  try:
-    # empty data to trigger a post
-    result = urllib2.urlopen(url, '')
-    result = json.load(result)
-  except urllib2.HTTPError, e:
-    result = json.load(e)
-    logging.info(result)
-    return
-
-  assert 'access_token' in result
-  account.access_token = result['access_token']
-
-
-# pylint: disable=invalid-name
-blueprint = flask.Blueprint('nest', __name__)
-
-
-@blueprint.route('/redirect')
-def nest_redirect_callback():
-  # Step 1; <s>cut a hole in the box</s>
-  # UI will open this page; we will redirect to
-  # Nest server
-  auth_code = flask.request.args.get('code')
-  if auth_code is None:
-    return flask.redirect(AUTH_URL)
-
-  # Step TODO: check state in callback is unique
-
-  # Step 2: Nest server redirects back to us
-  # with a auth_code - use this to create new
-  # nest account object
-  account = NestAccount(auth_code=auth_code)
-  refresh_access_token(account)
-
-  account.refresh_devices()
-
-  account.put()
-  return "OK"
