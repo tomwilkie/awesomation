@@ -24,10 +24,19 @@ class CommandClassValue(ndb.Model):
 @device.register('zwave')
 class ZWaveDevice(device.Device):
   """Generic Z Wave device driver."""
+  # pylint: disable=too-many-instance-attributes
   zwave_node_id = ndb.IntegerProperty(required=False)
   zwave_home_id = ndb.IntegerProperty(required=False)
   zwave_command_class_values = ndb.StructuredProperty(
       CommandClassValue, repeated=True)
+
+  zwave_node_type = ndb.StringProperty()
+  zwave_node_name = ndb.StringProperty()
+  zwave_manufacturer_name = ndb.StringProperty()
+  zwave_manufacturer_id = ndb.StringProperty()
+  zwave_produce_name = ndb.StringProperty()
+  zwave_product_type = ndb.StringProperty()
+  zwave_produce_id = ndb.StringProperty()
 
   def __init__(self, **kwargs):
     super(ZWaveDevice, self).__init__(**kwargs)
@@ -46,8 +55,10 @@ class ZWaveDevice(device.Device):
     super(ZWaveDevice, self).handle_event(event)
 
     notification_type = event['notificationType']
-    self.zwave_home_id = event['homeId']
-    self.zwave_node_id = event['nodeId']
+    if 'homeId' in event:
+      self.zwave_home_id = event['homeId']
+    if 'nodeId' in event:
+      self.zwave_node_id = event['nodeId']
 
     if notification_type in {'ValueAdded', 'ValueChanged'}:
       value = event['valueId']
@@ -67,6 +78,18 @@ class ZWaveDevice(device.Device):
 
       if command_class == 'COMMAND_CLASS_SENSOR_BINARY':
         self.lights(value['value'])
+
+    elif notification_type == 'NodeInfoUpdate':
+      # event['basic']
+      # event['generic']
+      # event['specific']
+      self.zwave_node_type = event['node_type']
+      self.zwave_node_name = event['node_name']
+      self.zwave_manufacturer_name = event['manufacturer_name']
+      self.zwave_manufacturer_id = event['manufacturer_id']
+      self.zwave_produce_name = event['product_name']
+      self.zwave_product_type = event['product_type']
+      self.zwave_produce_id = event['product_id']
 
     else:
       logging.info("Unknown event: %s", event)

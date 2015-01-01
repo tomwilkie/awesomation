@@ -31,6 +31,7 @@ class ZWave(proxy.Proxy):
     self._manager.addDriver(self._device)
 
     self._home_id = None
+    self._node_ids = set()
 
   def _zwave_callback(self, data):
     # pylint: disable=broad-except
@@ -45,10 +46,38 @@ class ZWave(proxy.Proxy):
     self._home_id = data['homeId']
     node_id = data['nodeId']
 
+    if notification_type == 'AwakeNodesQueried':
+      for node_id in self._node_ids:
+        node_info = {'notificationType': 'NodeInfoUpdate'}
+        node_info['basic'] = self._manager.getNodeBasic(
+            self._home_id, node_id)
+        node_info['generic'] = self._manager.getNodeGeneric(
+            self._home_id, node_id)
+        node_info['specific'] = self._manager.getNodeSpecific(
+            self._home_id, node_id)
+        node_info['node_type'] = self._manager.getNodeType(
+            self._home_id, node_id)
+        node_info['node_name'] = self._manager.getNodeName(
+            self._home_id, node_id)
+        node_info['manufacturer_name'] = self._manager.getNodeManufacturerName(
+            self._home_id, node_id)
+        node_info['manufacturer_id'] = self._manager.getNodeManufacturerId(
+            self._home_id, node_id)
+        node_info['product_name'] = self._manager.getNodeProductName(
+            self._home_id, node_id)
+        node_info['product_type'] = self._manager.getNodeProductType(
+            self._home_id, node_id)
+        node_info['product_id'] = self._manager.getNodeProductId(
+            self._home_id, node_id)
+        self._callback('zwave', 'zwave-%d' % node_id, node_info)
+
     if node_id in {1, 255}:
+      logging.info('ZWave callback - %d %s', node_id, notification_type)
       return
 
     if notification_type == 'NodeAdded':
+      self._node_ids.add(node_id)
+
       self._manager.addAssociation(self._home_id, node_id, 1, 1)
       self._manager.refreshNodeInfo(self._home_id, node_id)
       self._manager.requestNodeState(self._home_id, node_id)
@@ -56,7 +85,6 @@ class ZWave(proxy.Proxy):
       self._callback('zwave', 'zwave-%d' % node_id, data)
 
     elif notification_type in {'ValueAdded', 'ValueChanged', 'NodeNaming'}:
-      #logging.info('%s', data)
       self._callback('zwave', 'zwave-%d' % node_id, data)
 
     else:
