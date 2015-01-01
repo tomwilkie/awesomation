@@ -176,9 +176,11 @@
                   <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu">
+                  {{#HasCapability 'SWITCH'}}
                   <li><a href="#" class="device-on">Turn on</a></li>
                   <li><a href="#" class="device-off">Turn off</a></li>
                   <li class="divider"></li>
+                  {{/HasCapability}}
                   <li><a href="#" class='device-change-room'>Change room</a></li>
                   <li><a href="#" class='device-change-name'>Change name</a></li>
                   <li><a href="#" class='device-delete'>Delete</a></li>

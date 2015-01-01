@@ -20,11 +20,20 @@ var DOMICS = (function() {
     })
   }
 
-  Handlebars.registerHelper('IfEquals', function(a, b, options) {
-    if (a === b) {
-      return options.fn(this);
-    } else {
-      return options.inverse(this);
+  Handlebars.registerHelper({
+    'IfEquals': function(a, b, options) {
+      if (a === b) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
+    },
+    'HasCapability': function(capability, options) {
+      if (this.capabilities.indexOf(capability) >= 0) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
     }
   });
 
