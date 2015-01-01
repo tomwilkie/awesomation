@@ -117,12 +117,8 @@ class CommandView(flask.views.MethodView):
     elif obj.owner != user_id:
       flask.abort(403)
 
-
     func_name = body.pop('command', None)
     func = getattr(obj, func_name, None)
-
-    logging.info('%s %s %s', func, type(func), func.is_command)
-
     if func is None or not func.is_command:
       logging.error('Command %s does not exist or is not a command',
                     func_name)

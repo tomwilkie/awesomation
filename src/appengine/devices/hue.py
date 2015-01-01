@@ -37,10 +37,6 @@ class HueLight(device.Switch):
   hue_type = ndb.StringProperty()
   hue_model_id = ndb.StringProperty()
 
-  def __init__(self, **kwargs):
-    super(HueLight, self).__init__(**kwargs)
-    self.capabilities = ['SWITCH']
-
   @rest.command
   def turn_on(self):
     self.state = True

@@ -11,10 +11,6 @@ class RFSwitch(device.Switch):
   system_code = ndb.StringProperty(required=True)
   device_code = ndb.IntegerProperty(required=True)
 
-  def __init__(self, **kwargs):
-    super(RFSwitch, self).__init__(**kwargs)
-    self.capabilities = ['SWITCH']
-
   def _set_value(self, value):
     event = {'type': 'rfswitch', 'command': 'set_state',
              'system_code': self.system_code,

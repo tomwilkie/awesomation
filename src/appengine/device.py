@@ -46,10 +46,18 @@ class Device(model.Base):
   name = ndb.StringProperty(required=False)
   last_update = ndb.DateTimeProperty(required=False, auto_now=True)
   room = ndb.KeyProperty('room')
-  capabilities = ndb.StringProperty(repeated=True)
+  capabilities = ndb.ComputedProperty(lambda self: self.get_capabilities(),
+                                      repeated=True)
+
+  def get_capabilities(self):
+    return []
 
   def handle_event(self, event):
     pass
+
+  @classmethod
+  def get_by_capability(cls, capability):
+    return cls.query(Device.capabilities == capability)
 
   @classmethod
   def handle_static_command(cls, command_dict):
@@ -92,6 +100,9 @@ class Device(model.Base):
 class Switch(Device):
   """A swtich."""
   state = ndb.BooleanProperty()
+
+  def get_capabilities(self):
+    return ['SWITCH']
 
   @rest.command
   def turn_on(self):

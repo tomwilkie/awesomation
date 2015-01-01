@@ -1,5 +1,4 @@
 """ROOMs"""
-import logging
 
 from google.appengine.ext import ndb
 
@@ -16,20 +15,20 @@ class Room(model.Base):
 
   @rest.command
   def all_on(self):
-    switches = device.Switch.query().filter(
-        device.Device.room == self.key).iter()
+    switches = (device.Device.get_by_capability('SWITCH')
+                .filter(device.Device.room == self.key).iter())
     for switch in switches:
       switch.turn_on()
 
   @rest.command
   def all_off(self):
-    switches = device.Switch.query().filter(
-        device.Device.room == self.key).iter()
+    switches = (device.Device.get_by_capability('SWITCH')
+                .filter(device.Device.room == self.key).iter())
     for switch in switches:
       switch.turn_off()
 
 
-def create_room(room_id, user_id, _body):
+def create_room(room_id, user_id, _):
   return Room(id=room_id, owner=user_id)
 
 
