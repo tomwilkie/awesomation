@@ -56,6 +56,10 @@ class Device(model.Base):
     pass
 
   @classmethod
+  def handle_static_event(cls, event):
+    pass
+
+  @classmethod
   def get_by_capability(cls, capability):
     return cls.query(Device.capabilities == capability)
 
@@ -142,6 +146,10 @@ def handle_events():
     device_type = event['device_type']
     device_id = event['device_id']
     event_body = event['event']
+
+    if device_id is None:
+      DEVICE_TYPES[device_type].handle_static_event(event_body)
+      continue
 
     if device_id in device_cache:
       device = device_cache[device_id]

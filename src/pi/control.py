@@ -22,8 +22,9 @@ class Control(object):
                        self._device_event_callback),
         'wemo': wemo.Wemo(args.hue_scan_interval_secs,
                           self._device_event_callback),
-        'network': network.NetworkMonitor(args.network_scan_interval_secs,
-                                          args.network_scan_timeout_secs),
+        'network': network.NetworkMonitor(
+            self._device_event_callback, args.network_scan_interval_secs,
+            args.network_scan_timeout_secs),
     }
 
     self._pusher = pushrpc.PushRPC(self._push_event_callback)

@@ -21,13 +21,37 @@ RE = re.compile(RE)
 class NetworkMonitor(scanning_proxy.ScanningProxy):
   """Monitor devices appearing on the network."""
 
-  def __init__(self, period, timeout_secs):
-    super(NetworkMonitor, self).__init__(period)
+  def __init__(self, callback, scan_period_sec, timeout_secs):
+    super(NetworkMonitor, self).__init__(scan_period_sec)
+    self._callback = callback
     self._timeout_secs = timeout_secs
     self._ping_frequency_secs = 60
 
     self._hosts = {}
     self._last_ping = collections.defaultdict(float)
+
+    # This module has to poll the network pretty
+    # frequently to have a good chance of catching
+    # iphones etc which sleep a lot.
+    # Hence, we send edge-triggered events to the server
+    # to rate limit the number of events we're sending.
+    # (This also helps with latency).
+    # This works in the other scanners as (a) we assume the
+    # server is always there and (b) the server creates
+    # instances on demand for things like wemo and hue.
+    # We don't want to create instances on demand
+    # (there is too much junk we can't control on most
+    #  networks) - instead, the user will manually create
+    # objects to represents phones coming and going.
+    # Therefore, edge triggering isn't good enough
+    # - the user might create the phone object after the
+    # phone has been detected, and the server will miss
+    # the event.  There we will also periodically send
+    # a 'level-triggered' event - ie, just a list of
+    # devices which are present.  But we'll do this
+    # less frequently.
+    self._level_event_frequency_secs = 10*60
+    self._last_level_event = 0
 
   def _ping(self, ipaddr, now):
     """Ping a device, but rate limit.
@@ -42,6 +66,8 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
 
   def _scan_once(self):
     """Scan the network for devices."""
+
+    # TODO: probably need to ping the subnet?
 
     now = time.time()
     process = subprocess.Popen(['ip', '-s', 'neighbor', 'list'],
@@ -69,12 +95,20 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
 
       if mac not in self._hosts:
         logging.info('Found new device - %s, %s, %s', ipaddr, mac, state)
+        self._callback('network', None, {'appeared': mac})
 
       # update last seen time
       self._hosts[mac] = now
 
-    # expire old timestamps
+    # Expire old timestamps
     for mac, timestamp in self._hosts.items():
       if timestamp + self._timeout_secs < now:
         del self._hosts[mac]
         logging.info('Device disappeared - %s', mac)
+        self._callback('network', None, {'disappeared': mac})
+
+    # Periodically send event with list of
+    # devices we can see.
+    if self._last_level_event + self._level_event_frequency_secs < now:
+      self._last_level_event = now
+      self._callback('network', None, {'devices': self._hosts.keys()})
