@@ -165,6 +165,13 @@ var DOMICS = (function() {
       });
     });
 
+    // Dialog: add new device
+
+    $('div.main').on('click', 'a.add-new-device', function() {
+      dialog('script#new-device-dialog-template', {}, function() {
+      });
+    });
+
     // Dialog: delete room
 
     $('div.main').on('click', 'div.room .room-delete', function() {
