@@ -5,7 +5,7 @@ import logging
 import sys
 import time
 
-from pi import hue, pushrpc, rfswitch, wemo, zwave
+from pi import hue, network, pushrpc, rfswitch, wemo, zwave
 
 
 LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
@@ -21,7 +21,9 @@ class Control(object):
         'hue': hue.Hue(args.hue_scan_interval_secs,
                        self._device_event_callback),
         'wemo': wemo.Wemo(args.hue_scan_interval_secs,
-                                self._device_event_callback)
+                          self._device_event_callback),
+        'network': network.NetworkMonitor(args.network_scan_interval_secs,
+                                          args.network_scan_timeout_secs),
     }
 
     self._pusher = pushrpc.PushRPC(self._push_event_callback)
@@ -65,6 +67,8 @@ def main():
   parser.add_argument('--zwave_device', default='/dev/ttyUSB0')
   parser.add_argument('--rfswtich_pin', default=3)
   parser.add_argument('--hue_scan_interval_secs', default=5*60)
+  parser.add_argument('--network_scan_interval_secs', default=10)
+  parser.add_argument('--network_scan_timeout_secs', default=60)
   args = parser.parse_args()
 
   control = Control(args)
