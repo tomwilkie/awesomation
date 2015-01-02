@@ -13,6 +13,9 @@ class HueBridge(device.Device):
   """A hue bridge."""
   linked = ndb.BooleanProperty(required=True)
 
+  def get_capabilities(self):
+    return ['SCAN']
+
   @classmethod
   @device.static_command
   def scan(cls):

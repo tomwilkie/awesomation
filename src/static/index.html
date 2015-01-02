@@ -268,9 +268,13 @@
                   <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu">
+                  {{#HasCapability 'SCAN'}}
+                  <li><a href="#" class="device-command" data-command="scan">Scan</a></li>
+                  <li class="divider"></li>
+                  {{/HasCapability}}
                   {{#HasCapability 'SWITCH'}}
-                  <li><a href="#" class="device-on">Turn on</a></li>
-                  <li><a href="#" class="device-off">Turn off</a></li>
+                  <li><a href="#" class="device-command" data-command="turn_on">Turn on</a></li>
+                  <li><a href="#" class="device-command" data-command="turn_off">Turn off</a></li>
                   <li class="divider"></li>
                   {{/HasCapability}}
                   <li><a href="#" class='device-change-room'>Change room</a></li>

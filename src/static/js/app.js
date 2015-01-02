@@ -95,19 +95,12 @@ var DOMICS = (function() {
         });
     });
 
-    $('div.main').on('click', 'div.device .device-on', function() {
+    $('div.main').on('click', 'div.device .device-command', function() {
       var device_id = $(this).closest('div.device').data('device-id');
+      var command = $(this).data('command');
 
       post(sprintf('/api/device/%s/command', device_id), {
-          command: "turn_on",
-        });
-    });
-
-    $('div.main').on('click', 'div.device .device-off', function() {
-      var device_id = $(this).closest('div.device').data('device-id');
-
-      post(sprintf('/api/device/%s/command', device_id), {
-          command: "turn_off",
+          command: command,
         });
     });
 
