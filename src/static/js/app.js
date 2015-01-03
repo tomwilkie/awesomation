@@ -127,20 +127,6 @@ var DOMICS = (function() {
         .modal('hide');
     });
 
-    // Dialog: change room name
-
-    $('div.main').on('click', 'div.room .room-change-name', function() {
-      var room_id = $(this).closest('div.room').data('room-id');
-      var room = rooms[room_id];
-
-      dialog('script#room-change-name-dialog-template', room, function() {
-        var room_name = $(this).find('input#room-name').val();
-        post(sprintf('/api/room/%s', room_id), {
-            name: room_name,
-          });
-      });
-    });
-
     // Dialog: create new room
 
     function random_id() {
@@ -161,7 +147,33 @@ var DOMICS = (function() {
     // Dialog: add new device
 
     $('div.main').on('click', 'a.add-new-device', function() {
-      dialog('script#new-device-dialog-template', {}, function() {
+      dialog('script#new-device-dialog-template', {rooms: rooms}, function() {
+        var device_id = random_id();
+        var device_name = $(this).find('input#device-name').val();
+        var system_code = $(this).find('input#system-code').val();
+        var device_code = parseInt($(this).find('input#device-code').val());
+        var room_id = $(this).find('input#room').val();
+
+        post(sprintf('/api/device/%s', device_id), {
+          type: 'rfswitch',
+          name: device_name,
+          system_code: system_code,
+          device_code: device_code
+        });
+      });
+    });
+
+    // Dialog: change room name
+
+    $('div.main').on('click', 'div.room .room-change-name', function() {
+      var room_id = $(this).closest('div.room').data('room-id');
+      var room = rooms[room_id];
+
+      dialog('script#room-change-name-dialog-template', room, function() {
+        var room_name = $(this).find('input#room-name').val();
+        post(sprintf('/api/room/%s', room_id), {
+            name: room_name,
+          });
       });
     });
 
