@@ -141,4 +141,3 @@ def register_class(blueprint, cls, create_callback):
   command_view_func = CommandView.as_view('%s_command' % cls.__name__, cls)
   blueprint.add_url_rule('/<object_id>/command', methods=['POST'],
                          view_func=command_view_func)
-
