@@ -155,11 +155,26 @@ var DOMICS = (function() {
       Handlebars.registerPartial(this.id, that.html());
     });
 
-    $('body').on('cache_updated', function() {
-      var template = $('script#devices-template').text();
+    function render() {
+      var mode = $.bbq.getState('mode') || 'devices';
+      var template = $(sprintf('script#%s-template', mode)).text();
       template = Handlebars.compile(template);
       var rendered = template({rooms: cache.rooms, devices: cache.devices});
       $('div.main').html(rendered);
+    }
+
+    $('body').on('cache_updated', render);
+    $(window).bind('hashchange', render);
+
+    $('.nav-sidebar li').on('click', function() {
+      var mode = $(this).data('mode');
+      $('.nav-sidebar li').removeClass('active');
+      $(this).addClass('active');
+      $.bbq.pushState({mode: mode});
+    });
+
+    $('a[href=#]').click(function(event) {
+      event.preventDefault();
     });
 
     $('div.main').on('click', 'div.room .all-on', function() {

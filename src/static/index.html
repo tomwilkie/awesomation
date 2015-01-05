@@ -9,6 +9,8 @@
   <link href="/static/css/screen.css" rel="stylesheet">
 
   <script type="text/javascript" src="/static/js/jquery.js"></script>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.ba-bbq.js"></script>
   <script type="text/javascript" src="/static/js/sprintf.js"></script>
   <script type="text/javascript" src="/static/js/handlebars.js"></script>
   <script type="text/javascript" src="/static/js/bootstrap.js"></script>
@@ -311,7 +313,7 @@
 
   <script type="text/x-handlebars-template" id="devices-template">
     <h2 class="page-header">
-      Devices by room
+      Rooms and Devices
 
       <div class="btn-group btn-group-xs" role="group" aria-label="...">
         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -363,11 +365,31 @@
     {{/each}}
   </script>
 
+  <script type="text/x-handlebars-template" id="accounts-template">
+    <h2 class="page-header">
+      Accounts
+
+      <div class="btn-group btn-group-xs" role="group" aria-label="...">
+        <button type="button" class="btn btn-default" aria-expanded="false">
+          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+          Add new account
+        </button>
+      </div>
+    </h2>
+
+    {{#each accounts}}
+    <div class="row">
+
+    </div>
+    {{/each}}
+  </script>
+
   <div class="container-fluid">
     <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
         <ul class="nav nav-sidebar">
-          <li class="active"><a href="#">Devices <span class="sr-only">(current)</span></a></li>
+          <li class="active" data-mode="devices"><a href="#">Rooms and Devices <span class="sr-only">(current)</span></a></li>
+          <li data-mode="accounts"><a href="#">Accounts <span class="sr-only">(current)</span></a></li>
         </ul>
       </div>
 
