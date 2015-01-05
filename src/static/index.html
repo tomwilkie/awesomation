@@ -180,7 +180,7 @@
                   <form class="form-horizontal">
                     <p>433Mhz switches are configured with a set of dip switches on their reverse.  The first 5 switches
                     specify the system code, and the next 5 the device number.  Enter the system code (eg 010101) and
-                    device number (eg 1) below:</p>
+                    device number (eg 1) below.  NB 433Mhz switches require an Awesomation Proxy.</p>
 
                     <div class="form-group">
                       <label class="col-sm-3 control-label" for="device-name">Name</label>
@@ -211,7 +211,7 @@
                       </div>
                     </div>
                     <div class="pull-right">
-                      <button type="button" class="btn btn-primary">Create device</button>
+                      <button type="button" class="btn btn-primary" data-type='rfswitch'>Create device</button>
                     </div>
                   </form>
                 </div>
@@ -272,6 +272,33 @@
               <div id="collapseSeven" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive">
                 <div class="panel-body">
 
+                </div>
+              </div>
+            </div>
+            <div class="panel panel-default">
+              <div class="panel-heading" role="tab" id="headingThree">
+                <h4 class="panel-title">
+                  <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
+                    Awesomation Proxy
+                  </a>
+                </h4>
+              </div>
+              <div id="collapseEight" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingEight">
+                <div class="panel-body">
+                  <form class="form-horizontal">
+                    <p>Awesomation proxies are identified by a unique ID (found in the logs, printed at startup).
+                      To add an awesomation proxy, enter that ID below.</p>
+
+                    <div class="form-group">
+                      <label class="col-sm-3 control-label" for="proxy-id">Proxy ID</label>
+                      <div class="col-sm-5">
+                        <input type="text" class="form-control" id="proxy-id" placeholder="Proxy ID">
+                      </div>
+                    </div>
+                    <div class="pull-right">
+                      <button type="button" class="btn btn-primary" data-type='proxy'>Create device</button>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>

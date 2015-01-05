@@ -3,20 +3,20 @@ var DOMICS = (function() {
   var net = (function() {
     return {
       get: function(url, success) {
-        $.ajax(url, {
+        return $.ajax(url, {
           method: "get",
           success: success
         });
       },
       post: function(url, body) {
-        $.ajax(url, {
+        return $.ajax(url, {
           method: "post",
           contentType: "application/json; charset=utf-8",
           data: JSON.stringify(body)
         });
       },
       del: function(url) {
-        $.ajax(url, {
+        return $.ajax(url, {
           method: 'delete',
         });
       }
@@ -217,9 +217,9 @@ var DOMICS = (function() {
       modal.modal('show');
     }
 
-    $('.modal#main_modal').on('click', '.btn-primary', function() {
+    $('.modal#main_modal').on('click', '.btn-primary', function(event) {
       $('.modal#main_modal')
-        .trigger('success')
+        .trigger('success', [event.target])
         .html('')
         .off('success')
         .modal('hide');
@@ -245,19 +245,31 @@ var DOMICS = (function() {
     // Dialog: add new device
 
     $('div.main').on('click', 'a.add-new-device', function() {
-      dialog('script#new-device-dialog-template', {rooms: cache.rooms}, function() {
-        var device_id = random_id();
-        var device_name = $(this).find('input#device-name').val();
-        var system_code = $(this).find('input#system-code').val();
-        var device_code = parseInt($(this).find('input#device-code').val());
-        var room_id = $(this).find('input#room').val();
+      dialog('script#new-device-dialog-template', {rooms: cache.rooms}, function(event, target) {
+        var that = $(this);
+        var type = $(target).data('type');
+        switch(type) {
 
-        net.post(sprintf('/api/device/%s', device_id), {
-          type: 'rfswitch',
-          name: device_name,
-          system_code: system_code,
-          device_code: device_code
-        });
+        case 'rfswitch':
+          var device_id = random_id();
+          var device_name = that.find('input#device-name').val();
+          var system_code = that.find('input#system-code').val();
+          var device_code = parseInt(that.find('input#device-code').val());
+          var room_id = that.find('input#room').val();
+
+          net.post(sprintf('/api/device/%s', device_id), {
+            type: 'rfswitch',
+            name: device_name,
+            system_code: system_code,
+            device_code: device_code
+          });
+          break;
+
+        case 'proxy':
+          var proxy_id = that.find('input#proxy-id').val();
+          net.get(sprintf('/api/proxy/claim/%s', proxy_id));
+          break;
+        }
       });
     });
 
