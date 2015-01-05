@@ -58,3 +58,6 @@
 [submodule "third_party/py/pyping"]
 	path = third_party/py/pyping
 	url = https://github.com/certator/pyping/
+[submodule "third_party/static/jquery-bbq"]
+	path = third_party/static/jquery-bbq
+	url = https://github.com/cowboy/jquery-bbq
