@@ -210,6 +210,8 @@
                         <input type="number" min="0" max="4" step="1" value="0" class="form-control" id="device-code">
                       </div>
                     </div>
+                    <div class="error_placeholder">
+                    </div>
                     <div class="pull-right">
                       <button type="button" class="btn btn-primary" data-type='rfswitch'>Create device</button>
                     </div>
@@ -295,6 +297,8 @@
                         <input type="text" class="form-control" id="proxy-id" placeholder="Proxy ID">
                       </div>
                     </div>
+                    <div class="error_placeholder">
+                    </div>
                     <div class="pull-right">
                       <button type="button" class="btn btn-primary" data-type='proxy'>Create device</button>
                     </div>
@@ -305,6 +309,14 @@
           </div>
         </div>
       </div>
+    </div>
+  </script>
+
+  <script type="text/x-handlebars-template" id="error-template">
+    <div class="alert alert-danger" role="alert" id='proxy-error'>
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      {{message}}
     </div>
   </script>
 

@@ -218,12 +218,29 @@ var DOMICS = (function() {
     }
 
     $('.modal#main_modal').on('click', '.btn-primary', function(event) {
+      $('.modal#main_modal').trigger('success', [event.target]);
+    });
+
+    function hide_modal() {
       $('.modal#main_modal')
-        .trigger('success', [event.target])
         .html('')
         .off('success')
         .modal('hide');
-    });
+    }
+
+    function render_error(jqXHR, textStatus, errorThrown) {
+      var message;
+      try {
+        var error = $.parseJSON(jqXHR.responseText);
+        message = error.message;
+      } catch (e) {
+        message = errorThrown;
+      }
+
+      var template = $('script#error-template').text();
+      template = Handlebars.compile(template);
+      return template({message: message});
+    }
 
     // Dialog: create new room
 
@@ -262,12 +279,29 @@ var DOMICS = (function() {
             name: device_name,
             system_code: system_code,
             device_code: device_code
+          }).done(function () {
+            hide_modal();
+          }).fail(function (jqXHR, textStatus, errorThrown) {
+            that.find('input#proxy-id')
+              .closest('div.form-group')
+              .siblings('.error_placeholder')
+                .html(render_error(jqXHR, textStatus, errorThrown));
           });
           break;
 
         case 'proxy':
           var proxy_id = that.find('input#proxy-id').val();
-          net.get(sprintf('/api/proxy/claim/%s', proxy_id));
+          net.post('/api/proxy/claim', {
+            proxy_id: proxy_id
+          }).done(function () {
+            hide_modal();
+          }).fail(function (jqXHR, textStatus, errorThrown) {
+            that.find('input#proxy-id')
+              .closest('div.form-group')
+              .addClass('has-error')
+              .siblings('.error_placeholder')
+                .html(render_error(jqXHR, textStatus, errorThrown));
+          });
           break;
         }
       });
@@ -282,8 +316,8 @@ var DOMICS = (function() {
       dialog('script#room-change-name-dialog-template', room, function() {
         var room_name = $(this).find('input#room-name').val();
         net.post(sprintf('/api/room/%s', room_id), {
-            name: room_name,
-          });
+          name: room_name,
+        }).always(hide_modal);
       });
     });
 
@@ -294,7 +328,7 @@ var DOMICS = (function() {
       var room = cache.rooms[room_id];
 
       dialog('script#delete-room-dialog-template', room, function() {
-        net.del(sprintf('/api/room/%s', room_id));
+        net.del(sprintf('/api/room/%s', room_id)).always(hide_modal);
       });
     });
 
@@ -307,9 +341,9 @@ var DOMICS = (function() {
       dialog('script#device-change-room-dialog-template', state, function() {
         var room_id = $(this).find('select#room').val();
         net.post(sprintf('/api/device/%s/command', device_id), {
-            command: 'set_room',
-            room_id: room_id
-          });
+          command: 'set_room',
+          room_id: room_id
+        }).always(hide_modal);
       });
     });
 
@@ -322,8 +356,8 @@ var DOMICS = (function() {
       dialog('script#device-change-name-dialog-template', device, function() {
         var device_name = $(this).find('input#device-name').val();
         net.post(sprintf('/api/device/%s', device_id), {
-            name: device_name,
-          });
+          name: device_name,
+        }).always(hide_modal);
       });
     });
 
@@ -334,7 +368,7 @@ var DOMICS = (function() {
       var device = cache.devices[device_id];
 
       dialog('script#delete-device-dialog-template', device, function() {
-        net.del(sprintf('/api/device/%s', device_id));
+        net.del(sprintf('/api/device/%s', device_id)).always(hide_modal);
       });
     });
 

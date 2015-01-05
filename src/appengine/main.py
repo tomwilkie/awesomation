@@ -37,6 +37,12 @@ def root():
   return flask.send_from_directory(static_dir(), 'index.html')
 
 
+@app.errorhandler(400)
+def custom400(error):
+  response = flask.jsonify({'message': error.description})
+  return response, 400
+
+
 @app.before_request
 def before_request():
   """Ensure user is authenticated."""

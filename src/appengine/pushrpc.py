@@ -68,9 +68,16 @@ def authenticate():
 
 
 # Step 1(b). Users need to claim a proxy from the UI
-@blueprint.route('/claim/<proxy_id>', methods=['GET'])
-def claim_proxy(proxy_id):
+@blueprint.route('/claim', methods=['POST'])
+def claim_proxy():
   """Claim the given proxy id for the current user."""
+  body = flask.request.get_json()
+  if body is None:
+    flask.abort(400, 'JSON body and mime type required.')
+
+  proxy_id = body.get('proxy_id', None)
+  if proxy_id is None or proxy_id == '':
+    flask.abort(400, 'proxy_id required.')
 
   # this will run as a user, so we don't need to authenticate
   # it (already done in main).  Running in users namespace.
@@ -86,7 +93,7 @@ def claim_proxy(proxy_id):
     flask.abort(404)
 
   if proxy.owner is not None:
-    flask.abort(401)
+    flask.abort(400, 'Proxy already claimed')
 
   proxy.owner = user_id
   proxy.put()
