@@ -7,11 +7,13 @@
 
   <link href="/static/css/bootstrap.css" rel="stylesheet">
   <link href="/static/css/screen.css" rel="stylesheet">
-  <script src="/static/js/jquery.js"></script>
-  <script src="/static/js/sprintf.js"></script>
-  <script src="/static/js/handlebars.js"></script>
-  <script src="/static/js/bootstrap.js"></script>
-  <script src="/static/js/app.js"></script>
+
+  <script type="text/javascript" src="/static/js/jquery.js"></script>
+  <script type="text/javascript" src="/static/js/sprintf.js"></script>
+  <script type="text/javascript" src="/static/js/handlebars.js"></script>
+  <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+  <script type="text/javascript" src="/_ah/channel/jsapi"></script>
+  <script type="text/javascript" src="/static/js/app.js"></script>
 </head>
 <body>
   <div class="modal fade" id="main_modal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -277,6 +279,36 @@
     </div>
   </script>
 
+  <script type="text/x-handlebars-template" class="handlebars-partial" id="device">
+    <div class="col-xs-6 col-sm-3 device" data-device-id="{{id}}">
+      <h5>
+        {{#if name}}{{name}}{{else}}{{id}}{{/if}}
+
+        <div class="input-group">
+          <div class="input-group-btn">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+              <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+              {{#HasCapability 'SCAN'}}
+              <li><a href="#" class="device-command" data-command="scan">Scan</a></li>
+              <li class="divider"></li>
+              {{/HasCapability}}
+              {{#HasCapability 'SWITCH'}}
+              <li><a href="#" class="device-command" data-command="turn_on">Turn on</a></li>
+              <li><a href="#" class="device-command" data-command="turn_off">Turn off</a></li>
+              <li class="divider"></li>
+              {{/HasCapability}}
+              <li><a href="#" class='device-change-room'>Change room</a></li>
+              <li><a href="#" class='device-change-name'>Change name</a></li>
+              <li><a href="#" class='device-delete'>Delete</a></li>
+            </ul>
+          </div>
+        </div>
+      </h5>
+    </div>
+  </script>
+
   <script type="text/x-handlebars-template" id="devices-template">
     <h2 class="page-header">
       Devices by room
@@ -291,6 +323,12 @@
         </ul>
       </div>
     </h2>
+
+    <div class="row devices">
+    {{#HomelessDevices}}
+      {{> device}}
+    {{/HomelessDevices}}
+    </div>
 
     {{#each rooms}}
     <div class="room" data-room-id="{{@key}}">
@@ -317,35 +355,9 @@
       </h3>
 
       <div class="row devices">
-      {{#devices}}
-        <div class="col-xs-6 col-sm-3 device" data-device-id="{{id}}">
-          <h5>
-            {{#if name}}{{name}}{{else}}{{id}}{{/if}}
-
-            <div class="input-group">
-              <div class="input-group-btn">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                  <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" role="menu">
-                  {{#HasCapability 'SCAN'}}
-                  <li><a href="#" class="device-command" data-command="scan">Scan</a></li>
-                  <li class="divider"></li>
-                  {{/HasCapability}}
-                  {{#HasCapability 'SWITCH'}}
-                  <li><a href="#" class="device-command" data-command="turn_on">Turn on</a></li>
-                  <li><a href="#" class="device-command" data-command="turn_off">Turn off</a></li>
-                  <li class="divider"></li>
-                  {{/HasCapability}}
-                  <li><a href="#" class='device-change-room'>Change room</a></li>
-                  <li><a href="#" class='device-change-name'>Change name</a></li>
-                  <li><a href="#" class='device-delete'>Delete</a></li>
-                </ul>
-              </div>
-            </div>
-          </h5>
-        </div>
-      {{/devices}}
+      {{#DevicesForRoom id}}
+        {{> device}}
+      {{/DevicesForRoom}}
       </div>
     </div>
     {{/each}}

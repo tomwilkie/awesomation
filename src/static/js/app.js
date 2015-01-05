@@ -1,24 +1,99 @@
 var DOMICS = (function() {
-  function get(url, success) {
-    $.ajax(url, {
-      method: "get",
-      success: success
+
+  var net = (function() {
+    return {
+      get: function(url, success) {
+        $.ajax(url, {
+          method: "get",
+          success: success
+        });
+      },
+      post: function(url, body) {
+        $.ajax(url, {
+          method: "post",
+          contentType: "application/json; charset=utf-8",
+          data: JSON.stringify(body)
+        });
+      },
+      del: function(url) {
+        $.ajax(url, {
+          method: 'delete',
+        });
+      }
+    };
+  }());
+
+  var cache = (function() {
+    var rooms = {};
+    var devices = {};
+    var accounts = {};
+    var types = {
+      account: accounts,
+      device: devices,
+      room: rooms,
+    };
+
+    function fetch() {
+      net.get('/api/account', function(result) {
+        $.each(result.objects, function(i, account) {
+          accounts[account.id] = account;
+        });
+
+        $('body').trigger('cache_updated');
+      });
+
+      net.get('/api/room', function(result) {
+        $.each(result.objects, function(i, room) {
+          rooms[room.id] = room;
+        });
+
+        $('body').trigger('cache_updated');
+      });
+
+      net.get('/api/device', function(result) {
+        $.each(result.objects, function(i, device) {
+          devices[device.id] = device;
+        });
+
+        $('body').trigger('cache_updated');
+      });
+    }
+
+    function connect_channel() {
+      net.get('/api/user/new_channel', function (data) {
+        channel = new goog.appengine.Channel(data.token);
+        socket = channel.open();
+        socket.onmessage = function (m) {
+          var message = JSON.parse(m.data);
+          console.log(message);
+          $.each(message.events, function(i, event) {
+            switch (event.event) {
+            case 'delete':
+              delete types[event.cls][event.id];
+              break;
+            case 'update':
+              types[event.cls][event.id] = event.obj;
+              break;
+            }
+          });
+          $('body').trigger('cache_updated');
+        };
+      });
+    }
+
+    $(function () {
+      window.setTimeout(function() {
+        connect_channel();
+        fetch();
+      }, 0);
     });
-  }
 
-  function post(url, body) {
-    $.ajax(url, {
-      method: "post",
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(body)
-    })
-  }
-
-  function del(url) {
-    $.ajax(url, {
-      method: 'delete',
-    })
-  }
+    return {
+      rooms: rooms,
+      devices: devices,
+      accounts: accounts,
+    };
+  }());
 
   Handlebars.registerHelper({
     'IfEquals': function(a, b, options) {
@@ -28,61 +103,69 @@ var DOMICS = (function() {
         return options.inverse(this);
       }
     },
+
     'HasCapability': function(capability, options) {
       if (this.capabilities.indexOf(capability) >= 0) {
         return options.fn(this);
       } else {
         return options.inverse(this);
       }
+    },
+
+    'HomelessDevices': function(options) {
+      var found = false;
+      var ret = '';
+
+      $.each(cache.devices, function(id, device) {
+        if (!(device.room in cache.rooms)) {
+          found = true;
+          ret = ret + options.fn(device);
+        }
+      });
+
+      if (!found) {
+        ret = ret + options.inverse(this);
+      }
+
+      return ret;
+    },
+
+    'DevicesForRoom': function(room_id, options) {
+      var found = false;
+      var ret = '';
+
+      $.each(cache.devices, function(id, device) {
+        if (device.room === room_id) {
+          found = true;
+          ret = ret + options.fn(device);
+        }
+      });
+
+      if (!found) {
+        ret = ret + options.inverse(this);
+      }
+
+      return ret;
     }
   });
 
-  var rooms = {
-    'unknown': {name: 'Unknown', devices: []}
-  };
-
-  var devices = {};
-  var accounts = {};
-
-  function render() {
-    var template = $('script#devices-template').text();
-    template = Handlebars.compile(template);
-    var rendered = template({rooms: rooms});
-    $('div.main').html(rendered);
-  }
-
-  function fetch() {
-    get('/api/account', function(result) {
-      $.each(result.objects, function(i, account) {
-        accounts[account.id] = account;
-      });
-    });
-
-    get('/api/room', function(result) {
-      $.each(result.objects, function(i, room) {
-        rooms[room.id] = room;
-        rooms[room.id].devices = [];
-      });
-
-      get('/api/device', function(result) {
-        $.each(result.objects, function(i, device) {
-          var room_id = device.room in rooms ? device.room : 'unknown';
-          rooms[room_id].devices.push(device);
-          devices[device.id] = device;
-        });
-
-        render();
-      });
-    });
-  }
-
   $(function () {
-    fetch();
+    $('script.handlebars-partial').each(function() {
+      var that = $(this);
+      Handlebars.registerPartial(this.id, that.html());
+    });
+
+    $('body').on('cache_updated', function() {
+      var template = $('script#devices-template').text();
+      template = Handlebars.compile(template);
+      var rendered = template({rooms: cache.rooms, devices: cache.devices});
+      $('div.main').html(rendered);
+    });
 
     $('div.main').on('click', 'div.room .all-on', function() {
       var room_id = $(this).closest('div.room').data('room-id');
 
-      post(sprintf('/api/room/%s/command', room_id), {
+      net.post(sprintf('/api/room/%s/command', room_id), {
           command: "all_on",
         });
     });
@@ -90,7 +173,7 @@ var DOMICS = (function() {
     $('div.main').on('click', 'div.room .all-off', function() {
       var room_id = $(this).closest('div.room').data('room-id');
 
-      post(sprintf('/api/room/%s/command', room_id), {
+      net.post(sprintf('/api/room/%s/command', room_id), {
           command: "all_off",
         });
     });
@@ -99,7 +182,7 @@ var DOMICS = (function() {
       var device_id = $(this).closest('div.device').data('device-id');
       var command = $(this).data('command');
 
-      post(sprintf('/api/device/%s/command', device_id), {
+      net.post(sprintf('/api/device/%s/command', device_id), {
           command: command,
         });
     });
@@ -130,7 +213,7 @@ var DOMICS = (function() {
     // Dialog: create new room
 
     function random_id() {
-      return ("0000" + (Math.random() * Math.pow(36,4) << 0).toString(36)).slice(-4)
+      return ("0000" + (Math.random() * Math.pow(36,4) << 0).toString(36)).slice(-4);
     }
 
     $('div.main').on('click', 'a.create-new-room', function() {
@@ -138,7 +221,7 @@ var DOMICS = (function() {
         var room_id = random_id();
         var room_name = $(this).find('input#room-name').val();
 
-        post(sprintf('/api/room/%s', room_id), {
+        net.post(sprintf('/api/room/%s', room_id), {
             name: room_name,
           });
       });
@@ -147,14 +230,14 @@ var DOMICS = (function() {
     // Dialog: add new device
 
     $('div.main').on('click', 'a.add-new-device', function() {
-      dialog('script#new-device-dialog-template', {rooms: rooms}, function() {
+      dialog('script#new-device-dialog-template', {rooms: cache.rooms}, function() {
         var device_id = random_id();
         var device_name = $(this).find('input#device-name').val();
         var system_code = $(this).find('input#system-code').val();
         var device_code = parseInt($(this).find('input#device-code').val());
         var room_id = $(this).find('input#room').val();
 
-        post(sprintf('/api/device/%s', device_id), {
+        net.post(sprintf('/api/device/%s', device_id), {
           type: 'rfswitch',
           name: device_name,
           system_code: system_code,
@@ -167,11 +250,11 @@ var DOMICS = (function() {
 
     $('div.main').on('click', 'div.room .room-change-name', function() {
       var room_id = $(this).closest('div.room').data('room-id');
-      var room = rooms[room_id];
+      var room = cache.rooms[room_id];
 
       dialog('script#room-change-name-dialog-template', room, function() {
         var room_name = $(this).find('input#room-name').val();
-        post(sprintf('/api/room/%s', room_id), {
+        net.post(sprintf('/api/room/%s', room_id), {
             name: room_name,
           });
       });
@@ -181,10 +264,10 @@ var DOMICS = (function() {
 
     $('div.main').on('click', 'div.room .room-delete', function() {
       var room_id = $(this).closest('div.room').data('room-id');
-      var room = rooms[room_id];
+      var room = cache.rooms[room_id];
 
       dialog('script#delete-room-dialog-template', room, function() {
-        del(sprintf('/api/room/%s', room_id));
+        net.del(sprintf('/api/room/%s', room_id));
       });
     });
 
@@ -192,11 +275,11 @@ var DOMICS = (function() {
 
     $('div.main').on('click', 'div.device .device-change-room', function() {
       var device_id = $(this).closest('div.device').data('device-id');
-      var state = {rooms: rooms, device: devices[device_id]};
+      var state = {rooms: cache.rooms, device: cache.devices[device_id]};
 
       dialog('script#device-change-room-dialog-template', state, function() {
         var room_id = $(this).find('select#room').val();
-        post(sprintf('/api/device/%s/command', device_id), {
+        net.post(sprintf('/api/device/%s/command', device_id), {
             command: 'set_room',
             room_id: room_id
           });
@@ -207,11 +290,11 @@ var DOMICS = (function() {
 
     $('div.main').on('click', 'div.device .device-change-name', function() {
       var device_id = $(this).closest('div.device').data('device-id');
-      var device = devices[device_id];
+      var device = cache.devices[device_id];
 
       dialog('script#device-change-name-dialog-template', device, function() {
         var device_name = $(this).find('input#device-name').val();
-        post(sprintf('/api/device/%s', device_id), {
+        net.post(sprintf('/api/device/%s', device_id), {
             name: device_name,
           });
       });
@@ -221,18 +304,17 @@ var DOMICS = (function() {
 
     $('div.main').on('click', 'div.device .device-delete', function() {
       var device_id = $(this).closest('div.device').data('device-id');
-      var device = devices[device_id];
+      var device = cache.devices[device_id];
 
       dialog('script#delete-device-dialog-template', device, function() {
-        del(sprintf('/api/device/%s', device_id));
+        net.del(sprintf('/api/device/%s', device_id));
       });
     });
 
   });
 
   return {
-    'rooms': rooms,
-    'devices': devices,
-    'accounts': accounts
-  }
+    net: net,
+    cache: cache
+  };
 })();
