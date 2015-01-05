@@ -1,4 +1,6 @@
 """Handle user related queries."""
+import logging
+import re
 import uuid
 
 from google.appengine.api import channel
@@ -8,7 +10,7 @@ from google.appengine.ext import ndb
 
 import flask
 
-from appengine import model
+from appengine import json, model
 
 
 # pylint: disable=invalid-name
@@ -18,11 +20,13 @@ blueprint = flask.Blueprint('user', __name__)
 class Person(model.Base):
   # key_name is userid
   email = ndb.StringProperty(required=False)
-  channel_tokens = ndb.StringProperty(repeated=True)
+  channel_ids = ndb.StringProperty(repeated=True)
 
 
 def get_user_from_namespace():
-  return namespace_manager.get_namespace()
+  namespace = namespace_manager.get_namespace()
+  assert namespace != ''
+  return namespace
 
 
 def get_user():
@@ -45,12 +49,71 @@ def get_user_request():
 
 @blueprint.route('/new_channel')
 def new_channel():
+  """API for users to ask for a new channel."""
   user_id = get_user()
   person = Person.get_by_id(user_id)
 
-  channel_id = str(uuid.uuid4())
-  person.channel_tokens.append(channel_id)
+  channel_id = '%s/%s' % (user_id, uuid.uuid4())
+  person.channel_ids.append(channel_id)
   person.put()
 
   channel_token = channel.create_channel(channel_id)
   return flask.jsonify(token=channel_token)
+
+
+def send_event(**kwargs):
+  """Post events back to the pi."""
+  logging.info('Sending event %s to user', kwargs)
+  batch = flask.g.get('user_events', None)
+  if batch is None:
+    batch = []
+    setattr(flask.g, 'user_events', batch)
+  batch.append(kwargs)
+
+
+def push_events():
+  """Push all the events that have been caused by this request."""
+  events = flask.g.get('user_events', None)
+  if events is None:
+    return
+
+  json_encoder = json.Encoder()
+  events = json_encoder.encode({'events': events})
+
+  # Now figure out what channel to post these to.
+  # Can't use user.get_user as we might not be in
+  # a user's request (might be a device update
+  # from the proxy).  So we use the namespace
+  # instead.  Horrid.
+  user_id = get_user_from_namespace()
+  person = Person.get_by_id(user_id)
+  assert person is not None
+
+  for channel_id in person.channel_ids:
+    channel.send_message(channel_id, events)
+
+
+CHANNEL_REGEX = re.compile(r'^(\d+)/.*$')
+
+
+def channel_connected(_):
+  return ('', 204)
+
+
+def channel_disconnected(channel_id):
+  """Delete the channel when the UI disconnects."""
+  match = CHANNEL_REGEX.match(channel_id)
+  if not match:
+    logging.error('"%s" not matched by channel regex.', channel_id)
+    return
+
+  user_id = match.group(1)
+  namespace_manager.set_namespace(user_id)
+  person = Person.get_by_id(user_id)
+  if not person:
+    logging.error('User %s not found!', user_id)
+
+  person.channel_ids.remove(channel_id)
+  person.put()
+
+  return ('', 204)

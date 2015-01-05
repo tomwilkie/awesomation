@@ -19,8 +19,9 @@ def command(func):
 class ClassView(flask.views.MethodView):
   """Implements create, retrieve, update and removed endpoints for models."""
 
-  def __init__(self, cls, create_callback):
+  def __init__(self, classname, cls, create_callback):
     super(ClassView, self).__init__()
+    self._classname = classname
     self._cls = cls
     self._create_callback = create_callback
 
@@ -68,7 +69,7 @@ class ClassView(flask.views.MethodView):
     # Update the object; abort with 400 on unknown field
     try:
       obj.populate(**body)
-    except AttributeError, err:
+    except AttributeError:
       logging.error('Exception populating object', exc_info=sys.exc_info())
       flask.abort(400)
 
@@ -79,7 +80,11 @@ class ClassView(flask.views.MethodView):
       logging.error('Exception saving object', exc_info=sys.exc_info())
       flask.abort(400)
 
-    return flask.jsonify(**obj.to_dict())
+    values = obj.to_dict()
+    user.send_event(cls=self._classname, id=object_id,
+                    event='update', obj=values)
+
+    return flask.jsonify(**values)
 
   def delete(self, object_id):
     """Delete an object."""
@@ -92,6 +97,7 @@ class ClassView(flask.views.MethodView):
       flask.abort(403)
 
     obj.key.delete()
+    user.send_event(cls=self._classname, id=object_id, event='delete')
     return ('', 204)
 
 
@@ -132,7 +138,7 @@ class CommandView(flask.views.MethodView):
 def register_class(blueprint, cls, create_callback):
   """Register a ndb model for rest endpoints."""
   class_view_func = ClassView.as_view('%s_crud' % cls.__name__,
-                                      cls, create_callback)
+                                      blueprint.name, cls, create_callback)
   blueprint.add_url_rule('/', defaults={'object_id': None},
                          view_func=class_view_func, methods=['GET',])
   blueprint.add_url_rule('/<object_id>', view_func=class_view_func,
