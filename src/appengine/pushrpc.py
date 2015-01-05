@@ -146,10 +146,8 @@ def push_batch():
   # a user's request (might be a device update
   # from the proxy).  So we use the namespace
   # instead.  Horrid.
-  assert namespace_manager.get_namespace() != ''
+  user_id = user.get_user_from_namespace()
 
-  # We need to reset the namespace to access the proxies
-  user_id = namespace_manager.get_namespace()
   try:
     namespace_manager.set_namespace(None)
     proxies = Proxy.query(Proxy.owner == user_id).iter()
