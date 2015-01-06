@@ -43,7 +43,7 @@ class Encoder(flask.json.JSONEncoder):
 
 
 # pylint: disable=invalid-name
-app = flask.Flask('domics', static_folder=static_dir())
+app = flask.Flask('awesomation', static_folder=static_dir())
 app.debug = True
 app.json_encoder = Encoder
 app.register_blueprint(user.blueprint, url_prefix='/api/user')

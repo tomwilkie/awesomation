@@ -6,10 +6,6 @@ dist/%.yaml: src/%.yaml
 	@mkdir -p $(@D)
 	cp $< $@
 
-dist/door/%.pem: src/ios/Keys/%.pem
-	@mkdir -p $(@D)
-	cp $< $@
-
 clean:
 	rm -rf dist
 
@@ -87,11 +83,11 @@ dist/static/js/moment.js: third_party/static/moment/moment.js
 py_files := $(patsubst src/%,dist/%,$(shell find src -name *.py))
 static_files := $(patsubst src/static/%,dist/static/%,$(shell find src/static -type f))
 static_third_party = $(patsubst %,dist/static/%,js/jquery.js js/sprintf.js js/handlebars.js js/bootstrap.js css/bootstrap.css css/bootstrap.css.map fonts/glyphicons-halflings-regular.eot fonts/glyphicons-halflings-regular.svg fonts/glyphicons-halflings-regular.ttf fonts/glyphicons-halflings-regular.woff js/jquery.ba-bbq.js js/moment.js)
-key_files := dist/door/DomicsKey.pem dist/door/DomicsCert.pem
+
 
 dist/static: $(static_files) $(static_third_party)
 
-dist: dist/app.yaml dist/cron.yaml $(py_files) $(third_party_pyfiles) $(key_files) dist/static
+dist: dist/app.yaml dist/cron.yaml $(py_files) $(third_party_pyfiles) dist/static
 
 upload: dist
 	appcfg.py --oauth2 update dist

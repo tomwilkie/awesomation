@@ -1,4 +1,4 @@
-var DOMICS = (function() {
+var AWESOMATION = (function() {
 
   var net = (function() {
     return {
