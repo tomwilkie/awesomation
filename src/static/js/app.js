@@ -157,9 +157,15 @@ var DOMICS = (function() {
 
     function render() {
       var mode = $.bbq.getState('mode') || 'devices';
+
+      // Update the selected status on the left.
+      $('.nav-sidebar li').removeClass('active');
+      $(sprintf('.nav-sidebar li[data-mode=%s]', mode)).addClass('active');
+
+      // Rendem the main view.
       var template = $(sprintf('script#%s-template', mode)).text();
       template = Handlebars.compile(template);
-      var rendered = template({rooms: cache.rooms, devices: cache.devices});
+      var rendered = template(cache);
       $('div.main').html(rendered);
     }
 
@@ -168,8 +174,6 @@ var DOMICS = (function() {
 
     $('.nav-sidebar li').on('click', function() {
       var mode = $(this).data('mode');
-      $('.nav-sidebar li').removeClass('active');
-      $(this).addClass('active');
       $.bbq.pushState({mode: mode});
     });
 
