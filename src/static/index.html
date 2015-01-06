@@ -29,7 +29,7 @@
           <form>
             <div class="form-group">
               <label for="room-name" class="control-label">Room name:</label>
-              <input type="text" class="form-control" id="room-name" value="{{name}}">
+              <input type="text" class="form-control" id="room-name" value="{{> room-name}}">
             </div>
           </form>
         </div>
@@ -45,7 +45,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-body">
-          <p>Are you sure you want to delete room '{{name}}'?</p>
+          <p>Are you sure you want to delete room '{{> room-name}}'?</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -83,7 +83,7 @@
               <label for="room" class="control-label">Room:</label>
               <select id="room" class="form-control">
                 {{#each rooms}}
-                <option value="{{id}}"{{#IfEquals ../device.room id}} selected{{/IfEquals}}>{{name}}</option>
+                <option value="{{id}}"{{#IfEquals ../device.room id}} selected{{/IfEquals}}>{{> room-name}}</option>
                 {{/each}}
               </select>
             </div>
@@ -104,7 +104,7 @@
           <form>
             <div class="form-group">
               <label for="room" class="control-label">Device name:</label>
-              <input type="text" class="form-control" id="device-name" value="{{name}}">
+              <input type="text" class="form-control" id="device-name" value="{{> device-name}}">
             </div>
           </form>
         </div>
@@ -120,7 +120,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-body">
-          <p>Are you sure you want to delete device '{{name}}'?</p>
+          <p>Are you sure you want to delete device '{{> device-name}}'?</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -194,7 +194,7 @@
                       <div class="col-sm-5">
                         <select id="room" class="form-control">
                           {{#each rooms}}
-                          <option value="{{id}}">{{name}}</option>
+                          <option value="{{id}}">{{> room-name}}</option>
                           {{/each}}
                         </select>
                       </div>
@@ -321,10 +321,14 @@
     </div>
   </script>
 
+  <script type="text/x-handlebars-template" class="handlebars-partial" id="room-name">{{#if name}}{{name}}{{else}}Room {{id}}{{/if}}</script>
+
+  <script type="text/x-handlebars-template" class="handlebars-partial" id="device-name">{{#if name}}{{name}}{{else}}{{id}} ({{class}}){{/if}}</script>
+
   <script type="text/x-handlebars-template" class="handlebars-partial" id="device">
     <div class="col-xs-6 col-sm-3 device" data-device-id="{{id}}">
       <h5>
-        {{#if name}}{{name}}{{else}}{{id}}{{/if}}
+        {{>device-name}}
 
         <div class="input-group">
           <div class="input-group-btn">
@@ -375,7 +379,7 @@
     {{#each rooms}}
     <div class="room" data-room-id="{{@key}}">
       <h3>
-        {{#if name}}{{name}}{{else}}{{@key}}{{/if}}
+        {{> room-name}}
 
         <div class="btn-group btn-group-xs" role="group" aria-label="...">
           <button type="button" class="btn btn-default all-on">
