@@ -25,17 +25,23 @@
   <script type="text/x-handlebars-template" id="room-change-name-dialog-template">
     <div class="modal-dialog">
       <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Change room name</h4>
+        </div>
         <div class="modal-body">
-          <form>
+          <form class="form-horizontal">
             <div class="form-group">
-              <label for="room-name" class="control-label">Room name:</label>
-              <input type="text" class="form-control" id="room-name" value="{{> room-name}}">
+              <label for="room-name" class="col-sm-3 control-label">Room name:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" id="room-name" value="{{> room-name}}">
+              </div>
             </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary">Change name</button>
+          <button type="button" class="btn btn-primary">Change room name</button>
         </div>
       </div>
     </div>
@@ -58,11 +64,17 @@
   <script type="text/x-handlebars-template" id="create-new-room-dialog-template">
     <div class="modal-dialog">
       <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Create new room</h4>
+        </div>
         <div class="modal-body">
-          <form>
+          <form class="form-horizontal">
             <div class="form-group">
-              <label for="room-name" class="control-label">Room name:</label>
-              <input type="text" class="form-control" id="room-name">
+              <label for="room-name" class="col-sm-3 control-label">Room name:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" id="room-name" value="{{> room-name}}">
+              </div>
             </div>
           </form>
         </div>
@@ -77,15 +89,21 @@
   <script type="text/x-handlebars-template" id="device-change-room-dialog-template">
     <div class="modal-dialog">
       <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Create new room</h4>
+        </div>
         <div class="modal-body">
-          <form>
+          <form class="form-horizontal">
             <div class="form-group">
-              <label for="room" class="control-label">Room:</label>
-              <select id="room" class="form-control">
-                {{#each rooms}}
-                <option value="{{id}}"{{#IfEquals ../device.room id}} selected{{/IfEquals}}>{{> room-name}}</option>
-                {{/each}}
-              </select>
+              <label for="room" class="col-sm-3 control-label">Room name:</label>
+              <div class="col-sm-8">
+                <select id="room" class="form-control">
+                  {{#each rooms}}
+                  <option value="{{id}}"{{#IfEquals ../device.room id}} selected{{/IfEquals}}>{{> room-name}}</option>
+                  {{/each}}
+                </select>
+              </div>
             </div>
           </form>
         </div>
@@ -100,11 +118,17 @@
   <script type="text/x-handlebars-template" id="device-change-name-dialog-template">
     <div class="modal-dialog">
       <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Change device name</h4>
+        </div>
         <div class="modal-body">
-          <form>
+          <form class="form-horizontal">
             <div class="form-group">
-              <label for="room" class="control-label">Device name:</label>
-              <input type="text" class="form-control" id="device-name" value="{{> device-name}}">
+              <label for="device-name" class="col-sm-3 control-label">Device name:</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" id="device-name" value="{{> device-name}}">
+              </div>
             </div>
           </form>
         </div>

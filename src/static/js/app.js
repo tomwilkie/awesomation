@@ -201,7 +201,7 @@ var AWESOMATION = (function() {
 
     $('div.modal#main_modal').modal({show: false});
     $('div.modal#main_modal').on('shown.bs.modal', function () {
-        $(this).find('input').first().focus()
+      $(this).find('input').first().focus();
     });
 
     function dialog(name, obj, f) {
