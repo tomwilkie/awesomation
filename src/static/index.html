@@ -325,6 +325,10 @@
 
   <script type="text/x-handlebars-template" class="handlebars-partial" id="device-name">{{#if name}}{{name}}{{else}}{{id}} ({{class}}){{/if}}</script>
 
+  <script type="text/x-handlebars-template" class="handlebars-partial" id="loading">
+    <div class='row text-center'><i><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>  Loading...</i></div>
+  </script>
+
   <script type="text/x-handlebars-template" class="handlebars-partial" id="device">
     <div class="col-xs-6 col-sm-3 device" data-device-id="{{id}}">
       <h5>
@@ -356,6 +360,9 @@
   </script>
 
   <script type="text/x-handlebars-template" id="devices-template">
+    {{#if loading}}
+      {{> loading}}
+    {{else}}
     <h2 class="page-header">
       Rooms and Devices
 
@@ -376,7 +383,7 @@
     {{/HomelessDevices}}
     </div>
 
-    {{#each rooms}}
+    {{#each objects.room}}
     <div class="room" data-room-id="{{@key}}">
       <h3>
         {{> room-name}}
@@ -409,9 +416,13 @@
       </div>
     </div>
     {{/each}}
+    {{/if}}
   </script>
 
   <script type="text/x-handlebars-template" id="accounts-template">
+    {{#if loading}}
+      {{> loading}}
+    {{else}}
     <h2 class="page-header">
       Accounts
 
@@ -423,12 +434,13 @@
       </div>
     </h2>
 
-    {{#each accounts}}
+    {{#each objects.account}}
     <div class="row">
       <h4>{{human_type}} account</h4>
       Last updated: {{HumanTime last_updated}}
     </div>
     {{/each}}
+    {{/if}}
   </script>
 
   <div class="container-fluid">

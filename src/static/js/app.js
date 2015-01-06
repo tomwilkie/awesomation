@@ -24,38 +24,29 @@ var AWESOMATION = (function() {
   }());
 
   var cache = (function() {
-    var rooms = {};
-    var devices = {};
-    var accounts = {};
-    var types = {
-      account: accounts,
-      device: devices,
-      room: rooms,
+    var types = ['room', 'device', 'account'];
+    var objects = {};
+    var cache = {
+      loading: true,
+      objects: objects
     };
 
     function fetch() {
-      net.get('/api/account', function(result) {
-        $.each(result.objects, function(i, account) {
-          accounts[account.id] = account;
+      var loaded = types.length;
+
+      $.each(types, function(i, type) {
+        net.get(sprintf('/api/%s', type), function(result) {
+          objects[type] = {};
+          $.each(result.objects, function(i, object) {
+            objects[type][object.id] = object;
+          });
+
+          loaded--;
+          if (loaded === 0) {
+            cache.loading = false;
+            $('body').trigger('cache_updated');
+          }
         });
-
-        $('body').trigger('cache_updated');
-      });
-
-      net.get('/api/room', function(result) {
-        $.each(result.objects, function(i, room) {
-          rooms[room.id] = room;
-        });
-
-        $('body').trigger('cache_updated');
-      });
-
-      net.get('/api/device', function(result) {
-        $.each(result.objects, function(i, device) {
-          devices[device.id] = device;
-        });
-
-        $('body').trigger('cache_updated');
       });
     }
 
@@ -65,14 +56,13 @@ var AWESOMATION = (function() {
         socket = channel.open();
         socket.onmessage = function (m) {
           var message = JSON.parse(m.data);
-          console.log(message);
           $.each(message.events, function(i, event) {
             switch (event.event) {
             case 'delete':
-              delete types[event.cls][event.id];
+              delete objects[event.cls][event.id];
               break;
             case 'update':
-              types[event.cls][event.id] = event.obj;
+              objects[event.cls][event.id] = event.obj;
               break;
             }
           });
@@ -88,11 +78,7 @@ var AWESOMATION = (function() {
       }, 0);
     });
 
-    return {
-      rooms: rooms,
-      devices: devices,
-      accounts: accounts,
-    };
+    return cache;
   }());
 
   Handlebars.registerHelper({
@@ -116,8 +102,8 @@ var AWESOMATION = (function() {
       var found = false;
       var ret = '';
 
-      $.each(cache.devices, function(id, device) {
-        if (!(device.room in cache.rooms)) {
+      $.each(cache.objects.device, function(id, device) {
+        if (!(device.room in cache.objects.room)) {
           found = true;
           ret = ret + options.fn(device);
         }
@@ -134,7 +120,7 @@ var AWESOMATION = (function() {
       var found = false;
       var ret = '';
 
-      $.each(cache.devices, function(id, device) {
+      $.each(cache.objects.device, function(id, device) {
         if (device.room === room_id) {
           found = true;
           ret = ret + options.fn(device);
@@ -175,6 +161,7 @@ var AWESOMATION = (function() {
 
     $('body').on('cache_updated', render);
     $(window).bind('hashchange', render);
+    render();
 
     $('.nav-sidebar li').on('click', function() {
       var mode = $(this).data('mode');
@@ -270,7 +257,7 @@ var AWESOMATION = (function() {
     // Dialog: add new device
 
     $('div.main').on('click', 'a.add-new-device', function() {
-      dialog('script#new-device-dialog-template', {rooms: cache.rooms}, function(event, target) {
+      dialog('script#new-device-dialog-template', {rooms: cache.objects.room}, function(event, target) {
         var that = $(this);
         var type = $(target).data('type');
         switch(type) {
@@ -319,7 +306,7 @@ var AWESOMATION = (function() {
 
     $('div.main').on('click', 'div.room .room-change-name', function() {
       var room_id = $(this).closest('div.room').data('room-id');
-      var room = cache.rooms[room_id];
+      var room = cache.objects.room[room_id];
 
       dialog('script#room-change-name-dialog-template', room, function() {
         var room_name = $(this).find('input#room-name').val();
@@ -333,7 +320,7 @@ var AWESOMATION = (function() {
 
     $('div.main').on('click', 'div.room .room-delete', function() {
       var room_id = $(this).closest('div.room').data('room-id');
-      var room = cache.rooms[room_id];
+      var room = cache.objects.room[room_id];
 
       dialog('script#delete-room-dialog-template', room, function() {
         net.del(sprintf('/api/room/%s', room_id)).always(hide_modal);
@@ -344,7 +331,7 @@ var AWESOMATION = (function() {
 
     $('div.main').on('click', 'div.device .device-change-room', function() {
       var device_id = $(this).closest('div.device').data('device-id');
-      var state = {rooms: cache.rooms, device: cache.devices[device_id]};
+      var state = {rooms: cache.objects.room, device: cache.objects.device[device_id]};
 
       dialog('script#device-change-room-dialog-template', state, function() {
         var room_id = $(this).find('select#room').val();
@@ -359,7 +346,7 @@ var AWESOMATION = (function() {
 
     $('div.main').on('click', 'div.device .device-change-name', function() {
       var device_id = $(this).closest('div.device').data('device-id');
-      var device = cache.devices[device_id];
+      var device = cache.objects.device[device_id];
 
       dialog('script#device-change-name-dialog-template', device, function() {
         var device_name = $(this).find('input#device-name').val();
@@ -373,7 +360,7 @@ var AWESOMATION = (function() {
 
     $('div.main').on('click', 'div.device .device-delete', function() {
       var device_id = $(this).closest('div.device').data('device-id');
-      var device = cache.devices[device_id];
+      var device = cache.objects.device[device_id];
 
       dialog('script#delete-device-dialog-template', device, function() {
         net.del(sprintf('/api/device/%s', device_id)).always(hide_modal);
