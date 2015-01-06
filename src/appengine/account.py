@@ -34,6 +34,10 @@ class Account(model.Base):
   auth_code = ndb.StringProperty(required=False)
   access_token = ndb.StringProperty(required=False)
   owner = ndb.StringProperty(required=True)
+  human_type = ndb.ComputedProperty(lambda a: a.get_human_type())
+
+  def get_human_type(self):
+    return ''
 
   def _get_refresh_data(self):
     return ''

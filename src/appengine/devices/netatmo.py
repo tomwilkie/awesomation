@@ -24,6 +24,9 @@ class NetatmoAccount(account.Account):
   CLIENT_ID = creds.NETATMO_CLIENT_ID
   CLIENT_SECRET = creds.NETATMO_CLIENT_SECRET
 
+  def get_human_type(self):
+    return 'Netatmo'
+
   def _get_refresh_data(self):
     return urllib.urlencode({'grant_type': 'authorization_code',
                              'client_id': self.CLIENT_ID,

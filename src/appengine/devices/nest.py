@@ -44,6 +44,9 @@ class NestAccount(account.Account):
   thermostats = ndb.KeyProperty(repeated=True)
   protects = ndb.KeyProperty(repeated=True)
 
+  def get_human_type(self):
+    return 'Nest'
+
   @rest.command
   def refresh_devices(self):
     if self.access_token is None:
