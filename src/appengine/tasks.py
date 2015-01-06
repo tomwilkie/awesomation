@@ -1,6 +1,6 @@
 """Regular update task."""
-
 import logging
+import sys
 
 from google.appengine.ext.ndb import metadata
 from google.appengine.api import namespace_manager
@@ -18,8 +18,12 @@ def update_per_namespace():
   """Do a bunch of periodic stuff for a user."""
   accounts = account.Account.query().iter()
   for acc in accounts:
-    acc.refresh_devices()
-    acc.put()
+    try:
+      acc.refresh_devices()
+      acc.put()
+    except:
+      logging.error('Error refreshing account %s',
+                    acc.key.string_id(), exc_info=sys.exc_info())
 
 
 @blueprint.route('/update', methods=['GET'])
