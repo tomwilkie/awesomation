@@ -377,32 +377,46 @@
   </script>
 
   <script type="text/x-handlebars-template" class="handlebars-partial" id="device">
-    <div class="col-xs-6 col-sm-3 device" data-device-id="{{id}}">
-      <h5>
-        {{>device-name}}
 
-        <div class="input-group">
-          <div class="input-group-btn">
-            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-              <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" role="menu">
-              {{#HasCapability 'SCAN'}}
-              <li><a href="#" class="device-command" data-command="scan">Scan</a></li>
-              <li class="divider"></li>
-              {{/HasCapability}}
-              {{#HasCapability 'SWITCH'}}
-              <li><a href="#" class="device-command" data-command="turn_on">Turn on</a></li>
-              <li><a href="#" class="device-command" data-command="turn_off">Turn off</a></li>
-              <li class="divider"></li>
-              {{/HasCapability}}
-              <li><a href="#" class='device-change-room'>Change room</a></li>
-              <li><a href="#" class='device-change-name'>Change name</a></li>
-              <li><a href="#" class='device-delete'>Delete</a></li>
-            </ul>
-          </div>
+    <div class="device col-sm-4 col-md-3" data-device-id="{{id}}">
+      <div class="thumbnail">
+        <span class="glyphicon glyphicon glyphicon-credit-card" aria-hidden="true"></span>
+        <div class="caption">
+          <p>
+            {{#HasCapability 'PRESENCE'}}
+            {{#if present}}
+            <span class="label label-success">present</span>
+            {{else}}
+            <span class="label label-warning">absent</span>
+            {{/if}}
+            {{/HasCapability}}
+          </p>
+          <p>
+            <div class="btn-group btn-group-sm" role="group" aria-label="...">
+              <button type="button" class="btn btn-default" aria-expanded="false" disabled="disabled">
+                {{>device-name}}
+              </button>
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-left" role="menu">
+                {{#HasCapability 'SCAN'}}
+                <li><a href="#" class="device-command" data-command="scan">Scan</a></li>
+                <li class="divider"></li>
+                {{/HasCapability}}
+                {{#HasCapability 'SWITCH'}}
+                <li><a href="#" class="device-command" data-command="turn_on">Turn on</a></li>
+                <li><a href="#" class="device-command" data-command="turn_off">Turn off</a></li>
+                <li class="divider"></li>
+                {{/HasCapability}}
+                <li><a href="#" class='device-change-room'>Change room</a></li>
+                <li><a href="#" class='device-change-name'>Change name</a></li>
+                <li><a href="#" class='device-delete'>Delete</a></li>
+              </ul>
+            </div>
+          </p>
         </div>
-      </h5>
+      </div>
     </div>
   </script>
 
@@ -417,7 +431,7 @@
         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
           <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu" role="menu">
+        <ul class="dropdown-menu dropdown-menu-right" role="menu">
           <li><a href="#" class='create-new-room'>Create new room</a></li>
           <li><a href="#" class='add-new-device'>Add new device</a></li>
         </ul>
@@ -447,7 +461,7 @@
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
             <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
           </button>
-          <ul class="dropdown-menu" role="menu">
+          <ul class="dropdown-menu dropdown-menu-right" role="menu">
             <li><a href="#" class='room-change-name'>Change name</a></li>
             <li><a href="#" class='room-delete'>Delete</a></li>
           </ul>

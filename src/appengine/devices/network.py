@@ -15,6 +15,9 @@ class NetworkDevice(device.Device):
   """A device on the network."""
   present = ndb.BooleanProperty(required=True, default=False)
 
+  def get_capabilities(self):
+    return ['PRESENCE']
+
   @classmethod
   def handle_static_event(cls, event):
     """Handle a device update event."""
