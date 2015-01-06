@@ -10,7 +10,7 @@ from google.appengine.ext import ndb
 
 import flask
 
-from appengine import json, model
+from appengine import model
 
 
 # pylint: disable=invalid-name
@@ -77,8 +77,7 @@ def push_events():
   if events is None:
     return
 
-  json_encoder = json.Encoder()
-  events = json_encoder.encode({'events': events})
+  events = flask.json.dumps({'events': events})
 
   # Now figure out what channel to post these to.
   # Can't use user.get_user as we might not be in
