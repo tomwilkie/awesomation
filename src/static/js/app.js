@@ -266,40 +266,77 @@ var AWESOMATION = (function() {
         switch(type) {
 
         case 'rfswitch':
-          var device_id = random_id();
-          var device_name = that.find('input#device-name').val();
-          var system_code = that.find('input#system-code').val();
-          var device_code = parseInt(that.find('input#device-code').val());
-          var room_id = that.find('input#room').val();
+          (function() {
+            var device_id = random_id();
+            var device_name = that.find('input#device-name').val();
+            var system_code = that.find('input#system-code').val();
+            var device_code = parseInt(that.find('input#device-code').val());
+            var room_id = that.find('input#room').val();
 
-          net.post(sprintf('/api/device/%s', device_id), {
-            type: 'rfswitch',
-            name: device_name,
-            system_code: system_code,
-            device_code: device_code
-          }).done(function () {
-            hide_modal();
-          }).fail(function (jqXHR, textStatus, errorThrown) {
-            that.find('input#proxy-id')
-              .closest('div.form-group')
-              .siblings('.error_placeholder')
-                .html(render_error(jqXHR, textStatus, errorThrown));
-          });
+            net.post(sprintf('/api/device/%s', device_id), {
+              type: 'rfswitch',
+              name: device_name,
+              system_code: system_code,
+              device_code: device_code
+            }).done(function () {
+              hide_modal();
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+              that.find('input#proxy-id')
+                .closest('div.form-group')
+                .siblings('.error_placeholder')
+                  .html(render_error(jqXHR, textStatus, errorThrown));
+            });
+          }());
           break;
 
         case 'proxy':
-          var proxy_id = that.find('input#proxy-id').val();
-          net.post('/api/proxy/claim', {
-            proxy_id: proxy_id
-          }).done(function () {
-            hide_modal();
-          }).fail(function (jqXHR, textStatus, errorThrown) {
-            that.find('input#proxy-id')
-              .closest('div.form-group')
-              .addClass('has-error')
-              .siblings('.error_placeholder')
-                .html(render_error(jqXHR, textStatus, errorThrown));
-          });
+          (function() {
+            var proxy_id = that.find('input#proxy-id').val();
+            net.post('/api/proxy/claim', {
+              proxy_id: proxy_id
+            }).done(function () {
+              hide_modal();
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+              that.find('input#proxy-id')
+                .closest('div.form-group')
+                .addClass('has-error')
+                .siblings('.error_placeholder')
+                  .html(render_error(jqXHR, textStatus, errorThrown));
+            });
+          }());
+          break;
+
+        case 'network':
+          (function() {
+            var device_name = that.find('input#network-device-name').val();
+            var mac_address = that.find('input#mac-address').val();
+            mac_address = mac_address.toLowerCase();
+
+            MAC_REGEX = /^([0-9a-f]{2}[:-]){5}([0-9a-f]{2})$/;
+            if (!MAC_REGEX.test(mac_address)) {
+              var error_html = render_error(null, null, 'MAC Address should be of the form \'71:50:FF:59:4C:1E\'.');
+
+              that.find('input#mac-address')
+                .closest('div.form-group')
+                .addClass('has-error')
+                .siblings('.error_placeholder')
+                  .html(error_html);
+              return;
+            }
+
+            net.post(sprintf('/api/device/mac-%s', mac_address), {
+              type: 'network',
+              name: device_name
+            }).done(function () {
+              hide_modal();
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+              that.find('input#mac-address')
+                .closest('div.form-group')
+                .addClass('has-error')
+                .siblings('.error_placeholder')
+                  .html(render_error(jqXHR, textStatus, errorThrown));
+            });
+          }());
           break;
         }
       });

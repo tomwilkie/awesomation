@@ -298,7 +298,30 @@
               </div>
               <div id="collapseSeven" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive">
                 <div class="panel-body">
+                  <form class="form-horizontal">
+                    <p>By adding your iPhones's MAC address below, your Awesomation proxy can track the presence
+                      of your iPhone on your wifi network, and use this to indicate your presence in the house.
+                      Your iPhone's MAC address can be found under Settings &gt; General &gt; About, referred to as the
+                      'Wi-Fi Address'.</p>
 
+                    <div class="form-group">
+                      <label class="col-sm-3 control-label" for="network-device-name">Name</label>
+                      <div class="col-sm-5">
+                        <input type="text" class="form-control" id="network-device-name" placeholder="Device Name">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-sm-3 control-label" for="mac-address">MAC Address</label>
+                      <div class="col-sm-5">
+                        <input type="text" class="form-control" id="mac-address" placeholder="MAC Address">
+                      </div>
+                    </div>
+                    <div class="error_placeholder">
+                    </div>
+                    <div class="pull-right">
+                      <button type="button" class="btn btn-primary" data-type='network'>Create device</button>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>

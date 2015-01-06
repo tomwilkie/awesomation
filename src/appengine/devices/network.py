@@ -13,7 +13,7 @@ RE = re.compile(r'mac-(.*)')
 @device.register('network')
 class NetworkDevice(device.Device):
   """A device on the network."""
-  present = ndb.BooleanProperty(required=True)
+  present = ndb.BooleanProperty(required=True, default=False)
 
   @classmethod
   def handle_static_event(cls, event):
