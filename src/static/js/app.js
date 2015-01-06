@@ -146,6 +146,10 @@ var DOMICS = (function() {
       }
 
       return ret;
+    },
+
+    'HumanTime': function(millis) {
+      return moment(millis).format('LLL');
     }
   });
 

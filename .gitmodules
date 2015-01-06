@@ -61,3 +61,6 @@
 [submodule "third_party/static/jquery-bbq"]
 	path = third_party/static/jquery-bbq
 	url = https://github.com/cowboy/jquery-bbq
+[submodule "third_party/static/moment"]
+	path = third_party/static/moment
+	url = https://github.com/moment/moment.git

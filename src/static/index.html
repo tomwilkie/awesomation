@@ -14,6 +14,7 @@
   <script type="text/javascript" src="/static/js/sprintf.js"></script>
   <script type="text/javascript" src="/static/js/handlebars.js"></script>
   <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+  <script type="text/javascript" src="/static/js/moment.js"></script>
   <script type="text/javascript" src="/_ah/channel/jsapi"></script>
   <script type="text/javascript" src="/static/js/app.js"></script>
 </head>
@@ -419,6 +420,7 @@
     {{#each accounts}}
     <div class="row">
       <h4>{{human_type}} account</h4>
+      Last updated: {{HumanTime last_updated}}
     </div>
     {{/each}}
   </script>

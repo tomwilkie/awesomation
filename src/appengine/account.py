@@ -35,6 +35,7 @@ class Account(model.Base):
   access_token = ndb.StringProperty(required=False)
   owner = ndb.StringProperty(required=True)
   human_type = ndb.ComputedProperty(lambda a: a.get_human_type())
+  last_update = ndb.DateTimeProperty(required=False, auto_now=True)
 
   def get_human_type(self):
     return ''
