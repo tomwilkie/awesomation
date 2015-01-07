@@ -10,22 +10,26 @@ from appengine import account, device, rest, user
 from common import creds
 
 
+@device.register('nest_thermostat')
 class NestThermostat(device.Device):
   """Class represents a Nest thermostat."""
   temperature = ndb.FloatProperty()
   humidity = ndb.FloatProperty()
+  account = ndb.StringProperty()
 
-  def update(self, info):
-    self.humidity = info['humidity']
-    self.temperature = info['ambient_temperature_c']
-    self.name = info['name_long']
+  def handle_event(self, event):
+    self.humidity = event['humidity']
+    self.temperature = event['ambient_temperature_c']
+    self.name = event['name_long']
 
 
+@device.register('nest_protect')
 class NestProtect(device.Device):
   """Class represents a Nest protect (smoke alarm)."""
+  account = ndb.StringProperty()
 
-  def update(self, info):
-    self.name = info['name_long']
+  def handle_event(self, event):
+    self.name = event['name_long']
 
 
 @account.register('nest')
@@ -41,9 +45,6 @@ class NestAccount(account.Account):
   CLIENT_ID = creds.NEST_CLIENT_ID
   CLIENT_SECRET = creds.NEST_CLIENT_SECRET
 
-  thermostats = ndb.KeyProperty(repeated=True)
-  protects = ndb.KeyProperty(repeated=True)
-
   def get_human_type(self):
     return 'Nest'
 
@@ -58,27 +59,21 @@ class NestAccount(account.Account):
     result = json.load(result)
     logging.info(result)
 
-    user_id = user.get_user_from_namespace()
+    events = []
 
     for protect_id, protect_info in result['smoke_co_alarms'].iteritems():
-      key = 'nest-protect-%s' % protect_id
-      if key not in self.protects:
-        protect = NestProtect(id=key, owner=user_id)
-        self.protects.append(protect.key)
-      else:
-        protect = NestProtect.get_by_id(key)
-
-      protect.update(protect_info)
-      protect.put()
+      events.append({
+          'device_type': 'nest_protect',
+          'device_id': 'nest-protect-%s' % protect_id,
+          'event': protect_info,
+      })
 
     for thermostat_id, thermostat_info in result['thermostats'].iteritems():
-      key = 'nest-thermostat-%s' % thermostat_id
-      if key not in self.thermostats:
-        thermostat = NestThermostat(id=key, owner=user_id)
-        self.thermostats.append(thermostat.key)
-      else:
-        thermostat = NestThermostat.get_by_id(key)
+      events.append({
+          'device_type': 'nest_thermostat',
+          'device_id': 'nest-thermostat-%s' % thermostat_id,
+          'event': thermostat_info,
+      })
 
-      thermostat.update(thermostat_info)
-      thermostat.put()
-
+    user_id = user.get_user_from_namespace()
+    device.process_events(events, user_id)

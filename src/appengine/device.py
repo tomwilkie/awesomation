@@ -122,6 +122,33 @@ blueprint = flask.Blueprint('device', __name__)
 rest.register_class(blueprint, Device, create_device)
 
 
+def process_events(events, user_id):
+  """Process a set of events."""
+
+  device_cache = {}
+
+  for event in events:
+    device_type = event['device_type']
+    device_id = event['device_id']
+    event_body = event['event']
+
+    if device_id is None:
+      DEVICE_TYPES[device_type].handle_static_event(event_body)
+      continue
+
+    if device_id in device_cache:
+      device = device_cache[device_id]
+    else:
+      device = Device.get_by_id(device_id)
+      if not device:
+        device = create_device(device_id, device_type, user_id)
+      device_cache[device_id] = device
+
+    device.handle_event(event_body)
+
+  ndb.put_multi(device_cache.values())
+
+
 @blueprint.route('/events', methods=['POST'])
 def handle_events():
   """Handle events from devices."""
@@ -140,29 +167,7 @@ def handle_events():
   events = flask.request.get_json()
   logging.info('Processing %d events', len(events))
 
-  device_cache = {}
-
-  for event in events:
-    device_type = event['device_type']
-    device_id = event['device_id']
-    event_body = event['event']
-
-    if device_id is None:
-      DEVICE_TYPES[device_type].handle_static_event(event_body)
-      continue
-
-    if device_id in device_cache:
-      device = device_cache[device_id]
-    else:
-      device = Device.get_by_id(device_id)
-      if not device:
-        device = create_device(device_id, device_type, proxy.owner)
-      device_cache[device_id] = device
-
-    device.handle_event(event_body)
-
-  for device in device_cache.itervalues():
-    device.put()
+  process_events(events, proxy.owner)
 
   return ('', 204)
 
