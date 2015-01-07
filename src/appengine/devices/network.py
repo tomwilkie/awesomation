@@ -1,5 +1,5 @@
 """Represents a device on the network - used for presence."""
-
+import logging
 import re
 
 from google.appengine.ext import ndb
@@ -17,9 +17,20 @@ class NetworkDevice(device.Device):
   present = ndb.BooleanProperty(required=True, default=False)
 
   def set_presence(self, value):
+    """Set the present status of this device, and
+       potentially update nest thermostats."""
     self.present = value
+
+    # Should we set Nest to be away?
+    # away = ! (big or all device)
+
+    someone_present = False
+    for presence_device in device.Device.get_by_capability('PRESENCE').iter():
+      someone_present = someone_present or presence_device.present
+
+    logging.info('Is anyone home? %s', someone_present)
     for nest_account in nest.NestAccount.query().iter():
-      nest_account.set_away(value)
+      nest_account.set_away(not someone_present)
 
   @rest.command
   def fake_present(self):
