@@ -427,7 +427,7 @@
     <h2 class="page-header">
       Rooms and Devices
 
-      <div class="btn-group btn-group-xs" role="group" aria-label="...">
+      <div class="btn-group btn-group-xs pull-right" role="group" aria-label="...">
         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
           <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
         </button>
@@ -449,7 +449,7 @@
       <h3>
         {{> room-name}}
 
-        <div class="btn-group btn-group-xs" role="group" aria-label="...">
+        <div class="btn-group btn-group-xs pull-right" role="group" aria-label="...">
           <button type="button" class="btn btn-default all-on">
             <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
             All on
@@ -487,7 +487,7 @@
     <h2 class="page-header">
       Accounts
 
-      <div class="btn-group btn-group-xs" role="group" aria-label="...">
+      <div class="btn-group btn-group-xs pull-right" role="group" aria-label="...">
         <button type="button" class="btn btn-default" aria-expanded="false">
           <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
           Add new account
@@ -496,8 +496,22 @@
     </h2>
 
     {{#each objects.account}}
-    <div class="row">
-      <h4>{{human_type}} account</h4>
+    <div data-account-id="{{id}}">
+      <h4>
+        {{human_type}} account
+
+        <div class="btn-group btn-group-xs pull-right" role="group">
+          <button type="button" class="btn btn-default delete-account">
+            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            Delete
+          </button>
+          <button type="button" class="btn btn-default refresh-account">
+            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+            Refresh
+          </button>
+        </div>
+      </h4>
+
       Last updated: {{HumanTime last_updated}}
     </div>
     {{/each}}
