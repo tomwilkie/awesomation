@@ -512,7 +512,8 @@
         </div>
       </h4>
 
-      Last updated: {{HumanTime last_updated}}
+      <p>Last updated: {{HumanTime last_updated}}</p>
+      <p>Devices: {{#DevicesForAccount id}}{{> device-name}}, {{else}}<i>None</i>{{/DevicesForAccount}}</p>
     </div>
     {{/each}}
     {{/if}}

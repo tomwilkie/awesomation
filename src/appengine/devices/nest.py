@@ -18,6 +18,7 @@ class NestThermostat(device.Device):
   account = ndb.StringProperty()
 
   def handle_event(self, event):
+    self.account = event['account']
     self.humidity = event['humidity']
     self.temperature = event['ambient_temperature_c']
     self.name = event['name_long']
@@ -29,6 +30,7 @@ class NestProtect(device.Device):
   account = ndb.StringProperty()
 
   def handle_event(self, event):
+    self.account = event['account']
     self.name = event['name_long']
 
 
@@ -62,6 +64,7 @@ class NestAccount(account.Account):
     events = []
 
     for protect_id, protect_info in result['smoke_co_alarms'].iteritems():
+      protect_info['account'] = self.key.string_id()
       events.append({
           'device_type': 'nest_protect',
           'device_id': 'nest-protect-%s' % protect_id,
@@ -69,6 +72,7 @@ class NestAccount(account.Account):
       })
 
     for thermostat_id, thermostat_info in result['thermostats'].iteritems():
+      thermostat_info['account'] = self.key.string_id()
       events.append({
           'device_type': 'nest_thermostat',
           'device_id': 'nest-thermostat-%s' % thermostat_id,

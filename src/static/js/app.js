@@ -136,7 +136,25 @@ var AWESOMATION = (function() {
 
     'HumanTime': function(millis) {
       return moment(millis).format('LLL');
-    }
+    },
+
+    'DevicesForAccount': function(account_id, options) {
+      var found = false;
+      var ret = '';
+
+      $.each(cache.objects.device, function(id, device) {
+        if (device.account === account_id) {
+          found = true;
+          ret = ret + options.fn(device);
+        }
+      });
+
+      if (!found) {
+        ret = ret + options.inverse(this);
+      }
+
+      return ret;
+    },
   });
 
   $(function () {
