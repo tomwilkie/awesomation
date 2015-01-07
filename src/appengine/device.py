@@ -45,7 +45,7 @@ class Device(model.Base):
   owner = ndb.StringProperty(required=True)
   name = ndb.StringProperty(required=False)
   last_update = ndb.DateTimeProperty(required=False, auto_now=True)
-  room = ndb.KeyProperty('room')
+  room = ndb.StringProperty()
   capabilities = ndb.ComputedProperty(lambda self: self.get_capabilities(),
                                       repeated=True)
 
@@ -75,19 +75,6 @@ class Device(model.Base):
                     func_name)
       flask.abort(400)
     func(**command_dict)
-
-  @rest.command
-  def set_room(self, room_id):
-    """Change the room associated with this device."""
-    from appengine import room as room_module
-    room = room_module.Room.get_by_id(room_id)
-    if not room:
-      flask.abort(404)
-    room.devices.append(self.key)
-    room.put()
-
-    self.room = room.key
-    self.put()
 
   def list_commands(self):
     """List commands on this device."""

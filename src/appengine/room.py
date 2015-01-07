@@ -11,7 +11,6 @@ class Room(model.Base):
   """A room in a property."""
   owner = ndb.StringProperty(required=True)
   name = ndb.StringProperty(required=False)
-  devices = ndb.KeyProperty(repeated=True)
 
   @rest.command
   def all_on(self):

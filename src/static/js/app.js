@@ -252,8 +252,8 @@ var AWESOMATION = (function() {
         var room_name = $(this).find('input#room-name').val();
 
         net.post(sprintf('/api/room/%s', room_id), {
-            name: room_name,
-          });
+          name: room_name,
+        }).always(hide_modal);
       });
     });
 
@@ -277,7 +277,8 @@ var AWESOMATION = (function() {
               type: 'rfswitch',
               name: device_name,
               system_code: system_code,
-              device_code: device_code
+              device_code: device_code,
+              room: room_id
             }).done(function () {
               hide_modal();
             }).fail(function (jqXHR, textStatus, errorThrown) {
@@ -375,9 +376,8 @@ var AWESOMATION = (function() {
 
       dialog('script#device-change-room-dialog-template', state, function() {
         var room_id = $(this).find('select#room').val();
-        net.post(sprintf('/api/device/%s/command', device_id), {
-          command: 'set_room',
-          room_id: room_id
+        net.post(sprintf('/api/device/%s', device_id), {
+          room: room_id
         }).always(hide_modal);
       });
     });
