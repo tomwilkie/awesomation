@@ -425,6 +425,16 @@ var AWESOMATION = (function() {
       });
     });
 
+    // Dialog: delete account
+
+    $('div.main').on('click', 'div.account .delete-account', function() {
+      var account_id = $(this).closest('div.account').data('account-id');
+      var account = cache.objects.account[account_id];
+
+      dialog('script#delete-account-dialog-template', account, function() {
+        net.del(sprintf('/api/account/%s', account_id)).always(hide_modal);
+      });
+    });
   });
 
   return {
