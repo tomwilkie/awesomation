@@ -130,9 +130,9 @@ class CommandView(flask.views.MethodView):
                     func_name)
       flask.abort(400)
 
-    # TODO return result somehow?
-    func(**body)
-    return ('', 204)
+    result = func(**body)
+    obj.put()
+    return flask.jsonify(result=result)
 
 
 def register_class(blueprint, cls, create_callback):

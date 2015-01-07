@@ -5,7 +5,7 @@ import re
 
 from google.appengine.ext import ndb
 
-from appengine import device, pushrpc, rest
+from appengine import device, pushrpc
 
 
 @device.register('hue_bridge')
@@ -40,17 +40,7 @@ class HueLight(device.Switch):
   hue_type = ndb.StringProperty()
   hue_model_id = ndb.StringProperty()
 
-  @rest.command
-  def turn_on(self):
-    self.state = True
-    self._set_state(True)
-
-  @rest.command
-  def turn_off(self):
-    self.state = False
-    self._set_state(False)
-
-  def _set_state(self, state):
+  def update_state(self, state):
     """Update the state of a light."""
     match = LIGHT_ID_RE.match(self.key.id())
     bridge_id = match.group(1)

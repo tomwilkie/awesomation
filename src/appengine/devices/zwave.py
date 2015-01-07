@@ -4,7 +4,7 @@ import logging
 
 from google.appengine.ext import ndb
 
-from appengine import device, pushrpc, rest
+from appengine import device, pushrpc, rest, room
 
 
 class CommandClassValue(ndb.Model):
@@ -97,17 +97,14 @@ class ZWaveDevice(device.Device):
   @rest.command
   def lights(self, state):
     """Turn the lights on/off in the room this sensor is in."""
-    room_key = self.room
-    if not room_key:
+    if not self.room:
       return
 
-    switches = device.Switch.query().filter(
-        device.Device.room == room_key).iter()
-    for switch in switches:
-      if state:
-        switch.turn_on()
-      else:
-        switch.turn_off()
+    room_obj = room.Room.get_by_id(self.room)
+    if not room_obj:
+      return
+
+    room_obj.set_lights(state)
 
   @classmethod
   @device.static_command

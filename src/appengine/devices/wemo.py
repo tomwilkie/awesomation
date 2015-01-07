@@ -2,7 +2,7 @@
 
 from google.appengine.ext import ndb
 
-from appengine import device, pushrpc, rest
+from appengine import device, pushrpc
 
 
 @device.register('wemo')
@@ -12,23 +12,13 @@ class WemoDevice(device.Switch):
   model = ndb.StringProperty()
   state = ndb.IntegerProperty()
 
-  @rest.command
-  def turn_on(self):
-    self.state = 1
-    self._set_state(1)
-
-  @rest.command
-  def turn_off(self):
-    self.state = 0
-    self._set_state(0)
-
   @classmethod
   @device.static_command
   def scan(cls):
     event = {'type': 'wemo', 'command': 'scan'}
     pushrpc.send_event(event)
 
-  def _set_state(self, state):
+  def update_state(self, state):
     """Update the state of a light."""
     event = {'type': 'wemo',
              'command': 'set_state',
