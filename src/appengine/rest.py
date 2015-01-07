@@ -104,8 +104,9 @@ class ClassView(flask.views.MethodView):
 class CommandView(flask.views.MethodView):
   """Implements /command endpoints for models."""
 
-  def __init__(self, cls):
+  def __init__(self, classname, cls):
     super(CommandView, self).__init__()
+    self._classname = classname
     self._cls = cls
 
   def post(self, object_id):
@@ -131,7 +132,11 @@ class CommandView(flask.views.MethodView):
       flask.abort(400)
 
     result = func(**body)
+
     obj.put()
+    user.send_event(cls=self._classname, id=object_id,
+                    event='update', obj=obj.to_dict())
+
     return flask.jsonify(result=result)
 
 
@@ -144,6 +149,7 @@ def register_class(blueprint, cls, create_callback):
   blueprint.add_url_rule('/<object_id>', view_func=class_view_func,
                          methods=['GET', 'POST', 'DELETE'])
 
-  command_view_func = CommandView.as_view('%s_command' % cls.__name__, cls)
+  command_view_func = CommandView.as_view('%s_command' % cls.__name__,
+                                          blueprint.name, cls)
   blueprint.add_url_rule('/<object_id>/command', methods=['POST'],
                          view_func=command_view_func)

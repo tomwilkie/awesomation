@@ -404,6 +404,14 @@
             <span class="label label-warning">absent</span>
             {{/if}}
             {{/HasCapability}}
+
+            {{#HasCapability 'SWITCH'}}
+            {{#if state}}
+            <span class="label label-success">on</span>
+            {{else}}
+            <span class="label label-warning">off</span>
+            {{/if}}
+            {{/HasCapability}}
           </p>
           <p>
             <div class="btn-group btn-group-sm" role="group" aria-label="...">

@@ -186,7 +186,7 @@ var AWESOMATION = (function() {
       $.bbq.pushState({mode: mode});
     });
 
-    $('a[href=#]').click(function(event) {
+    $('body').on('click', 'a[href=#]', function(event) {
       event.preventDefault();
     });
 
@@ -264,7 +264,7 @@ var AWESOMATION = (function() {
       return ("0000" + (Math.random() * Math.pow(36,4) << 0).toString(36)).slice(-4);
     }
 
-    $('div.main').on('click', 'a.create-new-room', function() {
+    $('div.main').on('click', '.create-new-room', function() {
       dialog('script#create-new-room-dialog-template', {}, function() {
         var room_id = random_id();
         var room_name = $(this).find('input#room-name').val();
@@ -277,7 +277,7 @@ var AWESOMATION = (function() {
 
     // Dialog: add new device
 
-    $('div.main').on('click', 'a.add-new-device', function() {
+    $('div.main').on('click', '.add-new-device', function() {
       dialog('script#new-device-dialog-template', {rooms: cache.objects.room}, function(event, target) {
         var that = $(this);
         var type = $(target).data('type');
