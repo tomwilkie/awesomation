@@ -194,16 +194,16 @@ var AWESOMATION = (function() {
       var room_id = $(this).closest('div.room').data('room-id');
 
       net.post(sprintf('/api/room/%s/command', room_id), {
-          command: "all_on",
-        });
+        command: "all_on",
+      });
     });
 
     $('div.main').on('click', 'div.room .all-off', function() {
       var room_id = $(this).closest('div.room').data('room-id');
 
       net.post(sprintf('/api/room/%s/command', room_id), {
-          command: "all_off",
-        });
+        command: "all_off",
+      });
     });
 
     $('div.main').on('click', 'div.device .device-command', function() {
@@ -211,8 +211,17 @@ var AWESOMATION = (function() {
       var command = $(this).data('command');
 
       net.post(sprintf('/api/device/%s/command', device_id), {
-          command: command,
-        });
+        command: command,
+      });
+    });
+
+    $('div.main').on('click', 'div.account .account-command', function() {
+      var account_id = $(this).closest('div.account').data('account-id');
+      var command = $(this).data('command');
+
+      net.post(sprintf('/api/account/%s/command', account_id), {
+        command: command,
+      });
     });
 
     // Dialogs

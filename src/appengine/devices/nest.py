@@ -4,6 +4,7 @@ import json
 import logging
 import urllib2
 
+from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 
 from appengine import account, device, rest, user
@@ -44,11 +45,39 @@ class NestAccount(account.Account):
                       'client_secret=%(client_secret)s&'
                       'grant_type=authorization_code')
   API_URL = 'https://developer-api.nest.com/devices.json?auth=%(access_token)s'
+  STRUCTURE_URL = ('https://developer-api.nest.com/structures/'
+                   '%(id)s?auth=%(access_token)s')
   CLIENT_ID = creds.NEST_CLIENT_ID
   CLIENT_SECRET = creds.NEST_CLIENT_SECRET
 
+  raw_data = ndb.TextProperty()
+
   def get_human_type(self):
     return 'Nest'
+
+  def set_away(self, value):
+    """Set away status of all structures."""
+    if not self.raw_data:
+      logging.error('Cant set away!')
+      return
+
+    data = json.loads(self.raw_data)
+    value = 'away' if value else 'home'
+
+    for structure_id in data['structures'].iterkeys():
+      url = self.STRUCTURE_URL % {'id': structure_id,
+                                  'access_token': self.access_token}
+      request_data = json.dumps({'away': value})
+      logging.info('Sending request "%s" to %s', request_data, url)
+
+      result = urlfetch.fetch(
+          url=url,
+          payload=request_data,
+          method=urlfetch.PUT)
+          #headers={'Content-Type': 'application/x-www-form-urlencoded'})
+
+      assert result.status_code == 200
+
 
   @rest.command
   def refresh_devices(self):
@@ -58,7 +87,9 @@ class NestAccount(account.Account):
 
     url = self.API_URL % {'access_token': self.access_token}
     result = urllib2.urlopen(url)
-    result = json.load(result)
+    result = result.read()
+    self.raw_data = result
+    result = json.loads(result)
     logging.info(result)
 
     events = []

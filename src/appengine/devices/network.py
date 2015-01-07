@@ -4,7 +4,8 @@ import re
 
 from google.appengine.ext import ndb
 
-from appengine import device
+from appengine import device, rest
+from appengine.devices import nest
 
 
 RE = re.compile(r'mac-(.*)')
@@ -14,6 +15,19 @@ RE = re.compile(r'mac-(.*)')
 class NetworkDevice(device.Device):
   """A device on the network."""
   present = ndb.BooleanProperty(required=True, default=False)
+
+  def set_presence(self, value):
+    self.present = value
+    for nest_account in nest.NestAccount.query().iter():
+      nest_account.set_away(value)
+
+  @rest.command
+  def fake_present(self):
+    self.set_presence(True)
+
+  @rest.command
+  def fake_absent(self):
+    self.set_presence(False)
 
   def get_capabilities(self):
     return ['PRESENCE']
@@ -27,7 +41,7 @@ class NetworkDevice(device.Device):
       if network_device is None:
         return
 
-      network_device.present = False
+      network_device.set_presence(False)
       network_device.put()
 
     elif 'appeared' in event:
@@ -35,7 +49,7 @@ class NetworkDevice(device.Device):
       if network_device is None:
         return
 
-      network_device.present = True
+      network_device.present.set_presence(True)
       network_device.put()
 
     elif 'devices' in event:
@@ -49,7 +63,7 @@ class NetworkDevice(device.Device):
         mac = match.group(1)
         present = mac in devices
         if network_device.present != present:
-          network_device.present = present
+          network_device.set_presence(present)
           devices_to_put.append(network_device)
 
       ndb.put_multi(devices_to_put)

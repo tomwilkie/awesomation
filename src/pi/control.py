@@ -53,7 +53,7 @@ class Control(object):
   def _device_event_callback(self, device_type, device_id, event_body):
     """Handle event from a device."""
     event = {'device_type': device_type, 'device_id': device_id,
-              'event': event_body}
+             'event': event_body}
     self._pusher.send_event(event)
 
 
@@ -69,7 +69,7 @@ def main():
   parser.add_argument('--rfswtich_pin', default=3)
   parser.add_argument('--hue_scan_interval_secs', default=5*60)
   parser.add_argument('--network_scan_interval_secs', default=10)
-  parser.add_argument('--network_scan_timeout_secs', default=60)
+  parser.add_argument('--network_scan_timeout_secs', default=5*60)
   args = parser.parse_args()
 
   control = Control(args)

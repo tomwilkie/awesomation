@@ -431,6 +431,11 @@
                 <li><a href="#" class="device-command" data-command="turn_off">Turn off</a></li>
                 <li class="divider"></li>
                 {{/HasCapability}}
+                {{#HasCapability 'PRESENCE'}}
+                <li><a href="#" class="device-command" data-command="fake_present">Fake Present</a></li>
+                <li><a href="#" class="device-command" data-command="fake_absent">Fake Absent</a></li>
+                <li class="divider"></li>
+                {{/HasCapability}}
                 <li><a href="#" class='device-change-room'>Change room</a></li>
                 <li><a href="#" class='device-change-name'>Change name</a></li>
                 <li><a href="#" class='device-delete'>Delete</a></li>
@@ -527,7 +532,7 @@
             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
             Delete
           </button>
-          <button type="button" class="btn btn-default refresh-account">
+          <button type="button" class="btn btn-default account-command" data-command="refresh_devices">
             <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
             Refresh
           </button>
