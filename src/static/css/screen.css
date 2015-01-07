@@ -99,13 +99,25 @@ body {
   margin-bottom: 30px;
   text-align: center;
 }
-.devices h4 {
-  margin-bottom: 0;
-}
+
 .device {
 
 }
 
+.devices h4 {
+  margin-bottom: 0;
+}
+
+.devices button.device-name {
+  width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*
+ * Spinning loading icon
+ */
 .glyphicon-refresh-animate {
     -animation: spin 1s infinite linear;
     -webkit-animation: spin2 1s infinite linear;
