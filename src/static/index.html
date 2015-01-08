@@ -427,13 +427,19 @@
                 <li class="divider"></li>
                 {{/HasCapability}}
                 {{#HasCapability 'SWITCH'}}
-                <li><a href="#" class="device-command" data-command="turn_on">Turn on</a></li>
+                {{#if state}}
                 <li><a href="#" class="device-command" data-command="turn_off">Turn off</a></li>
+                {{else}}
+                <li><a href="#" class="device-command" data-command="turn_on">Turn on</a></li>
+                {{/if}}
                 <li class="divider"></li>
                 {{/HasCapability}}
                 {{#HasCapability 'PRESENCE'}}
-                <li><a href="#" class="device-command" data-command="fake_present">Fake Present</a></li>
+                {{#if present}}
                 <li><a href="#" class="device-command" data-command="fake_absent">Fake Absent</a></li>
+                {{else}}
+                <li><a href="#" class="device-command" data-command="fake_present">Fake Present</a></li>
+                {{/if}}
                 <li class="divider"></li>
                 {{/HasCapability}}
                 <li><a href="#" class='device-change-room'>Change room</a></li>
