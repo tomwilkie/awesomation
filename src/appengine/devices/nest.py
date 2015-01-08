@@ -54,6 +54,14 @@ class NestAccount(account.Account):
 
   raw_data = ndb.TextProperty()
 
+  def do_request(self, url, **kwargs):
+    result = urlfetch.fetch(
+          url=url % {'access_token': self.access_token},
+          deadline=15,
+          **kwargs)
+    assert 200 <= result.status_code < 300
+    return json.loads(result.content)
+
   def get_human_type(self):
     return 'Nest'
 
@@ -63,9 +71,7 @@ class NestAccount(account.Account):
       logging.error('Cant set away!')
       return
 
-    url = self.STRUCTURES_URL % {'access_token': self.access_token}
-    result = urllib2.urlopen(url)
-    structures = json.load(result)
+    structures = self.do_request(self.STRUCTURES_URL)
 
     logging.info(structures)
     value = 'away' if value else 'home'
@@ -76,13 +82,9 @@ class NestAccount(account.Account):
       request_data = json.dumps({'away': value})
       logging.info('Sending request "%s" to %s', request_data, url)
 
-      result = urlfetch.fetch(
-          url=url,
-          payload=request_data,
+      self.do_request(
+          url, payload=request_data,
           method=urlfetch.PUT)
-          #headers={'Content-Type': 'application/x-www-form-urlencoded'})
-
-      assert result.status_code == 200
 
   @rest.command
   def refresh_devices(self):
@@ -90,9 +92,7 @@ class NestAccount(account.Account):
       logging.info('No access token, skipping.')
       return
 
-    url = self.API_URL % {'access_token': self.access_token}
-    result = urllib2.urlopen(url)
-    result = json.load(result)
+    result = self.do_request(self.API_URL)
     logging.info(result)
 
     events = []
