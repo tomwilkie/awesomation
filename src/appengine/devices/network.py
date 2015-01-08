@@ -60,7 +60,7 @@ class NetworkDevice(device.Device):
       if network_device is None:
         return
 
-      network_device.present.set_presence(True)
+      network_device.set_presence(True)
       network_device.put()
 
     elif 'devices' in event:
