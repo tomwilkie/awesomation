@@ -2,9 +2,10 @@
 
 import json
 import logging
-import urllib2
+import sys
 
 from google.appengine.api import urlfetch
+from google.appengine.api import urlfetch_errors
 from google.appengine.ext import ndb
 
 from appengine import account, device, rest, user
@@ -55,12 +56,21 @@ class NestAccount(account.Account):
   raw_data = ndb.TextProperty()
 
   def do_request(self, url, **kwargs):
-    result = urlfetch.fetch(
-          url=url % {'access_token': self.access_token},
-          deadline=15,
-          **kwargs)
-    assert 200 <= result.status_code < 300
-    return json.loads(result.content)
+    retries = 10
+    while retries > 0:
+      retries -= 1
+      try:
+        result = urlfetch.fetch(
+            url=url % {'access_token': self.access_token},
+            deadline=15,
+            **kwargs)
+        assert 200 <= result.status_code < 300
+        return json.loads(result.content)
+      except urlfetch_errors.DeadlineExceededError:
+        if retries > 0:
+          logging.error('Deadline exceeded, retrying.', exc_info=sys.exc_info)
+        else:
+          raise
 
   def get_human_type(self):
     return 'Nest'
