@@ -37,6 +37,10 @@ class Account(model.Base):
   human_type = ndb.ComputedProperty(lambda a: a.get_human_type())
   last_update = ndb.DateTimeProperty(required=False, auto_now=True)
 
+  @classmethod
+  def _event_classname(cls):
+    return 'account'
+
   def get_human_type(self):
     return ''
 

@@ -1,5 +1,4 @@
 """ROOMs"""
-
 from google.appengine.ext import ndb
 
 import flask
@@ -12,14 +11,23 @@ class Room(model.Base):
   owner = ndb.StringProperty(required=True)
   name = ndb.StringProperty(required=False)
 
+  @classmethod
+  def _event_classname(cls):
+    return 'room'
+
   def set_lights(self, value):
+    """Set all the lights in this room on/off."""
     switches = (device.Device.get_by_capability('SWITCH')
                 .filter(device.Device.room == self.key.string_id()).iter())
+    # We want to iterate over this twice.
+    switches = list(switches)
+
     for switch in switches:
       if value:
         switch.turn_on()
       else:
         switch.turn_off()
+    ndb.put_multi(switches)
 
   @rest.command
   def all_on(self):

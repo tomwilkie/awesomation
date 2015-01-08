@@ -81,9 +81,6 @@ class ClassView(flask.views.MethodView):
       flask.abort(400)
 
     values = obj.to_dict()
-    user.send_event(cls=self._classname, id=object_id,
-                    event='update', obj=values)
-
     return flask.jsonify(**values)
 
   def delete(self, object_id):
@@ -132,11 +129,7 @@ class CommandView(flask.views.MethodView):
       flask.abort(400)
 
     result = func(**body)
-
     obj.put()
-    user.send_event(cls=self._classname, id=object_id,
-                    event='update', obj=obj.to_dict())
-
     return flask.jsonify(result=result)
 
 

@@ -6,7 +6,7 @@ from google.appengine.ext import ndb
 
 import flask
 
-from appengine import model, pushrpc, rest, user
+from appengine import model, pushrpc, rest
 
 
 DEVICE_TYPES = {}
@@ -51,6 +51,10 @@ class Device(model.Base):
 
   def get_capabilities(self):
     return []
+
+  @classmethod
+  def _event_classname(cls):
+    return 'device'
 
   def handle_event(self, event):
     pass
@@ -139,10 +143,6 @@ def process_events(events, user_id):
     device.handle_event(event_body)
 
   ndb.put_multi(device_cache.values())
-
-  for device in device_cache.itervalues():
-    user.send_event(cls='device', id=device.key.string_id(),
-                    event='update', obj=device.to_dict())
 
 
 @blueprint.route('/events', methods=['POST'])

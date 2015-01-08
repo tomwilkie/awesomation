@@ -10,14 +10,12 @@ from google.appengine.ext import ndb
 
 import flask
 
-from appengine import model
-
 
 # pylint: disable=invalid-name
 blueprint = flask.Blueprint('user', __name__)
 
 
-class Person(model.Base):
+class Person(ndb.Model):
   # key_name is userid
   email = ndb.StringProperty(required=False)
   channel_ids = ndb.StringProperty(repeated=True)
