@@ -87,10 +87,10 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
       ipaddr = match.group('ip')
       state = match.group('state')
 
+      # ping everything in the table once a minute.
+      self._ping(ipaddr, now)
+
       if state != 'REACHABLE':
-        # give it a ping, so next time round
-        # it might be considered reachable
-        self._ping(ipaddr, now)
         continue
 
       if mac not in self._hosts:
