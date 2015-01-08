@@ -50,10 +50,31 @@ var AWESOMATION = (function() {
       });
     }
 
-    function connect_channel() {
-      net.get('/api/user/new_channel', function (data) {
+    function connect_channel(opened) {
+      net.get('/api/user/new_channel').done(function (data) {
         channel = new goog.appengine.Channel(data.token);
         socket = channel.open();
+        socket.onopen = function () {
+          console.log('socket opened');
+          opened()
+        };
+
+        socket.onerror = function () {
+          console.log('socket error');
+        };
+
+        socket.onclose = function () {
+          console.log('socket closed');
+
+          // Tell UI cache is now loading again
+          cache.loading = true;
+          $('body').trigger('cache_updated');
+
+          // reset cache, connect channel, fetch
+          cache.objects = (objects = {});
+          connect_channel(fetch);
+        };
+
         socket.onmessage = function (m) {
           var message = JSON.parse(m.data);
           $.each(message.events, function(i, event) {
@@ -68,13 +89,16 @@ var AWESOMATION = (function() {
           });
           $('body').trigger('cache_updated');
         };
+      }).error(function () {
+        window.setTimeout(function() {
+          connect_channel(fetch);
+        }, 1 * 1000);
       });
     }
 
     $(function () {
       window.setTimeout(function() {
-        connect_channel();
-        fetch();
+        connect_channel(fetch);
       }, 0);
     });
 
