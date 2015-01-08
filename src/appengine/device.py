@@ -27,9 +27,11 @@ def register(device_type):
   return class_rebuilder
 
 
-def create_device(device_id, user_id, body):
+def create_device(device_id, user_id, body, device_type=None):
   """Factory for creating new devices."""
-  device_type = body.pop('type', None)
+  if device_type is None:
+    device_type = body.pop('type', None)
+
   if device_type is None:
     flask.abort(400, '\'type\' field expected in body.')
 
@@ -137,7 +139,8 @@ def process_events(events, user_id):
     else:
       device = Device.get_by_id(device_id)
       if not device:
-        device = create_device(device_id, device_type, user_id)
+        device = create_device(device_id, user_id, None,
+                               device_type=device_type)
       device_cache[device_id] = device
 
     device.handle_event(event_body)

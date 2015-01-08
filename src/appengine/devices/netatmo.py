@@ -11,6 +11,17 @@ from appengine import account, device, rest, user
 from common import creds
 
 
+@device.register('netatmo_weather_station')
+class NetatmoWeatherStation(device.Device):
+  """A Netatmo Weather Station."""
+
+  temperature = ndb.FloatProperty()
+  humidity = ndb.FloatProperty()
+  co2 = ndb.FloatProperty()
+  pressure = ndb.FloatProperty()
+  noise = ndb.FloatProperty()
+
+
 @account.register('netatmo')
 class NetatmoAccount(account.Account):
   """Class represents a Netatmo account."""
@@ -46,3 +57,26 @@ class NetatmoAccount(account.Account):
     result = json.load(result)
     logging.info(result)
 
+    events = []
+    for details in result['body']['modules']:
+      if details['type'] not in {'NAModule1', 'NAModule4'}:
+        continue
+
+      events.append({
+        'device_type': 'netatmo_weather_station',
+        'device_id': 'netatmo-%s' % details['_id'],
+        'event': details,
+      })
+
+    for details in result['body']['devices']:
+      if details['type'] not in {'NAMain'}:
+        continue
+
+      events.append({
+        'device_type': 'netatmo_weather_station',
+        'device_id': 'netatmo-%s' % details['_id'],
+        'event': details,
+      })
+
+    user_id = user.get_user_from_namespace()
+    device.process_events(events, user_id)
