@@ -72,6 +72,7 @@ def send_event(**kwargs):
 def push_events():
   """Push all the events that have been caused by this request."""
   events = flask.g.get('user_events', None)
+  setattr(flask.g, 'user_events', None)
   if events is None:
     return
 
@@ -84,7 +85,8 @@ def push_events():
   # instead.  Horrid.
   user_id = get_user_from_namespace()
   person = Person.get_by_id(user_id)
-  assert person is not None
+  if person is None:
+    return
 
   for channel_id in person.channel_ids:
     channel.send_message(channel_id, events)

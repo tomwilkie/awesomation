@@ -141,6 +141,7 @@ def send_event(event):
 def push_batch():
   """Push all the events that have been caused by this request."""
   batch = flask.g.get('events', None)
+  setattr(flask.g, 'events', None)
   if batch is None:
     return
 

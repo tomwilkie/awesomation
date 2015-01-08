@@ -7,7 +7,7 @@ from google.appengine.api import namespace_manager
 
 import flask
 
-from appengine import account
+from appengine import account, pushrpc, user
 
 
 # pylint: disable=invalid-name
@@ -25,6 +25,10 @@ def update_per_namespace():
       logging.error('Error refreshing account %s',
                     acc.key.string_id(), exc_info=sys.exc_info())
 
+  pushrpc.push_batch()
+  user.push_events()
+
+
 
 @blueprint.route('/update', methods=['GET'])
 def update():
@@ -34,4 +38,5 @@ def update():
     namespace_manager.set_namespace(namespace)
     update_per_namespace()
 
+  namespace_manager.set_namespace('')
   return ('', 204)
