@@ -56,7 +56,7 @@ var AWESOMATION = (function() {
         socket = channel.open();
         socket.onopen = function () {
           console.log('socket opened');
-          opened()
+          opened();
         };
 
         socket.onerror = function () {
