@@ -1,0 +1,104 @@
+{
+  u 'status': u 'ok',
+  u 'body': {
+    u 'modules': [{
+      u 'rf_status': 69,
+      u 'data_type': [u 'Temperature', u 'Humidity'],
+      u 'last_message': 1420797218,
+      u 'firmware': 43,
+      u 'main_device': u '70:ee:50:01:2d:22',
+      u 'dashboard_data': {
+        u 'date_min_temp': 1420792911,
+        u 'Temperature': 16.199999999999999,
+        u 'time_utc': 1420797167,
+        u 'Humidity': 62,
+        u 'min_temp': 16.199999999999999,
+        u 'date_max_temp': 1420761691,
+        u 'max_temp': 16.399999999999999
+      },
+      u 'module_name': u 'Office',
+      u 'battery_vp': 5956,
+      u '_id': u '02:00:00:01:6d:2e',
+      u 'type': u 'NAModule1',
+      u 'last_seen': 1420797218
+    }, {
+      u 'rf_status': 80,
+      u 'data_type': [u 'Temperature', u 'Co2', u 'Humidity'],
+      u 'last_message': 1420797218,
+      u 'firmware': 43,
+      u 'main_device': u '70:ee:50:01:2d:22',
+      u 'dashboard_data': {
+        u 'CO2': 729,
+        u 'Temperature': 15.9,
+        u 'time_utc': 1420797173,
+        u 'Humidity': 54,
+        u 'date_min_temp': 1420763184,
+        u 'min_temp': 15.5,
+        u 'date_max_temp': 1420782306,
+        u 'max_temp': 16
+      },
+      u 'module_name': u 'Master Bedroom',
+      u 'battery_vp': 5979,
+      u '_id': u '03:00:00:00:cb:7c',
+      u 'type': u 'NAModule4',
+      u 'last_seen': 1420797173
+    }],
+    u 'devices': [{
+      u 'meteo_alarms': [{
+        u 'status': u 'new',
+        u 'max level': 1,
+        u 'begin': 1419692400,
+        u 'end': 1419764400,
+        u 'descr': u 'Widespread icy patches are expected to readily form on untreated surfaces this evening and during Saturday night, especially where snow cover exists or where wintry showers occur.',
+        u 'title': u '__MA_ALARM_SNOW_TITLE',
+        u 'time_generated': 1419692534,
+        u 'area': u 'London & South East',
+        u 'alarm_id': 132425,
+        u 'text_field': u '__MA_ALARM_SNOW_LEVEL_1',
+        u '_id': {
+          u '$id': u '549ec9f61c7759ab9d8b456b'
+        },
+        u 'type': u 'ALARM_SNOW',
+        u 'origin': u 'meteoalarm',
+        u 'level': 1
+      }],
+      u 'data_type': [u 'Temperature', u 'Co2', u 'Humidity', u 'Noise', u 'Pressure'],
+      u 'modules': [u '02:00:00:01:6d:2e', u '03:00:00:00:cb:7c'],
+      u 'firmware': 101,
+      u 'date_setup': {
+        u 'usec': 920000,
+        u 'sec': 1386607747
+      },
+      u 'co2_calibrating': False,
+      u 'last_status_store': 1420797219,
+      u 'wifi_status': 41,
+      u 'place': {
+        u 'city': u 'London',
+        u 'improveLocProposed': True,
+        u 'geoip_city': u 'London',
+        u 'country': u 'GB',
+        u 'altitude': 26,
+        u 'timezone': u 'Europe/London'
+      },
+      u 'dashboard_data': {
+        u 'Noise': 45,
+        u 'Temperature': 16.199999999999999,
+        u 'time_utc': 1420797204,
+        u 'Humidity': 67,
+        u 'Pressure': 1021.4,
+        u 'CO2': 553,
+        u 'AbsolutePressure': 1018.3,
+        u 'min_temp': 16.100000000000001,
+        u 'date_max_temp': 1420761704,
+        u 'date_min_temp': 1420774749,
+        u 'max_temp': 16.800000000000001
+      },
+      u 'module_name': u 'Home Cinema',
+      u 'station_name': u "Tom's Netatmo",
+      u '_id': u '70:ee:50:01:2d:22',
+      u 'type': u 'NAMain'
+    }]
+  },
+  u 'time_exec': 0.0078270435333252005,
+  u 'time_server': 1420797713
+}
