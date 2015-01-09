@@ -39,6 +39,7 @@ You'll need a Raspberry Pi running rasbian.  On the Pi, run:
 
 The proxy code will print out something like this:
 
+    2015-01-09 14:20:19,104 INFO pushrpc.py:40 - I am proxy '614d1ad1b9f446418db40791f5c5ec3f'
 
 Then, go to http://homeawesomation.appspot.com - you will be asked to login with your Google
 credentials, and this will automatically create an account for you.
@@ -47,7 +48,8 @@ In the top left of 'Rooms and Devices' page, select 'Add new device' from the dr
 top right.  Select 'Awesomation Proxy' enter the Proxy ID from above.  This will associate
 your proxy with your account.
 
-Then, add other devices, rooms etc.  Have fun!
+Then, add other devices, rooms etc.  Also, you might want to run the proxy in a screen
+session, just in case the ssh connection drops.  Have fun!
 
 ### Architecture
 
