@@ -14,6 +14,7 @@ from common import creds
 @device.register('netatmo_weather_station')
 class NetatmoWeatherStation(device.Device):
   """A Netatmo Weather Station."""
+  account = ndb.StringProperty()
 
   temperature = ndb.FloatProperty()
   humidity = ndb.FloatProperty()
@@ -23,6 +24,8 @@ class NetatmoWeatherStation(device.Device):
 
   def handle_event(self, event):
     self.device_name = event['module_name']
+    self.account = event['account']
+
     self.temperature = event['dashboard_data'].get('Temperature', None)
     self.humidity = event['dashboard_data'].get('Humidity', None)
     self.co2 = event['dashboard_data'].get('CO2', None)
@@ -63,13 +66,13 @@ class NetatmoAccount(account.Account):
     url = self.API_URL % {'access_token': self.access_token}
     result = urllib2.urlopen(url)
     result = json.load(result)
-    logging.info(result)
 
     events = []
     for details in result['body']['modules']:
       if details['type'] not in {'NAModule1', 'NAModule4'}:
         continue
 
+      details['account'] = self.key.string_id()
       events.append({
         'device_type': 'netatmo_weather_station',
         'device_id': 'netatmo-%s' % details['_id'],
@@ -80,6 +83,7 @@ class NetatmoAccount(account.Account):
       if details['type'] not in {'NAMain'}:
         continue
 
+      details['account'] = self.key.string_id()
       events.append({
         'device_type': 'netatmo_weather_station',
         'device_id': 'netatmo-%s' % details['_id'],
