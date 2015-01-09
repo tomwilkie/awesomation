@@ -59,8 +59,8 @@ var AWESOMATION = (function() {
           opened();
         };
 
-        socket.onerror = function () {
-          console.log('socket error');
+        socket.onerror = function (error) {
+          console.log('socket error: %O', error);
         };
 
         socket.onclose = function () {
@@ -311,7 +311,9 @@ var AWESOMATION = (function() {
     // Dialog: add new device
 
     $('div.main').on('click', '.add-new-device', function() {
-      dialog('script#new-device-dialog-template', {rooms: cache.objects.room}, function(event, target) {
+      var accounts_only = $(this).data('accounts-only');
+
+      function new_device(event, target) {
         var that = $(this);
         var type = $(target).data('type');
         switch(type) {
@@ -391,7 +393,11 @@ var AWESOMATION = (function() {
           }());
           break;
         }
-      });
+      }
+
+      dialog('script#new-device-dialog-template',
+             {rooms: cache.objects.room, accounts_only: accounts_only},
+             new_device);
     });
 
     // Dialog: change room name

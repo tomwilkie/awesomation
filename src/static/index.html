@@ -177,6 +177,7 @@
         </div>
         <div class="modal-body">
           <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            {{#unless accounts_only}}
             <div class="panel panel-default">
               <div class="panel-heading" role="tab" id="headingOne">
                 <h4 class="panel-title">
@@ -261,36 +262,6 @@
             <div class="panel panel-default">
               <div class="panel-heading" role="tab" id="headingThree">
                 <h4 class="panel-title">
-                  <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-                    Nest devices
-                  </a>
-                </h4>
-              </div>
-              <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
-                <div class="panel-body">
-                  Nest devices are automatically added once you add your Nest account.
-                  <a href="/api/account/start_flow?type=nest" target="_new">Click here to add a Nest account.</a>
-                </div>
-              </div>
-            </div>
-            <div class="panel panel-default">
-              <div class="panel-heading" role="tab" id="headingThree">
-                <h4 class="panel-title">
-                  <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
-                    Netatmo devices
-                  </a>
-                </h4>
-              </div>
-              <div id="collapseFive" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive">
-                <div class="panel-body">
-                  Netatmo devices are automatically added once you add your Netatmo account.
-                  <a href="/api/account/start_flow?type=netatmo" target="_new">Click here to add a Netatmo account.</a>
-                </div>
-              </div>
-            </div>
-            <div class="panel panel-default">
-              <div class="panel-heading" role="tab" id="headingThree">
-                <h4 class="panel-title">
                   <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
                     ZWave Devices
                   </a>
@@ -365,6 +336,37 @@
                       <button type="button" class="btn btn-primary" data-type='proxy'>Create device</button>
                     </div>
                   </form>
+                </div>
+              </div>
+            </div>
+            {{/unless}}
+            <div class="panel panel-default">
+              <div class="panel-heading" role="tab" id="headingThree">
+                <h4 class="panel-title">
+                  <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                    Nest devices
+                  </a>
+                </h4>
+              </div>
+              <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+                <div class="panel-body">
+                  Nest devices are automatically added once you add your Nest account.
+                  <a href="/api/account/start_flow?type=nest" target="_new">Click here to add a Nest account.</a>
+                </div>
+              </div>
+            </div>
+            <div class="panel panel-default">
+              <div class="panel-heading" role="tab" id="headingThree">
+                <h4 class="panel-title">
+                  <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                    Netatmo devices
+                  </a>
+                </h4>
+              </div>
+              <div id="collapseFive" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive">
+                <div class="panel-body">
+                  Netatmo devices are automatically added once you add your Netatmo account.
+                  <a href="/api/account/start_flow?type=netatmo" target="_new">Click here to add a Netatmo account.</a>
                 </div>
               </div>
             </div>
@@ -521,7 +523,7 @@
       Accounts
 
       <div class="btn-group btn-group-xs pull-right" role="group" aria-label="...">
-        <button type="button" class="btn btn-default" aria-expanded="false">
+        <button type="button" class="btn btn-default add-new-device" aria-expanded="false" data-accounts-only="true">
           <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
           Add new account
         </button>
