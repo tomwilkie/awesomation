@@ -21,6 +21,14 @@ class NetatmoWeatherStation(device.Device):
   pressure = ndb.FloatProperty()
   noise = ndb.FloatProperty()
 
+  def handle_event(self, event):
+    self.device_name = event['module_name']
+    self.temperature = event['dashboard_data'].get('Temperature', None)
+    self.humidity = event['dashboard_data'].get('Humidity', None)
+    self.co2 = event['dashboard_data'].get('CO2', None)
+    self.pressure = event['dashboard_data'].get('Pressure', None)
+    self.noise = event['dashboard_data'].get('Noise', None)
+
 
 @account.register('netatmo')
 class NetatmoAccount(account.Account):

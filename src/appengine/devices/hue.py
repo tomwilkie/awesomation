@@ -27,7 +27,7 @@ class HueBridge(device.Device):
     # Only events are when we find a bridge,
     # and we are told the name and linked status
 
-    self.name = event['name']
+    self.device_name = event['name']
     self.linked = event['linked']
 
 
@@ -56,7 +56,7 @@ class HueLight(device.Switch):
   def handle_event(self, event):
     """Handle a device update event."""
     logging.info(event)
-    self.name = event['name']
+    self.device_name = event['name']
     self.hue_type = event['type']
     self.hue_model_id = event['modelid']
 

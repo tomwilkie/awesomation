@@ -45,7 +45,13 @@ def create_device(device_id, user_id, body, device_type=None):
 class Device(model.Base):
   """Base class for all device drivers."""
   owner = ndb.StringProperty(required=True)
+
+  # This is the name the user sets
   name = ndb.StringProperty(required=False)
+
+  # This is the (optional) name read from the device itself
+  device_name = ndb.StringProperty(required=False)
+
   last_update = ndb.DateTimeProperty(required=False, auto_now=True)
   room = ndb.StringProperty()
   capabilities = ndb.ComputedProperty(lambda self: self.get_capabilities(),

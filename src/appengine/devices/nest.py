@@ -23,7 +23,7 @@ class NestThermostat(device.Device):
     self.account = event['account']
     self.humidity = event['humidity']
     self.temperature = event['ambient_temperature_c']
-    self.name = event['name_long']
+    self.device_name = event['name_long']
 
 
 @device.register('nest_protect')
@@ -33,7 +33,7 @@ class NestProtect(device.Device):
 
   def handle_event(self, event):
     self.account = event['account']
-    self.name = event['name_long']
+    self.device_name = event['name_long']
 
 
 @account.register('nest')

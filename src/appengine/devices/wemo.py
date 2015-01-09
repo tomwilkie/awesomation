@@ -28,7 +28,7 @@ class WemoDevice(device.Switch):
 
   def handle_event(self, event):
     """Handle a device update event."""
-    self.name = event['name']
+    self.device_name = event['name']
     self.serial_number = event['serial_number']
     self.model = event['model']
     self.state = event['state']
