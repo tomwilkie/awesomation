@@ -64,3 +64,6 @@
 [submodule "third_party/static/moment"]
 	path = third_party/static/moment
 	url = https://github.com/moment/moment.git
+[submodule "third_party/py/boto"]
+	path = third_party/py/boto
+	url = https://github.com/boto/boto.git

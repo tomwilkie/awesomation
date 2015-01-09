@@ -7,7 +7,7 @@ The 'architecture' is client-server, with a Raspberry Pi based proxy running in 
 Currently supports the following devices:
 * ZWave motion sensors (Using the Aeon Labs Multisensor for testing)
 * Philips Hue lights
-* Wemo switches
+* Belkin Wemo switches
 * 433Mhz RF Switches (testing with [Brennenstuhl remote control mains sockets](http://www.amazon.co.uk/dp/B003BIFLSY))
 * Nest Thermostats and Protects
 * Netatmo weather stations
@@ -53,7 +53,7 @@ session, just in case the ssh connection drops.  Have fun!
 
 ### Architecture
 
-The client/server model was choosen as I wanted to integrate with internet enabled apis/devices, like the Nest and Netatmo.  These APIs require pre-registered OAuth callbacks, and as far as I can tell, cannot be made to work if the callback address is different for different users.
+The client/server model was chosen as I wanted to integrate with internet enabled apis/devices, like the Nest and Netatmo.  These APIs require pre-registered OAuth callbacks, and as far as I can tell, cannot be made to work if the callback address is different for different users.
 
 [Pusher](https://pusher.com/) is used to send commands from the server app to the client app.  Credentials for the Pusher account are stored in a private subrepo; you will need to setup your own.
 
