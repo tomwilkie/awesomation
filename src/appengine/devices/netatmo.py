@@ -50,12 +50,19 @@ class NetatmoAccount(account.Account):
     return 'Netatmo'
 
   def _get_refresh_data(self):
-    return urllib.urlencode({'grant_type': 'authorization_code',
-                             'client_id': self.CLIENT_ID,
-                             'client_secret': self.CLIENT_SECRET,
-                             'code': self.auth_code,
-                             'redirect_uri': account.REDIRECT_URL,
-                             'scope': self.SCOPES})
+    values = {'client_id': self.CLIENT_ID,
+              'client_secret': self.CLIENT_SECRET}
+
+    if self.refresh_token is None:
+      values['grant_type'] = 'authorization_code'
+      values['code'] = self.auth_code
+      values['redirect_uri'] = account.REDIRECT_URL
+      values['scope'] = self.SCOPES
+    else:
+      values['grant_type'] = 'refresh_token'
+      values['refresh_token'] = self.refresh_token
+
+    return urllib.urlencode(values)
 
   @rest.command
   def refresh_devices(self):
@@ -74,9 +81,9 @@ class NetatmoAccount(account.Account):
 
       details['account'] = self.key.string_id()
       events.append({
-        'device_type': 'netatmo_weather_station',
-        'device_id': 'netatmo-%s' % details['_id'],
-        'event': details,
+          'device_type': 'netatmo_weather_station',
+          'device_id': 'netatmo-%s' % details['_id'],
+          'event': details,
       })
 
     for details in result['body']['devices']:
@@ -85,9 +92,9 @@ class NetatmoAccount(account.Account):
 
       details['account'] = self.key.string_id()
       events.append({
-        'device_type': 'netatmo_weather_station',
-        'device_id': 'netatmo-%s' % details['_id'],
-        'event': details,
+          'device_type': 'netatmo_weather_station',
+          'device_id': 'netatmo-%s' % details['_id'],
+          'event': details,
       })
 
     user_id = user.get_user_from_namespace()

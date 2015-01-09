@@ -2,10 +2,13 @@
 
 import json
 import logging
+import sys
 import time
 import urllib2
 import uuid
 
+from google.appengine.api import urlfetch
+from google.appengine.api import urlfetch_errors
 from google.appengine.ext import ndb
 
 import flask
@@ -50,6 +53,23 @@ class Account(model.Base):
 
   def _get_refresh_data(self):
     return ''
+
+  def do_request(self, url, **kwargs):
+    retries = 10
+    while retries > 0:
+      retries -= 1
+      try:
+        result = urlfetch.fetch(
+            url=url % {'access_token': self.access_token},
+            deadline=15,
+            **kwargs)
+        assert 200 <= result.status_code < 300
+        return json.loads(result.content)
+      except urlfetch_errors.DeadlineExceededError:
+        if retries > 0:
+          logging.error('Deadline exceeded, retrying.', exc_info=sys.exc_info)
+        else:
+          raise
 
   @rest.command
   def refresh_access_token(self):

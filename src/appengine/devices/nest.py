@@ -2,10 +2,8 @@
 
 import json
 import logging
-import sys
 
 from google.appengine.api import urlfetch
-from google.appengine.api import urlfetch_errors
 from google.appengine.ext import ndb
 
 from appengine import account, device, rest, user
@@ -53,34 +51,11 @@ class NestAccount(account.Account):
   CLIENT_ID = creds.NEST_CLIENT_ID
   CLIENT_SECRET = creds.NEST_CLIENT_SECRET
 
-  raw_data = ndb.TextProperty()
-
-  def do_request(self, url, **kwargs):
-    retries = 10
-    while retries > 0:
-      retries -= 1
-      try:
-        result = urlfetch.fetch(
-            url=url % {'access_token': self.access_token},
-            deadline=15,
-            **kwargs)
-        assert 200 <= result.status_code < 300
-        return json.loads(result.content)
-      except urlfetch_errors.DeadlineExceededError:
-        if retries > 0:
-          logging.error('Deadline exceeded, retrying.', exc_info=sys.exc_info)
-        else:
-          raise
-
   def get_human_type(self):
     return 'Nest'
 
   def set_away(self, value):
     """Set away status of all structures."""
-    if not self.raw_data:
-      logging.error('Cant set away!')
-      return
-
     structures = self.do_request(self.STRUCTURES_URL)
 
     logging.info(structures)
