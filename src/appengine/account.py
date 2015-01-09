@@ -2,6 +2,7 @@
 
 import json
 import logging
+import time
 import urllib2
 import uuid
 
@@ -33,6 +34,9 @@ class Account(model.Base):
 
   auth_code = ndb.StringProperty(required=False)
   access_token = ndb.StringProperty(required=False)
+  expires = ndb.FloatProperty(required=False)
+  refresh_token = ndb.StringProperty(required=False)
+
   owner = ndb.StringProperty(required=True)
   human_type = ndb.ComputedProperty(lambda a: a.get_human_type())
   last_update = ndb.DateTimeProperty(required=False, auto_now=True)
@@ -62,13 +66,15 @@ class Account(model.Base):
       # empty data to trigger a post
       result = urllib2.urlopen(url, data)
       result = json.load(result)
+      logging.info('result: %s', result)
     except urllib2.HTTPError, err:
       result = json.load(err)
       logging.info(result)
       raise err
 
-    assert 'access_token' in result
     self.access_token = result['access_token']
+    self.expires = time.time() + result['expires_in']
+    self.refresh_token = result.get('refresh_token', None)
 
   @rest.command
   def refresh_devices(self):
