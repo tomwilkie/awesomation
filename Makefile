@@ -95,6 +95,9 @@ upload: dist
 devapp: dist
 	PYTHONPATH=${PYTHONPATH}:./dist:./dist/third_party dev_appserver.py --use_mtime_file_watcher=true dist/app.yaml
 
+runpi: dist
+	sudo PYTHONPATH=$${PYTHONPATH}:~/dist:~/dist/third_party python ~/dist/pi/control.py'
+
 runonpi: dist
 	rsync -arvz dist/ pi@domicspi.local:~/dist/
 	ssh -t pi@domicspi.local 'sudo PYTHONPATH=$${PYTHONPATH}:~/dist:~/dist/third_party python ~/dist/pi/control.py'
