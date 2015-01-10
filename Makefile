@@ -39,12 +39,16 @@ define THIRD_PARTY_py_template
 dist/third_party/%.py: third_party/py/$(1)/%.py
 	@mkdir -p $$(@D)
 	cp $$< $$@
+
+dist/third_party/%.json: third_party/py/$(1)/%.json
+	@mkdir -p $$(@D)
+	cp $$< $$@
 endef
 
 third_party_py := $(shell find third_party/py/* -maxdepth 0 -type d | sed 's,^[^/]*/[^/]*/,,' | tr "\\n" " ")
 $(foreach dir,$(third_party_py),$(eval $(call THIRD_PARTY_py_template,$(dir))))
 
-third_party_pyfiles := $(shell find third_party/py -name *.py \
+third_party_pyfiles := $(shell find third_party/py -name *.py -o -name *.json \
 	| egrep -v "example|doc|setup|testsuite"		\
 	| sed 's,^third_party/[^/]*/[^/]*/,,'				\
 	| egrep -v "^__init__.py" | tr "\\n" " ")
@@ -89,8 +93,11 @@ dist/static: $(static_files) $(static_third_party)
 
 dist: dist/app.yaml dist/cron.yaml $(py_files) $(third_party_pyfiles) dist/static
 
-upload: dist
+upload-prod: dist
 	appcfg.py --oauth2 update dist
+
+upload-dev: dist
+	appcfg.py --oauth2 --application=awesomation-dev update dist
 
 devapp: dist
 	PYTHONPATH=${PYTHONPATH}:./dist:./dist/third_party dev_appserver.py --use_mtime_file_watcher=true dist/app.yaml

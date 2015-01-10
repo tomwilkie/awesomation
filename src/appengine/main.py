@@ -1,6 +1,7 @@
 """Main module for appengine app."""
 import calendar
 import datetime
+import logging
 import os
 import sys
 
@@ -11,11 +12,15 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
 
 import flask
 
-from appengine import account, device, driver, pushrpc, room, tasks, user
+from appengine import account, device, driver, history, pushrpc, room, tasks, user
 
 # This has the side effect of registering devices
 # pylint: disable=unused-wildcard-import,wildcard-import
 from appengine.devices import *
+
+
+# Configure logging
+logging.getLogger('boto').setLevel(logging.INFO)
 
 
 def static_dir():
@@ -100,6 +105,7 @@ def before_request():
 def after_request(response):
   pushrpc.push_batch()
   user.push_events()
+  history.store_batch()
   return response
 
 
