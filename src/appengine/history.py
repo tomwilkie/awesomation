@@ -137,6 +137,8 @@ def store_batch():
   if history is None:
     return
 
+  logging.info('Saving %d versions to dynamodb.', len(history))
+
   # we might, for some reason, try and store
   # two versions of the same objects in a single
   # request.  We just drop the first in this case.

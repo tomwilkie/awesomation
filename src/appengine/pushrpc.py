@@ -130,7 +130,6 @@ def pusher_client_auth_callback():
 
 def send_event(event):
   """Post events back to the pi."""
-  logging.info('Sending event %s', event)
   batch = flask.g.get('events', None)
   if batch is None:
     batch = []
@@ -144,6 +143,8 @@ def push_batch():
   setattr(flask.g, 'events', None)
   if batch is None:
     return
+
+  logging.info('Sending %d events to proxy', len(batch))
 
   pusher_client = pusher.Pusher(
       app_id=creds.pusher_app_id,

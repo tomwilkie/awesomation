@@ -61,7 +61,6 @@ def new_channel():
 
 def send_event(**kwargs):
   """Post events back to the pi."""
-  logging.info('Sending event %s to user', kwargs)
   batch = flask.g.get('user_events', None)
   if batch is None:
     batch = []
@@ -76,6 +75,7 @@ def push_events():
   if events is None:
     return
 
+  logging.info('Sending %d events to user', len(events))
   events = flask.json.dumps({'events': events})
 
   # Now figure out what channel to post these to.
