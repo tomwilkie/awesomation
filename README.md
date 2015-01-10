@@ -1,5 +1,7 @@
 # "Home Awesomation"
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tomwilkie/awesomation?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A Python 2 based home automation system.
 
 The 'architecture' is client-server, with a Raspberry Pi based proxy running in the home and the 'logic' running in the Cloud (on Google App Engine).
