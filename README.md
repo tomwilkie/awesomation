@@ -31,6 +31,7 @@ You'll need a Raspberry Pi running rasbian.  On the Pi, run:
 
     git clone https://github.com/tomwilkie/awesomation.git
     cd awesomation
+    git submodule init; git submodule update
     cd third_party/open-zwave; make; make install
     cd third_party/python-openzwave; make; make install
     cd third_party/wiringPi; make; make install
