@@ -10,6 +10,7 @@ from boto.dynamodb2 import layer1
 
 import flask
 
+from appengine import user
 from common import creds
 
 
@@ -83,7 +84,7 @@ INDEXES = [
 ]
 FIELDS_TO_IGNORE = {'class', 'id', 'owner', 'last_update', 'capabilities'}
 
-def get_dynamodb_table():
+def get_history_table():
   if os.environ.get('SERVER_SOFTWARE','').startswith('Development'):
     logging.info('Using local dynamodb.')
     connection = layer1.DynamoDBConnection(
@@ -102,20 +103,20 @@ def get_dynamodb_table():
     )
 
   if TABLE_NAME in connection.list_tables()['TableNames']:
-    table = table.Table(TABLE_NAME,
+    history_table = table.Table(TABLE_NAME,
       schema=SCHEMA,
       throughput=THROUGHPUT,
       indexes=INDEXES,
-      connection=CONNECTION)
+      connection=connection)
   else:
-    table = table.Table.create(
+    history_table = table.Table.create(
       TABLE_NAME,
       schema=SCHEMA,
       throughput=THROUGHPUT,
       indexes=INDEXES,
-      connection=CONNECTION)
+      connection=connection)
 
-  return table
+  return history_table
 
 
 def store_version(version):
@@ -124,7 +125,9 @@ def store_version(version):
   if batch is None:
     batch = []
     setattr(flask.g, 'history', batch)
-  batch.append(kwargs)
+
+  user_id = user.get_user_from_namespace()
+  batch.append((user_id, version))
 
 
 def store_batch():
@@ -138,10 +141,9 @@ def store_batch():
   # two versions of the same objects in a single
   # request.  We just drop the first in this case.
   dt = time.time()
-  user_id = user.get_user_from_namespace()
   items = {}
 
-  for version in history:
+  for user_id, version in history:
     version['hash_key'] = "%s-%s-%s" % (user_id, version['class'], version['id'])
     version['range_key'] = dt
     for key in FIELDS_TO_IGNORE:
@@ -149,9 +151,9 @@ def store_batch():
 
     items[version['hash_key']] = version
 
-  table = get_dynamodb_table()
+  history_table = get_history_table()
 
-  with table.batch_write() as batch:
-    for itme in items.itervalues():
+  with history_table.batch_write() as batch:
+    for item in items.itervalues():
       batch.put_item(data=item)
 
