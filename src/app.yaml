@@ -16,6 +16,8 @@ handlers:
 libraries:
 - name: webapp2
   version: latest
+- name: ssl
+  version: latest
 
 inbound_services:
 - channel_presence

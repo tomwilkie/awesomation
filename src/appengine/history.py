@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 
@@ -6,6 +7,8 @@ from boto.dynamodb2 import fields
 from boto.dynamodb2 import table
 from boto.dynamodb2 import types
 from boto.dynamodb2 import layer1
+
+import flask
 
 from common import creds
 
@@ -78,41 +81,41 @@ INDEXES = [
         fields.RangeKey('range_key', data_type=types.NUMBER)
     ]),
 ]
-
-if os.environ.get('SERVER_SOFTWARE','').startswith('Development'):
-  CONNECTION = layer1.DynamoDBConnection(
-      region='anything',
-      host='localhost',
-      port=8000,
-      aws_access_key_id='anything',
-      aws_secret_access_key='anything',
-      is_secure=False
-  )
-else:
-  CONNECTION = boto.dynamodb2.connect_to_region(
-      'us-east-1',
-      aws_access_key_id=creds.AWS_ACCESS_KEY_ID,
-      aws_secret_access_key=creds.AWS_SECRET_ACCESS_KEY,
-  )
-
-
 FIELDS_TO_IGNORE = {'class', 'id', 'owner', 'last_update', 'capabilities'}
 
+def get_dynamodb_table():
+  if os.environ.get('SERVER_SOFTWARE','').startswith('Development'):
+    logging.info('Using local dynamodb.')
+    connection = layer1.DynamoDBConnection(
+        region='anything',
+        host='localhost',
+        port=8100,
+        aws_access_key_id='anything',
+        aws_secret_access_key='anything',
+        is_secure=False
+    )
+  else:
+    connection = boto.dynamodb2.connect_to_region(
+        'us-east-1',
+        aws_access_key_id=creds.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=creds.AWS_SECRET_ACCESS_KEY,
+    )
 
-if TABLE_NAME in CONNECTION.list_tables():
-  HISTORY_TABLE = table.Table(TABLE_NAME,
-    schema=SCHEMA,
-    throughput=THROUGHPUT,
-    indexes=INDEXES,
-    connection=CONNECTION)
+  if TABLE_NAME in connection.list_tables()['TableNames']:
+    table = table.Table(TABLE_NAME,
+      schema=SCHEMA,
+      throughput=THROUGHPUT,
+      indexes=INDEXES,
+      connection=CONNECTION)
+  else:
+    table = table.Table.create(
+      TABLE_NAME,
+      schema=SCHEMA,
+      throughput=THROUGHPUT,
+      indexes=INDEXES,
+      connection=CONNECTION)
 
-else:
-  HISTORY_TABLE = table.Table.create(
-    TABLE_NAME,
-    schema=SCHEMA,
-    throughput=THROUGHPUT,
-    indexes=INDEXES,
-    connection=CONNECTION)
+  return table
 
 
 def store_version(version):
@@ -128,7 +131,7 @@ def store_batch():
   """Push all the events that have been caused by this request."""
   history = flask.g.get('history', None)
   setattr(flask.g, 'history', None)
-  if events is None:
+  if history is None:
     return
 
   # we might, for some reason, try and store
@@ -146,7 +149,9 @@ def store_batch():
 
     items[version['hash_key']] = version
 
-  with HISTORY_TABLE.batch_write() as batch:
+  table = get_dynamodb_table()
+
+  with table.batch_write() as batch:
     for itme in items.itervalues():
       batch.put_item(data=item)
 
