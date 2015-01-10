@@ -1,9 +1,11 @@
+import os
 import time
 
 import boto.dynamodb2
 from boto.dynamodb2 import fields
-from boto.dynamodb2.table import Table
-from boto.dynamodb2.types import NUMBER
+from boto.dynamodb2 import table
+from boto.dynamodb2 import types
+from boto.dynamodb2 import layer1
 
 from common import creds
 
@@ -66,35 +68,85 @@ from common import creds
 
 TABLE_NAME = 'history'
 SCHEMA = [
-    fields.HashKey('class_object', data_type=NUMBER),
-    fields.RangeKey('time'),
+    fields.HashKey('hash_key'),
+    fields.RangeKey('range_key', data_type=types.NUMBER),
 ]
 THROUGHPUT = {'read': 5, 'write': 15}
 INDEXES = [
-    fields.AllIndex('EverythingIndex'),
-    fields.HashKey('account_type', data_type=NUMBER),
+    fields.AllIndex('EverythingIndex', parts=[
+        fields.HashKey('hash_key'),
+        fields.RangeKey('range_key', data_type=types.NUMBER)
+    ]),
 ]
-CONNECTION = boto.dynamodb2.connect_to_region(
-    region='us-east-1',
-    aws_access_key_id=creds.AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=creds.AWS_SECRET_ACCESS_KEY,
-)
+
+if os.environ.get('SERVER_SOFTWARE','').startswith('Development'):
+  CONNECTION = layer1.DynamoDBConnection(
+      region='anything',
+      host='localhost',
+      port=8000,
+      aws_access_key_id='anything',
+      aws_secret_access_key='anything',
+      is_secure=False
+  )
+else:
+  CONNECTION = boto.dynamodb2.connect_to_region(
+      'us-east-1',
+      aws_access_key_id=creds.AWS_ACCESS_KEY_ID,
+      aws_secret_access_key=creds.AWS_SECRET_ACCESS_KEY,
+  )
 
 
 FIELDS_TO_IGNORE = {'class', 'id', 'owner', 'last_update', 'capabilities'}
 
 
-HISTORY_TABLE = Table.create(
-  TABLE_NAME,
-  schema=SCHEMA,
-  throughput=THROUGHPUT,
-  indexes=INDEXES,
-  connection=CONNECTION)
+if TABLE_NAME in CONNECTION.list_tables():
+  HISTORY_TABLE = table.Table(TABLE_NAME,
+    schema=SCHEMA,
+    throughput=THROUGHPUT,
+    indexes=INDEXES,
+    connection=CONNECTION)
+
+else:
+  HISTORY_TABLE = table.Table.create(
+    TABLE_NAME,
+    schema=SCHEMA,
+    throughput=THROUGHPUT,
+    indexes=INDEXES,
+    connection=CONNECTION)
 
 
-def store_version(values):
-  user_id = None
-  hash_key = "%s-%s-%s" % (user_id, values['class'], values['id'])
+def store_version(version):
+  """Post events back to the pi."""
+  batch = flask.g.get('history', None)
+  if batch is None:
+    batch = []
+    setattr(flask.g, 'history', batch)
+  batch.append(kwargs)
+
+
+def store_batch():
+  """Push all the events that have been caused by this request."""
+  history = flask.g.get('history', None)
+  setattr(flask.g, 'history', None)
+  if events is None:
+    return
+
+  # we might, for some reason, try and store
+  # two versions of the same objects in a single
+  # request.  We just drop the first in this case.
   dt = time.time()
+  user_id = user.get_user_from_namespace()
+  items = {}
 
-  values = []
+  for version in history:
+    version['hash_key'] = "%s-%s-%s" % (user_id, version['class'], version['id'])
+    version['range_key'] = dt
+    for key in FIELDS_TO_IGNORE:
+      version.pop(key, None)
+
+    items[version['hash_key']] = version
+
+  with HISTORY_TABLE.batch_write() as batch:
+    for itme in items.itervalues():
+      batch.put_item(data=item)
+
