@@ -5,3 +5,5 @@ dist/
 *.o
 ._*
 \#*
+src/common/creds
+src/common/creds.py

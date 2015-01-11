@@ -52,9 +52,6 @@
 [submodule "third_party/py/pywemo"]
 	path = third_party/py/pywemo
 	url = https://github.com/tomwilkie/pywemo.git
-[submodule "src/common/creds"]
-	path = src/common/creds
-	url = https://github.com/tomwilkie/creds.git
 [submodule "third_party/py/pyping"]
 	path = third_party/py/pyping
 	url = https://github.com/certator/pyping/
