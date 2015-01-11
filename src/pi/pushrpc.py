@@ -49,7 +49,8 @@ class PushRPC(object):
     self._callback = callback
 
     self._pusher = Pusher(public_creds.pusher_key,
-                          auth_callback=self._pusher_auth_callback)
+                          auth_callback=self._pusher_auth_callback,
+                          log_level=logging.ERROR)
     self._pusher.connection.bind(
         'pusher:connection_established',
         self._connect_handler)

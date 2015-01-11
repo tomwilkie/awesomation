@@ -81,11 +81,14 @@ class Control(object):
 
 def main():
   """Main function."""
+  # Setup logging
   logging.basicConfig(format=LOGFMT, level=logging.INFO)
   file_handler = logging.FileHandler('control.log')
   file_handler.setFormatter(logging.Formatter(LOGFMT))
   logging.getLogger().addHandler(file_handler)
+  logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.ERROR)
 
+  # Command line arguments
   parser = argparse.ArgumentParser()
   parser.add_argument('--zwave_device',
                       default='/dev/ttyUSB0')
