@@ -103,18 +103,19 @@ def get_history_table():
     )
 
   if TABLE_NAME in connection.list_tables()['TableNames']:
-    history_table = table.Table(TABLE_NAME,
-      schema=SCHEMA,
-      throughput=THROUGHPUT,
-      indexes=INDEXES,
-      connection=connection)
+    history_table = table.Table(
+        TABLE_NAME,
+        schema=SCHEMA,
+        throughput=THROUGHPUT,
+        indexes=INDEXES,
+        connection=connection)
   else:
     history_table = table.Table.create(
-      TABLE_NAME,
-      schema=SCHEMA,
-      throughput=THROUGHPUT,
-      indexes=INDEXES,
-      connection=connection)
+        TABLE_NAME,
+        schema=SCHEMA,
+        throughput=THROUGHPUT,
+        indexes=INDEXES,
+        connection=connection)
 
   return history_table
 
@@ -146,7 +147,8 @@ def store_batch():
   items = {}
 
   for user_id, version in history:
-    version['hash_key'] = "%s-%s-%s" % (user_id, version['class'], version['id'])
+    version['hash_key'] = '%s-%s-%s' % (
+        user_id, version['class'], version['id'])
     version['range_key'] = dt
     for key in FIELDS_TO_IGNORE:
       version.pop(key, None)
@@ -158,4 +160,16 @@ def store_batch():
   with history_table.batch_write() as batch:
     for item in items.itervalues():
       batch.put_item(data=item)
+
+
+def get_range(cls, object_id, start, end, field):
+  user_id = user.get_user_from_namespace()
+  history_table = get_history_table()
+  values = history_table.query_2(
+      hash_key__eq='%s-%s-%s' % (user_id, cls, object_id),
+      range_key__gt=start,
+      range_ket__lte=end)
+
+  for value in values:
+    yield (value['range_key'], value[field])
 

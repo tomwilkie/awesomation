@@ -1,7 +1,7 @@
 """Base classes for my data model."""
 from google.appengine.ext.ndb import polymodel
 
-from appengine import user, history
+from appengine import history, rest, user
 
 
 class Base(polymodel.PolyModel):
@@ -29,3 +29,9 @@ class Base(polymodel.PolyModel):
       history.store_version(values)
     return super(Base, self)._put_async(**ctx_options)
   put_async = _put_async
+
+  @rest.command
+  def get_history(self, field, start, end):
+    values = self.to_dict()
+    return history.get_range(values['class'], values['id'],
+                             start, end, field)
