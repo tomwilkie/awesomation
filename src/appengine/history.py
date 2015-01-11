@@ -82,7 +82,9 @@ INDEXES = [
         fields.RangeKey('range_key', data_type=types.NUMBER)
     ]),
 ]
-FIELDS_TO_IGNORE = {'class', 'id', 'owner', 'last_update', 'capabilities'}
+FIELDS_TO_IGNORE = {'class', 'id', 'owner', 'last_update', 'capabilities',
+                    # can't deal with repeated values yet.
+                    'zwave_command_class_values', 'capabilities'}
 
 def get_history_table():
   if os.environ.get('SERVER_SOFTWARE','').startswith('Development'):
