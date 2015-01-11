@@ -82,21 +82,23 @@ class NestAccount(account.Account):
 
     events = []
 
-    for protect_id, protect_info in result['smoke_co_alarms'].iteritems():
-      protect_info['account'] = self.key.string_id()
-      events.append({
-          'device_type': 'nest_protect',
-          'device_id': 'nest-protect-%s' % protect_id,
-          'event': protect_info,
-      })
+    if 'smoke_co_alarms' in result:
+      for protect_id, protect_info in result['smoke_co_alarms'].iteritems():
+        protect_info['account'] = self.key.string_id()
+        events.append({
+            'device_type': 'nest_protect',
+            'device_id': 'nest-protect-%s' % protect_id,
+            'event': protect_info,
+        })
 
-    for thermostat_id, thermostat_info in result['thermostats'].iteritems():
-      thermostat_info['account'] = self.key.string_id()
-      events.append({
-          'device_type': 'nest_thermostat',
-          'device_id': 'nest-thermostat-%s' % thermostat_id,
-          'event': thermostat_info,
-      })
+    if 'thermostats' in result:
+      for thermostat_id, thermostat_info in result['thermostats'].iteritems():
+        thermostat_info['account'] = self.key.string_id()
+        events.append({
+            'device_type': 'nest_thermostat',
+            'device_id': 'nest-thermostat-%s' % thermostat_id,
+            'event': thermostat_info,
+        })
 
     user_id = user.get_user_from_namespace()
     device.process_events(events, user_id)
