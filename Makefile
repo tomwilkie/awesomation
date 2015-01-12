@@ -1,6 +1,6 @@
 dist/%.py: src/%.py
 	@mkdir -p $(@D)
-	ln $< $@
+	ln -f $< $@
 
 dist/%.yaml: src/%.yaml
 	@mkdir -p $(@D)
@@ -57,7 +57,7 @@ third_party_pyfiles := $(patsubst %,dist/third_party/%,$(third_party_pyfiles))
 # Static targets
 dist/static/%: src/static/%
 	@mkdir -p $(@D)
-	ln $< $@
+	ln -f $< $@
 
 dist/static/%: third_party/static/bootstrap/dist/%
 	@mkdir -p $(@D)
