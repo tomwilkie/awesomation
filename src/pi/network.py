@@ -6,6 +6,8 @@ import re
 import subprocess
 import time
 
+import ipaddr
+import netifaces
 import pyping
 
 from pi import scanning_proxy
@@ -22,7 +24,6 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
   """Monitor devices appearing on the network."""
 
   def __init__(self, callback, scan_period_sec, timeout_secs):
-    super(NetworkMonitor, self).__init__(scan_period_sec)
     self._callback = callback
     self._timeout_secs = timeout_secs
     self._ping_frequency_secs = 60
@@ -53,6 +54,8 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
     self._level_event_frequency_secs = 10*60
     self._last_level_event = 0
 
+    super(NetworkMonitor, self).__init__(scan_period_sec)
+
   def _ping(self, ipaddr, now):
     """Ping a device, but rate limit.
 
@@ -64,12 +67,39 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
     pyping.ping(ipaddr, timeout=1, count=1)
     self._last_ping[ipaddr] = now
 
+  def ping_subnet(self, now):
+    """Ping broadcase address for all interfaces."""
+    if self._last_ping['SUBNET'] + self._ping_frequency_secs > now:
+      return
+
+    self._last_ping['SUBNET'] = now
+
+    for interface in netifaces.interfaces():
+      if interface.startswith('lo'):
+        continue
+
+      details = netifaces.ifaddresses(interface)
+      if netifaces.AF_INET not in details:
+        continue
+
+      for detail in details[netifaces.AF_INET]:
+        address = detail.get('addr', None)
+        netmask = detail.get('netmask', None)
+        if address is None or netmask is None:
+          continue
+
+        parsed = ipaddr.IPv4Network('%s/%s' % (address, netmask))
+        logging.debug('Ping broadcast address %s', parsed.broadcast)
+        pyping.ping(str(parsed.broadcast), timeout=10, count=10)
+
   def _scan_once(self):
     """Scan the network for devices."""
+    now = time.time()
 
     # TODO: probably need to ping the subnet?
+    self.ping_subnet(now)
 
-    now = time.time()
+    # Now look at contents of arp table
     process = subprocess.Popen(['ip', '-s', 'neighbor', 'list'],
                                stdin=None, stdout=subprocess.PIPE,
                                stderr=None, close_fds=True)

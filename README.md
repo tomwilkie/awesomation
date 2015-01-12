@@ -38,6 +38,7 @@ You'll need a Raspberry Pi running rasbian.  On the Pi, run:
     cd third_party/python-openzwave; make; make install
     cd third_party/wiringPi; make; make install
     cd third_party/rcswitch-pi; make; make install
+    sudo pip install netifaces
     make runpi
 
 The proxy code will print out something like this:
