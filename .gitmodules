@@ -64,3 +64,6 @@
 [submodule "third_party/py/boto"]
 	path = third_party/py/boto
 	url = https://github.com/boto/boto.git
+[submodule "third_party/py/ipaddr"]
+	path = third_party/py/ipaddr
+	url = https://github.com/tomwilkie/ipaddr-py.git
