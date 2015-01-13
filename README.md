@@ -29,7 +29,7 @@ Planned features:
 
 ### Getting Started
 
-You'll need a Raspberry Pi running rasbian.  On the Pi, run:
+All you'll need is a Raspberry Pi running rasbian.  On the Pi, run:
 
     git clone https://github.com/tomwilkie/awesomation.git
     cd awesomation
@@ -54,6 +54,15 @@ your proxy with your account.
 
 Then, add other devices, rooms etc.  Also, you might want to run the proxy in a screen
 session, just in case the ssh connection drops.  Have fun!
+
+### Run your own server instance
+
+This step is totally optional - you are more than welcome to use my hosted code as http://homeawesomation.appspot.com. If you wish to develop the server-side code, you'll need to host your own server instance.  To do this:
+
+* Sign up for an App Engine account, Pusher account, Netatmo developer account, Nest deveoper account and AWS account.
+* Make a copy of src/common/creds.example as src/common/creds.py and put you AWS, Pusher, Netatmo and Nest credentials in there.
+* Edit src/app.yaml and common/public_creds.py for the name of your app engine app and Pusher id.
+
 
 ### Architecture
 
