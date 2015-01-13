@@ -1,9 +1,7 @@
 """Integration with nest devices."""
 
-import json
 import logging
 import urllib
-import urllib2
 
 from google.appengine.ext import ndb
 
@@ -70,9 +68,7 @@ class NetatmoAccount(account.Account):
       logging.info('No access token, skipping.')
       return
 
-    url = self.API_URL % {'access_token': self.access_token}
-    result = urllib2.urlopen(url)
-    result = json.load(result)
+    result = self.do_request(self.API_URL)
 
     events = []
     for details in result['body']['modules']:

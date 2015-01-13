@@ -58,16 +58,23 @@ class Account(model.Base):
     retries = 10
     while retries > 0:
       retries -= 1
+
       try:
         result = urlfetch.fetch(
             url=url % {'access_token': self.access_token},
             deadline=15,
             **kwargs)
+
+        if result.status_code == 403:
+          logging.info('Got 403, refreshing credentials')
+          self.refresh_access_token()
+          continue
+
         assert 200 <= result.status_code < 300
         return json.loads(result.content)
       except urlfetch_errors.DeadlineExceededError:
         if retries > 0:
-          logging.error('Deadline exceeded, retrying.', exc_info=sys.exc_info)
+          logging.info('Deadline exceeded, retrying.', exc_info=sys.exc_info)
         else:
           raise
 
