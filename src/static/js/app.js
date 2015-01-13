@@ -50,57 +50,58 @@ var AWESOMATION = (function() {
       });
     }
 
-    function connect_channel(opened) {
-      net.get('/api/user/new_channel').done(function (data) {
-        channel = new goog.appengine.Channel(data.token);
-        socket = channel.open();
-        socket.onopen = function () {
-          console.log('socket opened');
-          opened();
-        };
-
-        socket.onerror = function (error) {
-          console.log('socket error: %O', error);
-        };
-
-        socket.onclose = function () {
-          console.log('socket closed');
-
-          // Tell UI cache is now loading again
-          cache.loading = true;
-          $('body').trigger('cache_updated');
-
-          // reset cache, connect channel, fetch
-          cache.objects = (objects = {});
-          connect_channel(fetch);
-        };
-
-        socket.onmessage = function (m) {
-          var message = JSON.parse(m.data);
-          $.each(message.events, function(i, event) {
-            switch (event.event) {
-            case 'delete':
-              delete objects[event.cls][event.id];
-              break;
-            case 'update':
-              objects[event.cls][event.id] = event.obj;
-              break;
-            }
-          });
-          $('body').trigger('cache_updated');
-        };
-      }).error(function () {
-        window.setTimeout(function() {
-          connect_channel(fetch);
-        }, 1 * 1000);
+    function handle_events(events) {
+      $.each(events, function(i, event) {
+        switch (event.event) {
+        case 'delete':
+          delete objects[event.cls][event.id];
+          break;
+        case 'update':
+          objects[event.cls][event.id] = event.obj;
+          break;
+        }
       });
+      $('body').trigger('cache_updated');
     }
 
-    $(function () {
-      window.setTimeout(function() {
-        connect_channel(fetch);
-      }, 0);
-    });
+    function disconnected() {
+      // Tell UI cache is now loading again
+      cache.loading = true;
+      $('body').trigger('cache_updated');
+
+      // reset cache, connect channel, fetch
+      cache.objects = (objects = {});
+    }
+
+    (function () {
+      var pusher = new Pusher('58c733f69ae8d5b639e0', {encrypted: true,
+        authEndpoint: '/api/user/channel_auth'});
+
+      pusher.connection.bind('error', function(err) {
+        console.log(err);
+      });
+
+      pusher.connection.bind('state_change', function(states) {
+        console.log(states.current);
+        if (states.current !== 'connected') {
+          disconnected();
+        }
+      });
+
+      net.get('/api/user').done(function (data) {
+        var channel = pusher.subscribe(sprintf('private-%s', data.id));
+
+        channel.bind('events', function(data) {
+          data = JSON.parse(data);
+          handle_events(data.events);
+        });
+
+        channel.bind('pusher:subscription_succeeded', function() {
+          console.log('subscribed to push channel.');
+          fetch();
+        });
+      });
+    }());
 
     return cache;
   }());

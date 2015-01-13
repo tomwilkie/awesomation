@@ -9,6 +9,9 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 
 import flask
+import pusher
+
+from common import creds, public_creds
 
 
 # pylint: disable=invalid-name
@@ -40,9 +43,12 @@ def get_user():
 
 @blueprint.route('/', methods=['GET'])
 def get_user_request():
+  """Return the user's json."""
   user_id = get_user()
   person = Person.get_by_id(user_id)
-  return flask.jsonify(**person.to_dict())
+  values = person.to_dict()
+  values['id'] = user_id
+  return flask.jsonify(**values)
 
 
 @blueprint.route('/new_channel')
@@ -76,7 +82,7 @@ def push_events():
     return
 
   logging.info('Sending %d events to user', len(events))
-  events = flask.json.dumps({'events': events})
+  events_json = flask.json.dumps({'events': events})
 
   # Now figure out what channel to post these to.
   # Can't use user.get_user as we might not be in
@@ -89,7 +95,17 @@ def push_events():
     return
 
   for channel_id in person.channel_ids:
-    channel.send_message(channel_id, events)
+    channel.send_message(channel_id, events_json)
+
+  # Also push them to pusher, as we're migrating
+  # the UI to that.
+  pusher_client = pusher.Pusher(
+      app_id=creds.pusher_app_id,
+      key=public_creds.pusher_key, secret=creds.pusher_secret)
+
+  channel_id = 'private-%s' % user_id
+  logging.info('Sending to channel %s', channel_id)
+  pusher_client[channel_id].trigger('events', events_json)
 
 
 CHANNEL_REGEX = re.compile(r'^(\d+)/.*$')
@@ -116,3 +132,28 @@ def channel_disconnected(channel_id):
   person.put()
 
   return ('', 204)
+
+
+# UI calls /api/user/channel_auth with its
+# (id & secret) auth and channel name == private-user_id.
+# pusher client library makes a callback
+# to this end point to check the client
+# can use said channel.
+@blueprint.route('/channel_auth', methods=['POST'])
+def pusher_client_auth_callback():
+  """Authenticate a given socket for a given channel."""
+
+  # We know the user is authenticated at this point
+  user_id = get_user()
+  socket_id = flask.request.form.get('socket_id')
+  channel_name = flask.request.form.get('channel_name')
+  if channel_name != 'private-%s' % user_id:
+    logging.error('User %s is not allowed channel %s!', user_id, channel_name)
+    flask.abort(401)
+
+  pusher_client = pusher.Pusher(
+      app_id=creds.pusher_app_id,
+      key=public_creds.pusher_key, secret=creds.pusher_secret)
+  auth = pusher_client[channel_name].authenticate(socket_id)
+
+  return flask.jsonify(**auth)
