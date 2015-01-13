@@ -43,12 +43,16 @@ dist/third_party/%.py: third_party/py/$(1)/%.py
 dist/third_party/%.json: third_party/py/$(1)/%.json
 	@mkdir -p $$(@D)
 	cp $$< $$@
+
+dist/third_party/%.pem: third_party/py/$(1)/%.pem
+	@mkdir -p $$(@D)
+	cp $$< $$@
 endef
 
 third_party_py := $(shell find third_party/py/* -maxdepth 0 -type d | sed 's,^[^/]*/[^/]*/,,' | tr "\\n" " ")
 $(foreach dir,$(third_party_py),$(eval $(call THIRD_PARTY_py_template,$(dir))))
 
-third_party_pyfiles := $(shell find third_party/py -name *.py -o -name *.json \
+third_party_pyfiles := $(shell find third_party/py -name *.py -o -name *.json -o -name *.pem\
 	| egrep -v "example|doc|setup|testsuite"		\
 	| sed 's,^third_party/[^/]*/[^/]*/,,'				\
 	| egrep -v "^__init__.py" | tr "\\n" " ")
