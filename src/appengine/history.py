@@ -145,7 +145,7 @@ def store_batch():
   # we might, for some reason, try and store
   # two versions of the same objects in a single
   # request.  We just drop the first in this case.
-  dt = time.time()
+  dt = long(time.time() * 1000)
   items = {}
 
   for user_id, version in history:
@@ -154,6 +154,16 @@ def store_batch():
     version['range_key'] = dt
     for key in FIELDS_TO_IGNORE:
       version.pop(key, None)
+
+    # Explictly taking copy of keys as we're mutating dict.
+    # Putting a float doesn't work all the time:
+    #  https://github.com/boto/boto/issues/1531
+    for key in version.keys():
+      value = version[key]
+      if isinstance(value, list):
+        version[key] = json.dumps(value)
+      elif isinstance(value, float):
+        del version[key]
 
     items[version['hash_key']] = version
 

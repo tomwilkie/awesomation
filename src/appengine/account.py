@@ -37,7 +37,7 @@ class Account(model.Base):
 
   auth_code = ndb.StringProperty(required=False)
   access_token = ndb.StringProperty(required=False)
-  expires = ndb.FloatProperty(required=False)
+  expires = ndb.IntegerProperty(required=False)
   refresh_token = ndb.StringProperty(required=False)
 
   owner = ndb.StringProperty(required=True)
@@ -93,7 +93,7 @@ class Account(model.Base):
       raise err
 
     self.access_token = result['access_token']
-    self.expires = time.time() + result['expires_in']
+    self.expires = int(time.time() + result['expires_in'])
     self.refresh_token = result.get('refresh_token', None)
 
   @rest.command
