@@ -161,7 +161,7 @@ def store_batch():
     for key in version.keys():
       value = version[key]
       if isinstance(value, list):
-        version[key] = json.dumps(value)
+        version[key] = flask.json.dumps(value)
       elif isinstance(value, float):
         del version[key]
 
