@@ -19,5 +19,3 @@ libraries:
 - name: ssl
   version: latest
 
-inbound_services:
-- channel_presence

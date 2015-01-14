@@ -1,6 +1,5 @@
 """Handle user related queries."""
 import logging
-import re
 import uuid
 
 from google.appengine.api import channel
@@ -21,7 +20,6 @@ blueprint = flask.Blueprint('user', __name__)
 class Person(ndb.Model):
   # key_name is userid
   email = ndb.StringProperty(required=False)
-  channel_ids = ndb.StringProperty(repeated=True)
 
 
 def get_user_from_namespace():
@@ -82,6 +80,9 @@ def push_events():
     return
 
   logging.info('Sending %d events to user', len(events))
+
+  # We use the flask json encoder as thats been
+  # setup to encode datetimes, keys etc.
   events_json = flask.json.dumps({'events': events})
 
   # Now figure out what channel to post these to.
@@ -90,14 +91,8 @@ def push_events():
   # from the proxy).  So we use the namespace
   # instead.  Horrid.
   user_id = get_user_from_namespace()
-  person = Person.get_by_id(user_id)
-  if person is None:
-    return
 
-  for channel_id in person.channel_ids:
-    channel.send_message(channel_id, events_json)
-
-  # Also push them to pusher, as we're migrating
+  # Push them to pusher, as we've migrated
   # the UI to that.
   pusher_client = pusher.Pusher(
       app_id=creds.pusher_app_id,
@@ -106,32 +101,6 @@ def push_events():
   channel_id = 'private-%s' % user_id
   logging.info('Sending to channel %s', channel_id)
   pusher_client[channel_id].trigger('events', events_json)
-
-
-CHANNEL_REGEX = re.compile(r'^(\d+)/.*$')
-
-
-def channel_connected(_):
-  return ('', 204)
-
-
-def channel_disconnected(channel_id):
-  """Delete the channel when the UI disconnects."""
-  match = CHANNEL_REGEX.match(channel_id)
-  if not match:
-    logging.error('"%s" not matched by channel regex.', channel_id)
-    return
-
-  user_id = match.group(1)
-  namespace_manager.set_namespace(user_id)
-  person = Person.get_by_id(user_id)
-  if not person:
-    logging.error('User %s not found!', user_id)
-
-  person.channel_ids.remove(channel_id)
-  person.put()
-
-  return ('', 204)
 
 
 # UI calls /api/user/channel_auth with its

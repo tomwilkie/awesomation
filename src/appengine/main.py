@@ -12,7 +12,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
 
 import flask
 
-from appengine import account, device, driver, history, pushrpc, room, tasks, user
+from appengine import account, device, driver, history
+from appengine import pushrpc, room, tasks, user
 
 # This has the side effect of registering devices
 # pylint: disable=unused-wildcard-import,wildcard-import
@@ -108,12 +109,3 @@ def after_request(response):
   history.store_batch()
   return response
 
-
-@app.route('/_ah/channel/connected/')
-def channel_connected():
-  return user.channel_connected(flask.request.get('from'))
-
-
-@app.route('/_ah/channel/disconnected')
-def channel_disconnected():
-  return user.channel_disconnected(flask.request.get('from'))
