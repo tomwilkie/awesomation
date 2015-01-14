@@ -73,6 +73,8 @@ class ClassView(flask.views.MethodView):
       logging.error('Exception populating object', exc_info=sys.exc_info())
       flask.abort(400)
 
+    obj.sync()
+
     # Put the object - BadValueError if there are uninitalised required fields
     try:
       obj.put()

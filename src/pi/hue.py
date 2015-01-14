@@ -64,7 +64,8 @@ class Hue(scanning_proxy.ScanningProxy):
           self._lights[light_id] = light_details
 
   @proxy.command
-  def set_state(self, bridge_id, device_id, mode):
+  def set_state(self, bridge_id, device_id, mode,
+                brightness=255, color_temperature=500):
     """Turn a light on or off."""
     logging.info('bridge_id = %s, device_id = %d, mode = %s',
                  bridge_id, device_id, mode)
@@ -72,3 +73,5 @@ class Hue(scanning_proxy.ScanningProxy):
     bridge = self._bridges.get(bridge_id, None)
     light = bridge[device_id]
     light.on = mode
+    light.bri = brightness
+    light.ct = color_temperature

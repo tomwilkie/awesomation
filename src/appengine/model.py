@@ -35,3 +35,8 @@ class Base(polymodel.PolyModel):
     values = self.to_dict()
     return history.get_range(values['class'], values['id'],
                              start, end, field)
+
+  def sync(self):
+    """Called when fields on the object are updated
+       through the API."""
+    pass
