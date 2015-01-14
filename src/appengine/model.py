@@ -1,7 +1,26 @@
 """Base classes for my data model."""
+import decimal
+
+from google.appengine.ext import ndb
 from google.appengine.ext.ndb import polymodel
 
 from appengine import history, rest, user
+
+
+# From http://stackoverflow.com/questions/10035133/ndb-decimal-property
+class DecimalProperty(ndb.IntegerProperty):
+  """Decimal property ideal to store currency values, such as $20.34."""
+  # See https://developers.google.com/appengine/docs/python/ndb/subclassprop
+  def _validate(self, value):
+    if not isinstance(value, (decimal.Decimal, str, unicode, int, long)):
+      raise TypeError('Expected a Decimal, str, unicode, int '
+                     'or long an got instead %s' % repr(value))
+
+  def _to_base_type(self, value):
+    return int(decimal.Decimal(value) * 100)
+
+  def _from_base_type(self, value):
+    return decimal.Decimal(value)/decimal.Decimal(100)
 
 
 class Base(polymodel.PolyModel):
