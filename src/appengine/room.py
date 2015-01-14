@@ -61,28 +61,35 @@ class Room(model.Base):
     midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
     seconds_since_midnight = (now - midnight).seconds
 
+    logging.info('%s: start dim time = %s, end dime time = %s, '
+                 'time since midnight = %s, target brightness = %d, '
+                 'target color temp = %d',
+                 self.name, self.dim_start_time, self.dim_end_time,
+                 seconds_since_midnight, self.target_brightness,
+                 self.target_color_temperature)
+
     lights = (device.Device.get_by_capability('DIMMABLE')
               .filter(device.Device.room == self.key.string_id()).iter())
 
-    def interpolate(target_value, max_value):
+    def interpolate(from_value, to_value):
       """Given current seconds since midnight, interpolate
          between max_value and target_value."""
       if seconds_since_midnight < self.dim_start_time:
-        return max_value
+        return from_value
 
       if seconds_since_midnight > self.dim_end_time:
-        return self.target_brightness
+        return to_value
 
-      value_range = max_value - target_value
+      value_range = from_value - to_value
       time_range = self.dim_end_time - self.dim_start_time
       time_elapsed = seconds_since_midnight - self.dim_start_time
-      return max_value - ((value_range * time_elapsed) / time_range)
+      return from_value - ((value_range * time_elapsed) / time_range)
 
-    brightness = interpolate(self.target_brightness, 255)
-    color_temperature = interpolate(self.target_color_temperature, 500)
+    brightness = interpolate(255, self.target_brightness)
+    color_temperature = interpolate(153, self.target_color_temperature)
 
-    logging.info('Setting brightness to %d, color temp to %d in room %s',
-                 brightness, color_temperature, self.name)
+    logging.info('%s: setting brightness to %d, color temp to %d',
+                 self.name, brightness, color_temperature)
 
     for light in lights:
       light.brightness = brightness

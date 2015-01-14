@@ -451,7 +451,7 @@ var AWESOMATION = (function() {
         net.post(sprintf('/api/room/%s', room_id), {
           auto_dim_lights: true,
           target_brightness: parseInt(target_brightness),
-          target_color_temperature: parseInt(target_color_temperature),
+          target_color_temperature: 500 - parseInt(target_color_temperature),
           dim_start_time: (start_hours * 3600) + (start_mins * 60),
           dim_end_time: (end_hours * 3600) + (end_mins * 60),
         }).always(hide_modal).always(function() {
