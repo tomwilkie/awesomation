@@ -111,7 +111,7 @@ runpi: dist
 
 runonpi: dist
 	rsync -arvz dist/ pi@domicspi.local:~/dist/
-	ssh -t pi@domicspi.local 'sudo PYTHONPATH=$${PYTHONPATH}:~/dist:~/dist/third_party python ~/dist/pi/control.py'
+	ssh -t pi@domicspi.local 'sudo PYTHONPATH=$${PYTHONPATH}:~/dist:~/dist/third_party python ~/dist/pi/control.py --nodaemonize restart'
 
 test: dist
 	for test in $$(find src -name *_tests.py | sed 's,^src/,,'); do        \
