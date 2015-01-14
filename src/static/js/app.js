@@ -93,7 +93,7 @@ var AWESOMATION = (function() {
 
         channel.bind('events', function(data) {
           data = JSON.parse(data);
-          handle_events(data.events);
+          handle_events(data);
         });
 
         channel.bind('pusher:subscription_succeeded', function() {

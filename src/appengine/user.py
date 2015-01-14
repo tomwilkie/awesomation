@@ -1,8 +1,6 @@
 """Handle user related queries."""
 import logging
-import uuid
 
-from google.appengine.api import channel
 from google.appengine.api import namespace_manager
 from google.appengine.api import users
 from google.appengine.ext import ndb
@@ -10,7 +8,7 @@ from google.appengine.ext import ndb
 import flask
 import pusher
 
-from common import creds, public_creds
+from common import creds, public_creds, utils
 
 
 # pylint: disable=invalid-name
@@ -49,20 +47,6 @@ def get_user_request():
   return flask.jsonify(**values)
 
 
-@blueprint.route('/new_channel')
-def new_channel():
-  """API for users to ask for a new channel."""
-  user_id = get_user()
-  person = Person.get_by_id(user_id)
-
-  channel_id = '%s/%s' % (user_id, uuid.uuid4())
-  person.channel_ids.append(channel_id)
-  person.put()
-
-  channel_token = channel.create_channel(channel_id)
-  return flask.jsonify(token=channel_token)
-
-
 def send_event(**kwargs):
   """Post events back to the pi."""
   batch = flask.g.get('user_events', None)
@@ -81,26 +65,25 @@ def push_events():
 
   logging.info('Sending %d events to user', len(events))
 
-  # We use the flask json encoder as thats been
-  # setup to encode datetimes, keys etc.
-  events_json = flask.json.dumps({'events': events})
-
   # Now figure out what channel to post these to.
   # Can't use user.get_user as we might not be in
   # a user's request (might be a device update
   # from the proxy).  So we use the namespace
   # instead.  Horrid.
   user_id = get_user_from_namespace()
+  channel_id = 'private-%s' % user_id
+  logging.info('Sending to channel %s', channel_id)
 
   # Push them to pusher, as we've migrated
   # the UI to that.
   pusher_client = pusher.Pusher(
       app_id=creds.pusher_app_id,
-      key=public_creds.pusher_key, secret=creds.pusher_secret)
+      key=public_creds.pusher_key,
+      secret=creds.pusher_secret,
+      encoder=flask.json.JSONEncoder)
 
-  channel_id = 'private-%s' % user_id
-  logging.info('Sending to channel %s', channel_id)
-  pusher_client[channel_id].trigger('events', events_json)
+  for encoded_events in utils.limit_json_batch(events):
+    pusher_client[channel_id].trigger('events', encoded_events)
 
 
 # UI calls /api/user/channel_auth with its
