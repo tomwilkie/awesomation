@@ -67,11 +67,18 @@ class Hue(scanning_proxy.ScanningProxy):
   def set_state(self, bridge_id, device_id, mode,
                 brightness=255, color_temperature=500):
     """Turn a light on or off."""
-    logging.info('bridge_id = %s, device_id = %d, mode = %s',
-                 bridge_id, device_id, mode)
+    logging.info('bridge_id = %s, device_id = %d, mode = %s, '
+                 'brightness = %s, color temp = %s',
+                 bridge_id, device_id, mode, brightness,
+                 color_temperature)
 
     bridge = self._bridges.get(bridge_id, None)
-    light = bridge[device_id]
-    light.on = mode
-    light.bri = brightness
-    light.ct = color_temperature
+    if not bridge:
+      logging.error('Bridge %d not found!', bridge_id)
+
+    command = {'transitiontime' : 30, 'on' : mode,
+               'bri' : brightness}
+    if color_temperature is not None:
+      command['ct'] = color_temperature
+
+    bridge.set_light(device_id, command)

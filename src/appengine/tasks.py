@@ -7,17 +7,17 @@ from google.appengine.api import namespace_manager
 
 import flask
 
-from appengine import account, pushrpc, user
+from appengine import account, pushrpc, room, user
 
 
 # pylint: disable=invalid-name
 blueprint = flask.Blueprint('tasks', __name__)
 
 
-def update_per_namespace():
+def _update_per_namespace():
   """Do a bunch of periodic stuff for a user."""
-  accounts = account.Account.query().iter()
-  for acc in accounts:
+
+  for acc in account.Account.query().iter():
     try:
       acc.refresh_devices()
       acc.put()
@@ -25,9 +25,18 @@ def update_per_namespace():
       logging.error('Error refreshing account %s',
                     acc.key.string_id(), exc_info=sys.exc_info())
 
-  pushrpc.push_batch()
-  user.push_events()
+  for _room in room.Room.query(room.Room.auto_dim_lights == True).iter():
+    _room.update_auto_dim()
 
+
+def update_per_namespace():
+  try:
+    _update_per_namespace()
+  except:
+    logging.error('Error updating for user', exc_info=sys.exc_info())
+  finally:
+    pushrpc.push_batch()
+    user.push_events()
 
 
 @blueprint.route('/update', methods=['GET'])

@@ -22,9 +22,9 @@ The server-side logic has the concept of rooms, and when motion is sensed in a r
 Awesomation currently implements the following behaviours:
 * If motion is sensed in a room, the lights are turned on.
 * If your phone is detected on the network, Nest is set to home; otherwise, set to away.
+* Lights can be automatically dimmed into the evening.
 
 Planned features:
-* Lights are dimmed into the evening.
 * If motion is detected and your phone isn't on the network, an alert is sent.
 
 ### Getting Started

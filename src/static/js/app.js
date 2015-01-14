@@ -180,6 +180,15 @@ var AWESOMATION = (function() {
 
       return ret;
     },
+
+    'ExtractHours': function(seconds) {
+      return Math.floor(seconds / 3600);
+    },
+
+    'ExtractMinutes': function(seconds) {
+      rem = seconds % 3600;
+      return Math.floor(rem / 60);
+    },
   });
 
   $(function () {
@@ -229,6 +238,15 @@ var AWESOMATION = (function() {
       net.post(sprintf('/api/room/%s/command', room_id), {
         command: "all_off",
       });
+    });
+
+    $('div.main').on('click', 'div.room .room-set', function() {
+      var room_id = $(this).closest('div.room').data('room-id');
+      var data = {};
+
+      data[$(this).data('key')] = $(this).data('value');
+
+      net.post(sprintf('/api/room/%s', room_id), data);
     });
 
     $('div.main').on('click', 'div.device .device-command', function() {
@@ -412,6 +430,35 @@ var AWESOMATION = (function() {
         net.post(sprintf('/api/room/%s', room_id), {
           name: room_name,
         }).always(hide_modal);
+      });
+    });
+
+    // Dialog: setup auto dimming
+
+    $('div.main').on('click', 'div.room .enable-auto-dim', function() {
+      var room_id = $(this).closest('div.room').data('room-id');
+      var room = cache.objects.room[room_id];
+
+      dialog('script#setup-auto-dimming-dialog-template', room, function() {
+        var start_hours = $(this).find('input#start-hours').val();
+        var start_mins = $(this).find('input#start-mins').val();
+        var end_hours = $(this).find('input#end-hours').val();
+        var end_mins = $(this).find('input#end-mins').val();
+
+        var target_brightness = $(this).find('input#target-brightness').val();
+        var target_color_temperature = $(this).find('input#target-color-temperature').val();
+
+        net.post(sprintf('/api/room/%s', room_id), {
+          auto_dim_lights: true,
+          target_brightness: parseInt(target_brightness),
+          target_color_temperature: parseInt(target_color_temperature),
+          dim_start_time: (start_hours * 3600) + (start_mins * 60),
+          dim_end_time: (end_hours * 3600) + (end_mins * 60),
+        }).always(hide_modal).always(function() {
+          net.post(sprintf('/api/room/%s/command', room_id), {
+            command: 'update_auto_dim'
+          });
+        });
       });
     });
 
