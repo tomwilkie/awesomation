@@ -28,28 +28,39 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Enable auto dimming</h4>
+          <h4 class="modal-title">Configure auto dimming</h4>
         </div>
         <div class="modal-body">
           <form class="form-horizontal">
             <div class="form-group">
-              <label for="inputEmail3" class="col-sm-4 control-label">Start time</label>
-              <div class="col-sm-4">
+                <div class="col-sm-offset-4 col-sm-8">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" id="enable-auto-dim" {{#if auto_dim_lights}}checked{{/if}}> Enable auto dimming
+                    </label>
+                  </div>
+                </div>
+              </div>
+            <div class="form-group">
+              <label for="inputEmail3" class="col-sm-4 control-label">Start time (hh:mm)</label>
+              <div class="col-sm-3">
                 <input type="number" class="form-control" id="start-hours" placeholder="16"
                        min="0" max="23" value="{{ExtractHours dim_start_time}}">
               </div>
-              <div class="col-sm-4">
+              <div class="col-sm-1 text-center">:</div>
+              <div class="col-sm-3">
                 <input type="number" class="form-control" id="start-mins" placeholder="00"
                        min="0" max="59" value="{{ExtractMinutes dim_start_time}}">
               </div>
             </div>
             <div class="form-group">
-              <label for="inputPassword3" class="col-sm-4 control-label">End time</label>
-              <div class="col-sm-4">
+              <label for="inputPassword3" class="col-sm-4 control-label">End time (hh:mm)</label>
+              <div class="col-sm-3">
                 <input type="number" class="form-control" id="end-hours" placeholder="16"
                        min=0 max=23 value="{{ExtractHours dim_end_time}}">
               </div>
-              <div class="col-sm-4">
+              <div class="col-sm-1 text-center">:</div>
+              <div class="col-sm-3">
                 <input type="number" class="form-control" id="end-mins" placeholder="00"
                        min=0 max=59 value="{{ExtractMinutes dim_end_time}}">
               </div>
@@ -65,7 +76,7 @@
               <label for="room-name" class="col-sm-4 control-label">Target Color Temp:</label>
               <div class="col-sm-8">
                 <input type="range" id="target-color-temperature"
-                       value="{{target_color_temperature}}"
+                       value="{{InvertColorTemp target_color_temperature}}"
                        min="0" max="347">
               </div>
             </div>
@@ -73,7 +84,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary">Enable auto dimming</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
         </div>
       </div>
     </div>
@@ -565,13 +576,7 @@
             <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
           </button>
           <ul class="dropdown-menu dropdown-menu-right" role="menu">
-            {{#if auto_dim_lights}}
-            <li><a href="#" class="room-set" data-key="auto_dim_lights" data-value="false">Disable auto dimming</a></li>
-            <li><a href="#" class="enable-auto-dim">Change auto dimming</a></li>
-            {{else}}
-            <li><a href="#" class="enable-auto-dim">Enable auto dimming</a></li>
-            {{/if}}
-
+            <li><a href="#" class="configure-auto-dim">Configure auto dimming</a></li>
             <li><a href="#" class='room-change-name'>Change name</a></li>
             <li><a href="#" class='room-delete'>Delete</a></li>
           </ul>

@@ -189,6 +189,10 @@ var AWESOMATION = (function() {
       rem = seconds % 3600;
       return Math.floor(rem / 60);
     },
+
+    'InvertColorTemp': function(ct) {
+      return 500 - ct;
+    },
   });
 
   $(function () {
@@ -435,21 +439,21 @@ var AWESOMATION = (function() {
 
     // Dialog: setup auto dimming
 
-    $('div.main').on('click', 'div.room .enable-auto-dim', function() {
+    $('div.main').on('click', 'div.room .configure-auto-dim', function() {
       var room_id = $(this).closest('div.room').data('room-id');
       var room = cache.objects.room[room_id];
 
       dialog('script#setup-auto-dimming-dialog-template', room, function() {
+        var enable = $(this).find('input#enable-auto-dim').val() === 'on';
         var start_hours = $(this).find('input#start-hours').val();
         var start_mins = $(this).find('input#start-mins').val();
         var end_hours = $(this).find('input#end-hours').val();
         var end_mins = $(this).find('input#end-mins').val();
-
         var target_brightness = $(this).find('input#target-brightness').val();
         var target_color_temperature = $(this).find('input#target-color-temperature').val();
 
         net.post(sprintf('/api/room/%s', room_id), {
-          auto_dim_lights: true,
+          auto_dim_lights: enable,
           target_brightness: parseInt(target_brightness),
           target_color_temperature: 500 - parseInt(target_color_temperature),
           dim_start_time: (start_hours * 3600) + (start_mins * 60),
