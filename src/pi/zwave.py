@@ -96,13 +96,18 @@ class ZWave(proxy.Proxy):
     self._manager.healNetwork(self._home_id, upNodeRoute=True)
 
   @proxy.command
+  def hard_reset(self):
+    self._manager.resetController(self._home_id)
+
+  @proxy.command
   def heal_node(self, node_id):
     self._manager.healNetworkNode(self._home_id, node_id,
                                   upNodeRoute=True)
 
   @proxy.command
   def set_value(self, node_id, value_id, value):
-    logging.info('Setting value %s on device %s to %s', value_id, node_id, value)
+    logging.info('Setting value %s on device %s to %s',
+                 value_id, node_id, value)
     self._manager.setValue(value_id, value)
 
   def stop(self):
