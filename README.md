@@ -14,6 +14,7 @@ Currently supports the following devices:
 * Nest Thermostats and Protects
 * Netatmo weather stations
 * Arbitrary wifi devices (ie your phone, for presence)
+* Sonos devices (basic detection right now)
 
 The server-side logic has the concept of rooms, and when motion is sensed in a room the lights in that room are turned on.
 
