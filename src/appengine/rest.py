@@ -125,7 +125,7 @@ class CommandView(flask.views.MethodView):
 
     func_name = body.pop('command', None)
     func = getattr(obj, func_name, None)
-    if func is None or not func.is_command:
+    if func is None or not getattr(func, 'is_command', False):
       logging.error('Command %s does not exist or is not a command',
                     func_name)
       flask.abort(400)
