@@ -70,6 +70,7 @@ class Room(model.Base):
 
     lights = (device.Device.get_by_capability('DIMMABLE')
               .filter(device.Device.room == self.key.string_id()).iter())
+    lights = list(lights)
 
     def interpolate(from_value, to_value):
       """Given current seconds since midnight, interpolate
