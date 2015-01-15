@@ -82,7 +82,7 @@ def push_events():
       secret=creds.pusher_secret,
       encoder=flask.json.JSONEncoder)
 
-  for encoded_events in utils.limit_json_batch(events):
+  for encoded_events in utils.limit_json_batch(events, max_size=10000):
     pusher_client[channel_id].trigger('events', encoded_events)
 
 
