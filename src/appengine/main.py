@@ -18,6 +18,7 @@ from appengine import pushrpc, room, tasks, user
 # This has the side effect of registering devices
 # pylint: disable=unused-wildcard-import,wildcard-import
 from appengine.devices import *
+from appengine.devices.zwave_drivers import *
 
 
 # Configure logging

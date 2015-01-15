@@ -7,6 +7,44 @@ from google.appengine.ext import ndb
 from appengine import device, pushrpc, rest, room
 
 
+ZWAVE_DRIVERS = {}
+
+
+class Driver(object):
+  """A manufacture / product specific driver for a zwave device.
+
+  NB has to be stateless.  Store you state in the zwave devices.
+  """
+
+  def __init__(self, _device):
+    self._device = _device
+
+  def get_capabilities(self):
+    return []
+
+  def _send_device_command(self, command, **kwargs):
+    """Convenience method to send a command to this device."""
+    event = {'type': 'zwave',
+             'command': command,
+             'node_id': self._device.zwave_node_id}
+    event.update(kwargs)
+    pushrpc.send_event(event)
+
+
+def register(manufacturer_id, product_type, product_id):
+  """Decorator to cause device types to be registered."""
+  key = '%s-%s-%s' % (manufacturer_id, product_type, product_id)
+  def class_rebuilder(cls):
+    ZWAVE_DRIVERS[key] = cls
+    return cls
+  return class_rebuilder
+
+
+def get_driver(manufacturer_id, product_type, product_id):
+  key = '%s-%s-%s' % (manufacturer_id, product_type, product_id)
+  return ZWAVE_DRIVERS.get(key, Driver)
+
+
 class CommandClassValue(ndb.Model):
   """A particular (command class, value)."""
 
@@ -34,12 +72,43 @@ class ZWaveDevice(device.Device):
   zwave_node_name = ndb.StringProperty()
   zwave_manufacturer_name = ndb.StringProperty()
   zwave_manufacturer_id = ndb.StringProperty()
-  zwave_produce_name = ndb.StringProperty()
+  zwave_product_name = ndb.StringProperty()
   zwave_product_type = ndb.StringProperty()
-  zwave_produce_id = ndb.StringProperty()
+  zwave_product_id = ndb.StringProperty()
+
+  # Haven't found a good way to fake out the properites yet
+  state = ndb.BooleanProperty()
 
   def __init__(self, **kwargs):
     super(ZWaveDevice, self).__init__(**kwargs)
+    self._driver = None
+
+  @property
+  def driver(self):
+    """Find the zwave driver for this device."""
+    if self._driver is not None:
+      return self._driver
+
+    key = '%s-%s-%s' % (self.zwave_manufacturer_id,
+                        self.zwave_product_type,
+                        self.zwave_product_id)
+    _driver = ZWAVE_DRIVERS.get(key, None)
+    logging.info('ZWave driver for %s = %s', key,
+                 _driver.__name__)
+
+    if _driver is None:
+      return Driver(self)
+    else:
+      self._driver = _driver(self)
+      return self._driver
+
+  # This is a trampoline through to the driver
+  # as this class cannot impolement everything
+  def __getattr__(self, name):
+    return getattr(self.driver, name)
+
+  def get_capabilities(self):
+    return self.driver.get_capabilities()
 
   def _command_class_value(self, command_class, index):
     """Find the given (command_class, index) or create a new one."""
@@ -87,9 +156,9 @@ class ZWaveDevice(device.Device):
       self.zwave_node_name = event['node_name']
       self.zwave_manufacturer_name = event['manufacturer_name']
       self.zwave_manufacturer_id = event['manufacturer_id']
-      self.zwave_produce_name = event['product_name']
+      self.zwave_product_name = event['product_name']
       self.zwave_product_type = event['product_type']
-      self.zwave_produce_id = event['product_id']
+      self.zwave_product_id = event['product_id']
 
     else:
       logging.info("Unknown event: %s", event)
