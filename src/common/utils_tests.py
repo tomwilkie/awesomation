@@ -11,13 +11,13 @@ class TestUtils(unittest.TestCase):
     """Tests for limit_json_batch function."""
 
     self.assertEquals(list(utils.limit_json_batch([])), [])
-    self.assertEquals(list(utils.limit_json_batch([1])), ['[1]'])
+    self.assertEquals(list(utils.limit_json_batch([1])), [[1]])
 
     long_string = '0' * (10 * 1000)
     self.assertEquals(list(utils.limit_json_batch([long_string])),
-                      ['["%s"]' % long_string])
+                      [[long_string]])
     self.assertEquals(list(utils.limit_json_batch([long_string, long_string])),
-                      ['["%s"]' % long_string, '["%s"]' % long_string])
+                      [[long_string], [long_string]])
 
 
 if __name__ == '__main__':

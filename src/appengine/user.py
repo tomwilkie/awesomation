@@ -63,8 +63,6 @@ def push_events():
   if events is None:
     return
 
-  logging.info('Sending %d events to user', len(events))
-
   # Now figure out what channel to post these to.
   # Can't use user.get_user as we might not be in
   # a user's request (might be a device update
@@ -72,7 +70,6 @@ def push_events():
   # instead.  Horrid.
   user_id = get_user_from_namespace()
   channel_id = 'private-%s' % user_id
-  logging.info('Sending to channel %s', channel_id)
 
   # Push them to pusher, as we've migrated
   # the UI to that.
@@ -82,8 +79,10 @@ def push_events():
       secret=creds.pusher_secret,
       encoder=flask.json.JSONEncoder)
 
-  for encoded_events in utils.limit_json_batch(events, max_size=10000):
-    pusher_client[channel_id].trigger('events', encoded_events)
+  for batch in utils.limit_json_batch(events, max_size=8000):
+    logging.info('Sending %d events to user on channel %s',
+                 len(batch), channel_id)
+    pusher_client[channel_id].trigger('events', batch)
 
 
 # UI calls /api/user/channel_auth with its

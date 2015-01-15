@@ -92,7 +92,6 @@ var AWESOMATION = (function() {
         var channel = pusher.subscribe(sprintf('private-%s', data.id));
 
         channel.bind('events', function(data) {
-          data = JSON.parse(data);
           handle_events(data);
         });
 
