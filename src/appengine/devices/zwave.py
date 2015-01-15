@@ -40,11 +40,6 @@ def register(manufacturer_id, product_type, product_id):
   return class_rebuilder
 
 
-def get_driver(manufacturer_id, product_type, product_id):
-  key = '%s-%s-%s' % (manufacturer_id, product_type, product_id)
-  return ZWAVE_DRIVERS.get(key, Driver)
-
-
 class CommandClassValue(ndb.Model):
   """A particular (command class, value)."""
 
@@ -83,7 +78,6 @@ class ZWaveDevice(device.Device):
     super(ZWaveDevice, self).__init__(**kwargs)
     self._driver = None
 
-  @property
   def driver(self):
     """Find the zwave driver for this device."""
     if self._driver is not None:
@@ -93,9 +87,6 @@ class ZWaveDevice(device.Device):
                         self.zwave_product_type,
                         self.zwave_product_id)
     _driver = ZWAVE_DRIVERS.get(key, None)
-    logging.info('ZWave driver for %s = %s', key,
-                 _driver.__name__)
-
     if _driver is None:
       return Driver(self)
     else:
@@ -103,12 +94,12 @@ class ZWaveDevice(device.Device):
       return self._driver
 
   # This is a trampoline through to the driver
-  # as this class cannot impolement everything
+  # as this class cannot implement everything
   def __getattr__(self, name):
-    return getattr(self.driver, name)
+    return getattr(self.driver(), name)
 
   def get_capabilities(self):
-    return self.driver.get_capabilities()
+    return self.driver().get_capabilities()
 
   def _command_class_value(self, command_class, index):
     """Find the given (command_class, index) or create a new one."""
