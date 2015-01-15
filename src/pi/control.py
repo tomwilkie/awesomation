@@ -5,7 +5,7 @@ import logging
 import sys
 import time
 
-from pi import daemon, hue, network, pushrpc, rfswitch, wemo, zwave
+from pi import daemon, hue, network, pushrpc, rfswitch, sonos, wemo, zwave
 
 
 LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
@@ -31,6 +31,8 @@ class Control(daemon.Daemon):
                        self._device_event_callback),
         'wemo': wemo.Wemo(self._args.hue_scan_interval_secs,
                           self._device_event_callback),
+        'sonos': sonos.Sonos(self._args.hue_scan_interval_secs,
+                             self._device_event_callback),
     }
 
     # This module needs root, so might not work

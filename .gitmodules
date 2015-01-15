@@ -67,3 +67,6 @@
 [submodule "third_party/py/ipaddr"]
 	path = third_party/py/ipaddr
 	url = https://github.com/tomwilkie/ipaddr-py.git
+[submodule "third_party/py/SoCo"]
+	path = third_party/py/SoCo
+	url = https://github.com/SoCo/SoCo.git
