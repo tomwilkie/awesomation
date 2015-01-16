@@ -30,16 +30,20 @@ Planned features:
 
 ### Getting Started
 
-All you'll need is a Raspberry Pi running rasbian.  On the Pi, run:
+All you'll need is a Raspberry Pi running [Raspbian](http://www.raspberrypi.org/downloads/) - I used the 2014-12-24 build.  On the Pi, run:
+
+    sudo apt-get install libudev-dev cython python-dev swig python-setuptools
+    sudo easy_install pip
+    sudo pip install netifaces
 
     git clone https://github.com/tomwilkie/awesomation.git
     cd awesomation
     git submodule init; git submodule update
-    cd third_party/open-zwave; make; make install
-    cd third_party/python-openzwave; make; make install
-    cd third_party/wiringPi; make; make install
+    cd third_party/open-zwave; make; sudo make install
+    cd third_party/python-openzwave; python setup-lib.py build; sudo python setup-lib.py install
+    cd third_party/wiringPi/wiringPi; make; sudo make install
     cd third_party/rcswitch-pi; make; make install
-    sudo pip install netifaces
+
     make runpi
 
 The proxy code will print out something like this:

@@ -21,8 +21,9 @@ class ZWave(proxy.Proxy):
     self._options = libopenzwave.PyOptions()
     self._options.create(CONFIG, '/home/pi/openzwave', '')
     self._options.addOptionBool('ConsoleOutput', False)
-    self._options.addOptionInt('SaveLogLevel', 7) # INFO
-    self._options.addOptionInt('QueueLogLevel', 7) # INFO
+    self._options.addOptionInt('SaveLogLevel', 6) # INFO
+    self._options.addOptionInt('QueueLogLevel', 6) # INFO
+    self._options.addOptionBool('AppendLogFile', True)
     self._options.lock()
 
     self._manager = libopenzwave.PyManager()
@@ -96,13 +97,18 @@ class ZWave(proxy.Proxy):
     self._manager.healNetwork(self._home_id, upNodeRoute=True)
 
   @proxy.command
+  def hard_reset(self):
+    self._manager.resetController(self._home_id)
+
+  @proxy.command
   def heal_node(self, node_id):
     self._manager.healNetworkNode(self._home_id, node_id,
                                   upNodeRoute=True)
 
   @proxy.command
   def set_value(self, node_id, value_id, value):
-    logging.info('Setting value %s on device %s to %s', value_id, node_id, value)
+    logging.info('Setting value %s on device %s to %s',
+                 value_id, node_id, value)
     self._manager.setValue(value_id, value)
 
   def stop(self):
