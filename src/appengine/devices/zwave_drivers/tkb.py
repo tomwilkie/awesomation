@@ -14,11 +14,11 @@ class TKBMultilevelPowerSwitch(zwave.Driver):
   @rest.command
   def turn_on(self):
     self._device.state = True
-    ccv = self._device._command_class_value('COMMAND_CLASS_BASIC', 0)
-    self._send_device_command('set_value', value_id=ccv.value_id, value=255)
+    ccv = self._device.get_command_class_value('COMMAND_CLASS_SWITCH_MULTILEVEL', 0)
+    ccv.set_value(255)
 
   @rest.command
   def turn_off(self):
     self._device.state = False
-    ccv = self._device._command_class_value('COMMAND_CLASS_BASIC', 0)
-    self._send_device_command('set_value', value_id=ccv.value_id, value=0)
+    ccv = self._device.get_command_class_value('COMMAND_CLASS_SWITCH_MULTILEVEL', 0)
+    ccv.set_value(0)

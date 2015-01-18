@@ -106,7 +106,7 @@ class ZWave(proxy.Proxy):
                                   upNodeRoute=True)
 
   @proxy.command
-  def set_value(self, node_id, value_id, value):
+  def set_value(self, value_id, value, node_id=None):
     logging.info('Setting value %s on device %s to %s',
                  value_id, node_id, value)
     self._manager.setValue(value_id, value)

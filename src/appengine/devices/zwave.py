@@ -7,13 +7,17 @@ from google.appengine.ext import ndb
 from appengine import device, pushrpc, rest, room
 
 
+NODE_ADDED = 'NodeAdded'
+NODE_INFO_UPDATE = 'NodeInfoUpdate'
+
+
 ZWAVE_DRIVERS = {}
 
 
 class Driver(object):
   """A manufacture / product specific driver for a zwave device.
 
-  NB has to be stateless.  Store you state in the zwave devices.
+  NB drivers have to be stateless.  Store you state in the zwave devices.
   """
 
   def __init__(self, _device):
@@ -29,6 +33,9 @@ class Driver(object):
              'node_id': self._device.zwave_node_id}
     event.update(kwargs)
     pushrpc.send_event(event)
+
+  def handle_event(self, event):
+    pass
 
 
 def register(manufacturer_id, product_type, product_id):
@@ -52,6 +59,14 @@ class CommandClassValue(ndb.Model):
   label = ndb.StringProperty()
   value_id = ndb.IntegerProperty()
   type = ndb.StringProperty()
+
+  def set_value(self, value):
+    """Convenience method to send a command to this device."""
+    event = {'type': 'zwave',
+             'command': 'set_value',
+             'value_id': self.value_id,
+             'value': value}
+    pushrpc.send_event(event)
 
 
 @device.register('zwave')
@@ -101,7 +116,7 @@ class ZWaveDevice(device.Device):
   def get_capabilities(self):
     return self.driver().get_capabilities()
 
-  def _command_class_value(self, command_class, index):
+  def get_command_class_value(self, command_class, index):
     """Find the given (command_class, index) or create a new one."""
     for ccv in self.zwave_command_class_values:
       if ccv.command_class == command_class and ccv.index == index:
@@ -130,7 +145,7 @@ class ZWaveDevice(device.Device):
       del value['nodeId']
       del value['instance']
 
-      ccv = self._command_class_value(command_class, index)
+      ccv = self.get_command_class_value(command_class, index)
       ccv.populate(**value)
 
       logging.info('%s.%s[%d] <- %s', self.zwave_node_id,
@@ -138,6 +153,15 @@ class ZWaveDevice(device.Device):
 
       if command_class == 'COMMAND_CLASS_SENSOR_BINARY':
         self.lights(value['value'])
+
+    elif notification_type in 'ValueRemoved':
+      command_class = value.pop('commandClass')
+      index = value.pop('index')
+      ccv = self.get_command_class_value(command_class, index)
+      self.zwave_command_class_values.remove(ccv)
+
+      logging.info('deleted %s.%s[%d]', self.zwave_node_id,
+                   command_class, index, value)
 
     elif notification_type == 'NodeInfoUpdate':
       # event['basic']
@@ -153,6 +177,8 @@ class ZWaveDevice(device.Device):
 
     else:
       logging.info("Unknown event: %s", event)
+
+    self.driver().handle_event(event)
 
   @rest.command
   def lights(self, state):
