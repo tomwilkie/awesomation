@@ -76,7 +76,7 @@ class Hue(scanning_proxy.ScanningProxy):
     if not bridge:
       logging.error('Bridge %d not found!', bridge_id)
 
-    command = {'transitiontime' : 30, 'on' : mode,
+    command = {'on' : mode,
                'bri' : brightness}
     if color_temperature is not None:
       command['ct'] = color_temperature
