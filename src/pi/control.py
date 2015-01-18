@@ -3,9 +3,9 @@
 import argparse
 import logging
 import sys
-import time
 
-from pi import daemon, hue, network, pushrpc, rfswitch, sonos, wemo, zwave
+from pi import daemon, events, hue, network
+from pi import pushrpc, rfswitch, sonos, wemo, zwave
 
 
 LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
@@ -62,8 +62,7 @@ class Control(daemon.Daemon):
 
     # Just sit in a loop sleeping for now
     try:
-      while True:
-        time.sleep(1000)
+      events.run()
     except KeyboardInterrupt:
       logging.info('Shutting down')
 
@@ -103,7 +102,7 @@ def main():
   file_handler.setFormatter(logging.Formatter(LOGFMT))
   logging.getLogger().addHandler(file_handler)
   logging.getLogger('requests.packages.urllib3.connectionpool'
-      ).setLevel(logging.ERROR)
+                   ).setLevel(logging.ERROR)
 
   # Command line arguments
   parser = argparse.ArgumentParser()
