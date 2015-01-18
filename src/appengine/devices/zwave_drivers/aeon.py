@@ -6,7 +6,7 @@ from appengine.devices import zwave
 class AeonLabsMultiSensor(zwave.Driver):
   """Driver for Aeon Labs Multi Sensor."""
   CONFIGURATION = {
-    ('COMMAND_CLASS_CONFIGURATION', 4): 'Binary Sensor Report',
+    ('COMMAND_CLASS_CONFIGURATION', 5): 'Binary Sensor Report',
     ('COMMAND_CLASS_CONFIGURATION', 101): 0b11100001,
     ('COMMAND_CLASS_CONFIGURATION', 111): 5*60
   }

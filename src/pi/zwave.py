@@ -109,7 +109,9 @@ class ZWave(proxy.Proxy):
   def set_value(self, value_id, value, node_id=None):
     logging.info('Setting value %s on device %s to %s',
                  value_id, node_id, value)
-    self._manager.setValue(value_id, value)
+    success = self._manager.setValue(value_id, value)
+    if not success:
+      logging.info('Failed')
 
   def stop(self):
     if self._home_id is not None:
