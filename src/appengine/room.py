@@ -33,10 +33,10 @@ class Room(model.Base):
     switches = list(switches)
 
     for switch in switches:
-      if value:
-        switch.turn_on()
-      else:
-        switch.turn_off()
+      if switch.state != value:
+        switch.state = value
+        switch.sync()
+
     ndb.put_multi(switches)
 
   @rest.command

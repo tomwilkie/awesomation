@@ -18,12 +18,12 @@ class WemoDevice(device.Switch):
     event = {'type': 'wemo', 'command': 'scan'}
     pushrpc.send_event(event)
 
-  def update_state(self, state):
+  def sync(self):
     """Update the state of a light."""
     event = {'type': 'wemo',
              'command': 'set_state',
              'serial_number': self.serial_number,
-             'state': 1 if state else 0}
+             'state': 1 if self.state else 0}
     pushrpc.send_event(event)
 
   def handle_event(self, event):

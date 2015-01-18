@@ -107,19 +107,6 @@ class Switch(Device):
   def get_capabilities(self):
     return ['SWITCH']
 
-  def update_state(self, value):
-    pass
-
-  @rest.command
-  def turn_on(self):
-    self.state = True
-    self.update_state(True)
-
-  @rest.command
-  def turn_off(self):
-    self.state = False
-    self.update_state(False)
-
 
 # pylint: disable=invalid-name
 blueprint = flask.Blueprint('device', __name__)

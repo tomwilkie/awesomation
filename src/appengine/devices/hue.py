@@ -48,9 +48,6 @@ class HueLight(device.Switch):
       capabilities.append('COLOR_TEMPERATURE')
     return capabilities
 
-  def update_state(self, state):
-    self.sync()
-
   def sync(self):
     """Update the state of a light."""
     match = LIGHT_ID_RE.match(self.key.id())

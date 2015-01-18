@@ -1,6 +1,5 @@
 """Drivers for TKB zwave devices."""
 
-from appengine import rest
 from appengine.devices import zwave
 
 
@@ -11,14 +10,7 @@ class TKBMultilevelPowerSwitch(zwave.Driver):
   def get_capabilities(self):
     return ['SWITCH']
 
-  @rest.command
-  def turn_on(self):
-    self._device.state = True
-    ccv = self._device.get_command_class_value('COMMAND_CLASS_SWITCH_MULTILEVEL', 0)
-    ccv.set_value(255)
-
-  @rest.command
-  def turn_off(self):
-    self._device.state = False
-    ccv = self._device.get_command_class_value('COMMAND_CLASS_SWITCH_MULTILEVEL', 0)
-    ccv.set_value(0)
+  def sync(self):
+    ccv = self._device.get_command_class_value(
+        'COMMAND_CLASS_SWITCH_MULTILEVEL', 0)
+    ccv.set_value(255 if self._device.state else 0)

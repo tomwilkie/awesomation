@@ -57,6 +57,9 @@ class Driver(object):
       if ccv.value != intended_value:
         ccv.set_value(intended_value)
 
+  def sync(self):
+    pass
+
 
 def register(manufacturer_id, product_type, product_id):
   """Decorator to cause device types to be registered."""
@@ -204,6 +207,9 @@ class ZWaveDevice(device.Device):
       logging.info("Unknown event: %s", event)
 
     self.driver().handle_event(event)
+
+  def sync(self):
+    self.driver().sync()
 
   @rest.command
   def lights(self, state):

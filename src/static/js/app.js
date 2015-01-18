@@ -246,10 +246,17 @@ var AWESOMATION = (function() {
     $('div.main').on('click', 'div.room .room-set', function() {
       var room_id = $(this).closest('div.room').data('room-id');
       var data = {};
-
       data[$(this).data('key')] = $(this).data('value');
 
       net.post(sprintf('/api/room/%s', room_id), data);
+    });
+
+    $('div.main').on('click', 'div.device .device-set', function() {
+      var device_id = $(this).closest('div.device').data('device-id');
+      var data = {};
+      data[$(this).data('key')] = $(this).data('value');
+
+      net.post(sprintf('/api/device/%s', device_id), data);
     });
 
     $('div.main').on('click', 'div.device .device-command', function() {
