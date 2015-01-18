@@ -19,12 +19,10 @@ class Driver(object):
 
   NB drivers have to be stateless.  Store you state in the zwave devices.
   """
+  CONFIGURATION = {}
 
   def __init__(self, _device):
     self._device = _device
-
-  def get_capabilities(self):
-    return []
 
   def _send_device_command(self, command, **kwargs):
     """Convenience method to send a command to this device."""
@@ -34,8 +32,30 @@ class Driver(object):
     event.update(kwargs)
     pushrpc.send_event(event)
 
+  def get_capabilities(self):
+    return []
+
   def handle_event(self, event):
     pass
+
+  def is_configured(self):
+    """Test if this device is configured correctly."""
+    for (command_class, index), intended_value \
+        in self.CONFIGURATION.iteritems():
+      ccv = self._device.get_command_class_value(command_class, index)
+      if ccv.value != intended_value:
+        return False
+
+    return True
+
+  @rest.command
+  def configure(self):
+    """Configure this device."""
+    for (command_class, index), intended_value \
+        in self.CONFIGURATION.iteritems():
+      ccv = self._device.get_command_class_value(command_class, index)
+      if ccv.value != intended_value:
+        ccv.set_value(intended_value)
 
 
 def register(manufacturer_id, product_type, product_id):
@@ -86,6 +106,8 @@ class ZWaveDevice(device.Device):
   zwave_product_type = ndb.StringProperty()
   zwave_product_id = ndb.StringProperty()
 
+  configured = ndb.ComputedProperty(lambda s: s.is_configured())
+
   # Haven't found a good way to fake out the properites yet
   state = ndb.BooleanProperty()
 
@@ -115,6 +137,9 @@ class ZWaveDevice(device.Device):
 
   def get_capabilities(self):
     return self.driver().get_capabilities()
+
+  def is_configured(self):
+    return self.driver().is_configured()
 
   def get_command_class_value(self, command_class, index):
     """Find the given (command_class, index) or create a new one."""
@@ -161,7 +186,7 @@ class ZWaveDevice(device.Device):
       self.zwave_command_class_values.remove(ccv)
 
       logging.info('deleted %s.%s[%d]', self.zwave_node_id,
-                   command_class, index, value)
+                   command_class, index)
 
     elif notification_type == 'NodeInfoUpdate':
       # event['basic']
