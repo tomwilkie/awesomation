@@ -1,0 +1,85 @@
+{
+  u 'name': u 'Home Cinema Right',
+  u 'swversion': u '66010820',
+  u 'pointsymbol': {
+    u '1': u 'none',
+    u '3': u 'none',
+    u '2': u 'none',
+    u '5': u 'none',
+    u '4': u 'none',
+    u '7': u 'none',
+    u '6': u 'none',
+    u '8': u 'none'
+  },
+  u 'state': {
+    u 'on': False,
+    u 'hue': 0,
+    u 'colormode': u 'ct',
+    u 'effect': u 'none',
+    u 'alert': u 'none',
+    u 'xy': [0.0, 0.0],
+    u 'reachable': False,
+    u 'bri': 0,
+    u 'ct': 154,
+    u 'sat': 0
+  },
+  u 'type': u 'Extended color light',
+  u 'modelid': u 'LCT001'
+}
+
+{
+  u 'name': u 'Home Cinema Left',
+  u 'swversion': u '66010820',
+  u 'pointsymbol': {
+    u '1': u 'none',
+    u '3': u 'none',
+    u '2': u 'none',
+    u '5': u 'none',
+    u '4': u 'none',
+    u '7': u 'none',
+    u '6': u 'none',
+    u '8': u 'none'
+  },
+  u 'state': {
+    u 'on': False,
+    u 'hue': 34515,
+    u 'colormode': u 'ct',
+    u 'effect': u 'none',
+    u 'alert': u 'none',
+    u 'xy': [0.31380000000000002, 0.32390000000000002],
+    u 'reachable': True,
+    u 'bri': 1,
+    u 'ct': 153,
+    u 'sat': 236
+  },
+  u 'type': u 'Extended color light',
+  u 'modelid': u 'LCT001'
+}
+
+{
+  u 'name': u 'Home Cinema LightStrips',
+  u 'swversion': u '66010400',
+  u 'pointsymbol': {
+    u '1': u 'none',
+    u '3': u 'none',
+    u '2': u 'none',
+    u '5': u 'none',
+    u '4': u 'none',
+    u '7': u 'none',
+    u '6': u 'none',
+    u '8': u 'none'
+  },
+  u 'state': {
+    u 'on': False,
+    u 'hue': 49238,
+    u 'colormode': u 'xy',
+    u 'effect': u 'none',
+    u 'alert': u 'none',
+    u 'xy': [0.18690000000000001, 0.098400000000000001],
+    u 'reachable': True,
+    u 'bri': 1,
+    u 'sat': 253
+  },
+  u 'type': u 'Color light',
+  u 'modelid': u 'LST001'
+}
