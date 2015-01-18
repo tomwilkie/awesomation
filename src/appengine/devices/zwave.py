@@ -235,6 +235,12 @@ class ZWaveDevice(device.Device):
     event = {'type': 'zwave', 'command': 'hard_reset'}
     pushrpc.send_event(event)
 
+  @classmethod
+  @device.static_command
+  def add_device(cls):
+    event = {'type': 'zwave', 'command': 'add_device'}
+    pushrpc.send_event(event)
+
   @rest.command
   def heal_node(self):
     event = {'type': 'zwave', 'command': 'heal_node',

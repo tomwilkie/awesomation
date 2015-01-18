@@ -5,10 +5,11 @@ import sys
 
 import libopenzwave
 
-from pi import proxy
+from pi import events, proxy
 
 
 CONFIG = '/usr/local/etc/openzwave'
+CONTROLLER_COMMAND_ADD_DEVICE = 1
 
 
 class ZWave(proxy.Proxy):
@@ -33,6 +34,7 @@ class ZWave(proxy.Proxy):
 
     self._home_id = None
     self._node_ids = set()
+    self._add_device_event = None
 
   def _zwave_callback(self, data):
     # pylint: disable=broad-except
@@ -113,7 +115,30 @@ class ZWave(proxy.Proxy):
     if not success:
       logging.info('Failed')
 
+  def _add_device_callback(self, args):
+    logging.info('_add_device_callback, args = %s', args)
+
+  def _cancel_add_device(self):
+    logging.info('Cancelling zwave inclusion mode.')
+    self._manager.cancelControllerCommand(self._home_id)
+
+  @proxy.command
+  def add_device(self):
+    """Put the zwave controller in inclusion mode for 30s."""
+    logging.info('Entering zwave inclusion mode.')
+    self._manager.beginControllerCommand(
+        self._home_id, CONTROLLER_COMMAND_ADD_DEVICE,
+        self._add_device_callback, highPower=True)
+
+    self._add_device_event = events.enter(30, self._cancel_add_device)
+
   def stop(self):
+    if self._add_device_event is not None:
+      try:
+        events.cancel(self._add_device_event)
+      except ValueError:
+        pass
+
     if self._home_id is not None:
       self._manager.writeConfig(self._home_id)
     self._manager.removeWatcher(self._callback)
