@@ -443,7 +443,7 @@ var AWESOMATION = (function() {
       var room = cache.objects.room[room_id];
 
       dialog('script#setup-auto-dimming-dialog-template', room, function() {
-        var enable = $(this).find('input#enable-auto-dim').val() === 'on';
+        var enable = $(this).find('input#enable-auto-dim').is(':checked');
         var start_hours = $(this).find('input#start-hours').val();
         var start_mins = $(this).find('input#start-mins').val();
         var end_hours = $(this).find('input#end-hours').val();
