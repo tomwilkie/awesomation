@@ -82,7 +82,8 @@ class Device(model.Base):
     func_name = command_dict.pop('command', None)
     func = getattr(cls, func_name, None)
     logging.info('%s %s %s', func, type(func), func.is_command)
-    if func is None or not func.is_command or not func.is_static:
+    if func is None or not getattr(func, 'is_command', False) \
+        or not getattr(func, 'is_static', False):
       logging.error('Command %s does not exist or is not a command',
                     func_name)
       flask.abort(400)
