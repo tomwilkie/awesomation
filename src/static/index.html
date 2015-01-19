@@ -67,14 +67,14 @@
               </div>
             </div>
             <div class="form-group">
-              <label for="room-name" class="col-sm-4 control-label">Target Brightness:</label>
+              <label for="target-brightnes" class="col-sm-4 control-label">Target Brightness:</label>
               <div class="col-sm-8">
                 <input type="range" id="target-brightness" value="{{target_brightness}}"
                        min="0" max="255">
               </div>
             </div>
             <div class="form-group">
-              <label for="room-name" class="col-sm-4 control-label">Target Color Temp:</label>
+              <label for="target-color-temperature" class="col-sm-4 control-label">Target Color Temp:</label>
               <div class="col-sm-8">
                 <input type="range" id="target-color-temperature"
                        value="{{InvertColorTemp target_color_temperature}}"
@@ -103,7 +103,7 @@
             <div class="form-group">
               <label for="room-name" class="col-sm-3 control-label">Room name:</label>
               <div class="col-sm-8">
-                <input type="text" class="form-control" id="room-name" value="{{> room-name}}">
+                <input type="text" class="form-control" id="room-name" value="{{Name this}}">
               </div>
             </div>
           </form>
@@ -120,7 +120,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-body">
-          <p>Are you sure you want to delete room '{{> room-name}}'?</p>
+          <p>Are you sure you want to delete room '{{Name this}}'?</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -160,7 +160,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Create new room</h4>
+          <h4 class="modal-title">Change room</h4>
         </div>
         <div class="modal-body">
           <form class="form-horizontal">
@@ -168,9 +168,9 @@
               <label for="room" class="col-sm-3 control-label">Room name:</label>
               <div class="col-sm-8">
                 <select id="room" class="form-control">
-                  {{#each rooms}}
-                  <option value="{{id}}"{{#IfEquals ../device.room id}} selected{{/IfEquals}}>{{> room-name}}</option>
-                  {{/each}}
+                  {{#NameSort rooms}}
+                  <option value="{{id}}"{{#IfEquals ../device.room id}} selected{{/IfEquals}}>{{Name this}}</option>
+                  {{/NameSort}}
                 </select>
               </div>
             </div>
@@ -196,7 +196,7 @@
             <div class="form-group">
               <label for="device-name" class="col-sm-3 control-label">Device name:</label>
               <div class="col-sm-8">
-                <input type="text" class="form-control" id="device-name" value="{{> device-name}}">
+                <input type="text" class="form-control" id="device-name" value="{{Name this}}">
               </div>
             </div>
           </form>
@@ -213,7 +213,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-body">
-          <p>Are you sure you want to delete device '{{> device-name}}'?</p>
+          <p>Are you sure you want to delete device '{{Name this}}'?</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -301,9 +301,9 @@
                       <label class="col-sm-3 control-label" for="room" >Room</label>
                       <div class="col-sm-5">
                         <select id="room" class="form-control">
-                          {{#each rooms}}
-                          <option value="{{id}}">{{> room-name}}</option>
-                          {{/each}}
+                          {{#NameSort rooms}}
+                          <option value="{{id}}">{{Name this}}</option>
+                          {{/NameSort}}
                         </select>
                       </div>
                     </div>
@@ -453,10 +453,6 @@
     </div>
   </script>
 
-  <script type="text/x-handlebars-template" class="handlebars-partial" id="room-name">{{#if name}}{{name}}{{else}}Room {{id}}{{/if}}</script>
-
-  <script type="text/x-handlebars-template" class="handlebars-partial" id="device-name">{{#if name}}{{name}}{{else}}{{#if device_name}}{{device_name}} ({{class}}){{else}}{{id}} ({{class}}){{/if}}{{/if}}</script>
-
   <script type="text/x-handlebars-template" class="handlebars-partial" id="loading">
     <div class='row text-center'><i><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>  Loading...</i></div>
   </script>
@@ -487,7 +483,7 @@
           <p>
             <div class="btn-group btn-group-sm" role="group" aria-label="...">
               <button type="button" class="btn btn-default device-name" aria-expanded="false" disabled="disabled">
-                {{>device-name}}
+                {{Name this}}
               </button>
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
@@ -559,10 +555,10 @@
     {{/HomelessDevices}}
     </div>
 
-    {{#each objects.room}}
+    {{#NameSort objects.room}}
     <div class="room" data-room-id="{{@key}}">
       <h3>
-        {{> room-name}}
+        {{Name this}}
 
         <div class="btn-group btn-group-xs pull-right" role="group" aria-label="...">
           <button type="button" class="btn btn-default all-on">
@@ -592,7 +588,7 @@
       {{/DevicesForRoom}}
       </div>
     </div>
-    {{/each}}
+    {{/NameSort}}
     {{/if}}
   </script>
 
@@ -611,7 +607,7 @@
       </div>
     </h2>
 
-    {{#each objects.account}}
+    {{#NameSort objects.account}}
     <div class="account" data-account-id="{{id}}">
       <h4>
         {{human_type}} account
@@ -629,9 +625,9 @@
       </h4>
 
       <p>Last updated: {{HumanTime last_updated}}</p>
-      <p>Devices: {{#DevicesForAccount id}}{{> device-name}}, {{else}}<i>None</i>{{/DevicesForAccount}}</p>
+      <p>Devices: {{#DevicesForAccount id}}{{Name this}}{{else}}<i>None</i>{{/DevicesForAccount}}</p>
     </div>
-    {{/each}}
+    {{/NameSort}}
     {{/if}}
   </script>
 

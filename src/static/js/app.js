@@ -105,7 +105,49 @@ var AWESOMATION = (function() {
     return cache;
   }());
 
+  function object_name(obj) {
+    if (obj.name) {
+      return obj.name;
+    }
+
+    if (obj.device_name) {
+      return obj.device_name;
+    }
+
+    if (obj.class == 'Room') {
+      return sprintf('Room %s', obj.id);
+    }
+
+    if (obj.human_type) {
+      return sprintf('%s account', obj.human_type);
+    }
+
+    return sprintf('%s (%s)', obj.id, obj.class);
+  }
+
+  function sort_by_name(objects) {
+    objects = $.map(objects, function(obj) {
+      return obj;
+    });
+    objects.sort(function (obj1, obj2) {
+      return String.prototype.localeCompare.call(
+        object_name(obj1), object_name(obj2));
+    });
+    return objects;
+  }
+
   Handlebars.registerHelper({
+    'Name': object_name,
+
+    'NameSort': function(objects, options) {
+      if (objects) {
+        var result = $.map(sort_by_name(objects), options.fn);
+        return result.join('');
+      }
+
+      return options.inverse(this);
+    },
+
     'IfEquals': function(a, b, options) {
       if (a === b) {
         return options.fn(this);
@@ -123,39 +165,33 @@ var AWESOMATION = (function() {
     },
 
     'HomelessDevices': function(options) {
-      var found = false;
-      var ret = '';
-
-      $.each(cache.objects.device, function(id, device) {
+      var devices = $.map(cache.objects.device, function(device) {
         if (!(device.room in cache.objects.room)) {
-          found = true;
-          ret = ret + options.fn(device);
+          return device;
         }
       });
 
-      if (!found) {
-        ret = ret + options.inverse(this);
+      if (devices) {
+        var result = $.map(sort_by_name(devices), options.fn);
+        return result.join('');
       }
 
-      return ret;
+      return options.inverse(this);
     },
 
     'DevicesForRoom': function(room_id, options) {
-      var found = false;
-      var ret = '';
-
-      $.each(cache.objects.device, function(id, device) {
+      var devices = $.map(cache.objects.device, function(device) {
         if (device.room === room_id) {
-          found = true;
-          ret = ret + options.fn(device);
+          return device;
         }
       });
 
-      if (!found) {
-        ret = ret + options.inverse(this);
+      if (devices) {
+        var result = $.map(sort_by_name(devices), options.fn);
+        return result.join('');
       }
 
-      return ret;
+      return options.inverse(this);
     },
 
     'HumanTime': function(millis) {
@@ -163,21 +199,18 @@ var AWESOMATION = (function() {
     },
 
     'DevicesForAccount': function(account_id, options) {
-      var found = false;
-      var ret = '';
-
-      $.each(cache.objects.device, function(id, device) {
+      var devices = $.map(cache.objects.device, function(device) {
         if (device.account === account_id) {
-          found = true;
-          ret = ret + options.fn(device);
+          return device;
         }
       });
 
-      if (!found) {
-        ret = ret + options.inverse(this);
+      if (devices) {
+        var result = $.map(sort_by_name(devices), options.fn);
+        return result.join(', ');
       }
 
-      return ret;
+      return options.inverse(this);
     },
 
     'ExtractHours': function(seconds) {
