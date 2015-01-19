@@ -279,32 +279,41 @@ var AWESOMATION = (function() {
 
     // Dialogs
 
-    $('div.modal#main_modal').modal({show: false});
-    $('div.modal#main_modal').on('shown.bs.modal', function () {
-      $(this).find('input').first().focus();
-    });
-
-    function dialog(name, obj, f) {
-      var template = Handlebars.compile($(name).text());
-      var rendered = template(obj);
+    var dialog = (function () {
       var modal = $('div.modal#main_modal');
+      modal.modal({show: false});
 
-      modal.html(rendered);
-      modal.modal();
-      modal.on('success', f);
-      modal.modal('show');
-    }
+      var on_success = null;
+      modal.on('shown.bs.modal', function () {
+        $(this).find('input').first().focus();
+      });
 
-    $('.modal#main_modal').on('click', '.btn-primary', function(event) {
-      $('.modal#main_modal').trigger('success', [event.target]);
-    });
+      function show(name, obj, f) {
+        var template = Handlebars.compile($(name).text());
+        var rendered = template(obj);
+        on_success = f;
+        modal.html(rendered);
+        modal.modal('show');
+      }
 
-    function hide_modal() {
-      $('.modal#main_modal')
-        .html('')
-        .off('success')
-        .modal('hide');
-    }
+      function hide() {
+        $('.modal#main_modal')
+          .modal('hide')
+          .html('');
+      }
+
+      modal.on('click', '.btn-primary', function() {
+        var result = on_success.apply(modal, arguments);
+        if (result === undefined || result === true) {
+          hide();
+        }
+      });
+
+      return {
+        show: show,
+        hide: hide
+      };
+    }());
 
     function render_error(jqXHR, textStatus, errorThrown) {
       var message;
@@ -327,13 +336,13 @@ var AWESOMATION = (function() {
     }
 
     $('div.main').on('click', '.create-new-room', function() {
-      dialog('script#create-new-room-dialog-template', {}, function() {
+      dialog.show('script#create-new-room-dialog-template', {}, function() {
         var room_id = random_id();
         var room_name = $(this).find('input#room-name').val();
 
         net.post(sprintf('/api/room/%s', room_id), {
           name: room_name,
-        }).always(hide_modal);
+        });
       });
     });
 
@@ -342,9 +351,9 @@ var AWESOMATION = (function() {
     $('div.main').on('click', '.add-new-device', function() {
       var accounts_only = $(this).data('accounts-only');
 
-      function new_device(event, target) {
+      function new_device(event) {
         var that = $(this);
-        var type = $(target).data('type');
+        var type = $(event.target).data('type');
         switch(type) {
 
         case 'rfswitch':
@@ -362,7 +371,7 @@ var AWESOMATION = (function() {
               device_code: device_code,
               room: room_id
             }).done(function () {
-              hide_modal();
+              dialog.hide();
             }).fail(function (jqXHR, textStatus, errorThrown) {
               that.find('input#proxy-id')
                 .closest('div.form-group')
@@ -378,7 +387,7 @@ var AWESOMATION = (function() {
             net.post('/api/proxy/claim', {
               proxy_id: proxy_id
             }).done(function () {
-              hide_modal();
+              dialog.hide();
             }).fail(function (jqXHR, textStatus, errorThrown) {
               that.find('input#proxy-id')
                 .closest('div.form-group')
@@ -404,14 +413,14 @@ var AWESOMATION = (function() {
                 .addClass('has-error')
                 .siblings('.error_placeholder')
                   .html(error_html);
-              return;
+              return false; // don't close the dialog
             }
 
             net.post(sprintf('/api/device/mac-%s', mac_address), {
               type: 'network',
               name: device_name
             }).done(function () {
-              hide_modal();
+              dialog.hide();
             }).fail(function (jqXHR, textStatus, errorThrown) {
               that.find('input#mac-address')
                 .closest('div.form-group')
@@ -422,9 +431,11 @@ var AWESOMATION = (function() {
           }());
           break;
         }
+
+        return false;
       }
 
-      dialog('script#new-device-dialog-template',
+      dialog.show('script#new-device-dialog-template',
              {rooms: cache.objects.room, accounts_only: accounts_only},
              new_device);
     });
@@ -435,11 +446,11 @@ var AWESOMATION = (function() {
       var room_id = $(this).closest('div.room').data('room-id');
       var room = cache.objects.room[room_id];
 
-      dialog('script#room-change-name-dialog-template', room, function() {
+      dialog.show('script#room-change-name-dialog-template', room, function() {
         var room_name = $(this).find('input#room-name').val();
         net.post(sprintf('/api/room/%s', room_id), {
           name: room_name,
-        }).always(hide_modal);
+        });
       });
     });
 
@@ -449,7 +460,7 @@ var AWESOMATION = (function() {
       var room_id = $(this).closest('div.room').data('room-id');
       var room = cache.objects.room[room_id];
 
-      dialog('script#setup-auto-dimming-dialog-template', room, function() {
+      dialog.show('script#setup-auto-dimming-dialog-template', room, function() {
         var enable = $(this).find('input#enable-auto-dim').is(':checked');
         var start_hours = $(this).find('input#start-hours').val();
         var start_mins = $(this).find('input#start-mins').val();
@@ -464,7 +475,7 @@ var AWESOMATION = (function() {
           target_color_temperature: 500 - parseInt(target_color_temperature),
           dim_start_time: (start_hours * 3600) + (start_mins * 60),
           dim_end_time: (end_hours * 3600) + (end_mins * 60),
-        }).always(hide_modal).always(function() {
+        }).always(function() {
           net.post(sprintf('/api/room/%s/command', room_id), {
             command: 'update_auto_dim'
           });
@@ -478,8 +489,8 @@ var AWESOMATION = (function() {
       var room_id = $(this).closest('div.room').data('room-id');
       var room = cache.objects.room[room_id];
 
-      dialog('script#delete-room-dialog-template', room, function() {
-        net.del(sprintf('/api/room/%s', room_id)).always(hide_modal);
+      dialog.show('script#delete-room-dialog-template', room, function() {
+        net.del(sprintf('/api/room/%s', room_id));
       });
     });
 
@@ -489,11 +500,11 @@ var AWESOMATION = (function() {
       var device_id = $(this).closest('div.device').data('device-id');
       var state = {rooms: cache.objects.room, device: cache.objects.device[device_id]};
 
-      dialog('script#device-change-room-dialog-template', state, function() {
+      dialog.show('script#device-change-room-dialog-template', state, function() {
         var room_id = $(this).find('select#room').val();
         net.post(sprintf('/api/device/%s', device_id), {
           room: room_id
-        }).always(hide_modal);
+        });
       });
     });
 
@@ -503,11 +514,11 @@ var AWESOMATION = (function() {
       var device_id = $(this).closest('div.device').data('device-id');
       var device = cache.objects.device[device_id];
 
-      dialog('script#device-change-name-dialog-template', device, function() {
+      dialog.show('script#device-change-name-dialog-template', device, function() {
         var device_name = $(this).find('input#device-name').val();
         net.post(sprintf('/api/device/%s', device_id), {
           name: device_name,
-        }).always(hide_modal);
+        });
       });
     });
 
@@ -517,8 +528,8 @@ var AWESOMATION = (function() {
       var device_id = $(this).closest('div.device').data('device-id');
       var device = cache.objects.device[device_id];
 
-      dialog('script#delete-device-dialog-template', device, function() {
-        net.del(sprintf('/api/device/%s', device_id)).always(hide_modal);
+      dialog.show('script#delete-device-dialog-template', device, function() {
+        net.del(sprintf('/api/device/%s', device_id));
       });
     });
 
@@ -528,8 +539,8 @@ var AWESOMATION = (function() {
       var account_id = $(this).closest('div.account').data('account-id');
       var account = cache.objects.account[account_id];
 
-      dialog('script#delete-account-dialog-template', account, function() {
-        net.del(sprintf('/api/account/%s', account_id)).always(hide_modal);
+      dialog.show('script#delete-account-dialog-template', account, function() {
+        net.del(sprintf('/api/account/%s', account_id));
       });
     });
   });
