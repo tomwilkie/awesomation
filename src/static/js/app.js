@@ -353,7 +353,7 @@ var AWESOMATION = (function() {
             var device_name = that.find('input#device-name').val();
             var system_code = that.find('input#system-code').val();
             var device_code = parseInt(that.find('input#device-code').val());
-            var room_id = that.find('input#room').val();
+            var room_id = that.find('select#room').val();
 
             net.post(sprintf('/api/device/%s', device_id), {
               type: 'rfswitch',
