@@ -4,7 +4,7 @@ import re
 
 from google.appengine.ext import ndb
 
-from appengine import device, rest
+from appengine import device
 from appengine.devices import nest
 
 
@@ -16,11 +16,10 @@ class NetworkDevice(device.Device):
   """A device on the network."""
   present = ndb.BooleanProperty(required=True, default=False)
 
-  def set_presence(self, value):
+  @staticmethod
+  def update_presence():
     """Set the present status of this device, and
        potentially update nest thermostats."""
-    self.present = value
-
     # Should we set Nest to be away?
     # away = ! (big or all device)
 
@@ -32,13 +31,8 @@ class NetworkDevice(device.Device):
     for nest_account in nest.NestAccount.query().iter():
       nest_account.set_away(not someone_present)
 
-  @rest.command
-  def fake_present(self):
-    self.set_presence(True)
-
-  @rest.command
-  def fake_absent(self):
-    self.set_presence(False)
+  def sync(self):
+    self.update_presence()
 
   def get_capabilities(self):
     return ['PRESENCE']
@@ -52,7 +46,8 @@ class NetworkDevice(device.Device):
       if network_device is None:
         return
 
-      network_device.set_presence(False)
+      network_device.present = False
+      network_device.update_presence()
       network_device.put()
 
     elif 'appeared' in event:
@@ -60,7 +55,8 @@ class NetworkDevice(device.Device):
       if network_device is None:
         return
 
-      network_device.set_presence(True)
+      network_device.present = True
+      network_device.update_presence()
       network_device.put()
 
     elif 'devices' in event:
@@ -74,7 +70,8 @@ class NetworkDevice(device.Device):
         mac = match.group(1)
         present = mac in devices
         if network_device.present != present:
-          network_device.set_presence(present)
+          network_device.present = present
+          network_device.update_presence()
           devices_to_put.append(network_device)
 
       ndb.put_multi(devices_to_put)

@@ -517,9 +517,9 @@
 
                 {{#HasCapability 'PRESENCE'}}
                 {{#if present}}
-                <li><a href="#" class="device-command" data-command="fake_absent">Fake Absent</a></li>
+                <li><a href="#" class="device-set" data-key="present" data-value="false">Fake Absent</a></li>
                 {{else}}
-                <li><a href="#" class="device-command" data-command="fake_present">Fake Present</a></li>
+                <li><a href="#" class="device-set" data-key="present" data-value="true">Fake Present</a></li>
                 {{/if}}
                 {{/HasCapability}}
 
