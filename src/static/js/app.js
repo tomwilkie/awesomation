@@ -199,7 +199,7 @@ var AWESOMATION = (function() {
     },
 
     'PercentOf': function(numerator, denominator) {
-      return sprintf('%d', numerator * 100. / denominator);
+      return sprintf('%d', numerator * 100.0 / denominator);
     },
 
     'DevicesForAccount': function(account_id, options) {
