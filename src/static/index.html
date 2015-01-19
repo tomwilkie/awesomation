@@ -458,75 +458,77 @@
   </script>
 
   <script type="text/x-handlebars-template" class="handlebars-partial" id="device">
+    <div class="device" data-device-id="{{id}}">
+      <div class="caption">
+        <p class="device-name">
+          {{Name this}}
+        </p>
+        <p>
+          {{#HasCapability 'PRESENCE'}}
+          {{#if present}}
+          <span class="label label-success">present: yes</span>
+          {{else}}
+          <span class="label label-warning">present: no</span>
+          {{/if}}
+          {{/HasCapability}}
 
-    <div class="device col-sm-4 col-md-3" data-device-id="{{id}}">
-      <div class="thumbnail">
-        <span class="glyphicon glyphicon glyphicon-credit-card" aria-hidden="true"></span>
-        <div class="caption">
-          <p>
-            {{#HasCapability 'PRESENCE'}}
-            {{#if present}}
-            <span class="label label-success">present</span>
-            {{else}}
-            <span class="label label-warning">absent</span>
-            {{/if}}
-            {{/HasCapability}}
+          {{#HasCapability 'SWITCH'}}
+          {{#if state}}
+          <span class="label label-success">state: on</span>
+          {{else}}
+          <span class="label label-warning">state: off</span>
+          {{/if}}
+          {{/HasCapability}}
 
-            {{#HasCapability 'SWITCH'}}
-            {{#if state}}
-            <span class="label label-success">on</span>
-            {{else}}
-            <span class="label label-warning">off</span>
-            {{/if}}
-            {{/HasCapability}}
-          </p>
-          <p>
-            <div class="btn-group btn-group-sm" role="group" aria-label="...">
-              <button type="button" class="btn btn-default device-name" aria-expanded="false" disabled="disabled">
-                {{Name this}}
-              </button>
-              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-left" role="menu">
-                {{#HasCapability 'SCAN'}}
-                <li><a href="#" class="device-command" data-command="scan">Scan</a></li>
-                {{/HasCapability}}
+          {{#HasCapability 'DIMMABLE'}}
+          {{#if state}}
+          <span class="label label-success">brigthness: {{PercentOf brightness 255}}%</span>
+          {{else}}
+          <span class="label label-warning">brightness: {{PercentOf brightness 255}}%</span>
+          {{/if}}
+          {{/HasCapability}}
+        </p>
+      </div>
+      <div class="btn-group btn-group" role="group" aria-label="...">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+          <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+          {{#HasCapability 'SCAN'}}
+          <li><a href="#" class="device-command" data-command="scan">Scan</a></li>
+          {{/HasCapability}}
 
-                {{#HasCapability 'SWITCH'}}
-                {{#if state}}
-                <li><a href="#" class="device-set" data-key="state" data-value="false">Turn off</a></li>
-                {{else}}
-                <li><a href="#" class="device-set" data-key="state" data-value="true">Turn on</a></li>
-                {{/if}}
-                {{/HasCapability}}
+          {{#HasCapability 'SWITCH'}}
+          {{#if state}}
+          <li><a href="#" class="device-set" data-key="state" data-value="false">Turn off</a></li>
+          {{else}}
+          <li><a href="#" class="device-set" data-key="state" data-value="true">Turn on</a></li>
+          {{/if}}
+          {{/HasCapability}}
 
-                {{#HasCapability 'DIMMABLE'}}
-                <li><a href="#"><span class='glyphicon glyphicon glyphicon-adjust'></span>
-                  <input type="range" min="0" max="255" value="{{brightness}}"></a></li>
-                {{/HasCapability}}
+          {{#HasCapability 'DIMMABLE'}}
+          <li><a href="#"><span class='glyphicon glyphicon glyphicon-adjust'></span>
+            <input type="range" min="0" max="255" value="{{brightness}}"></a></li>
+          {{/HasCapability}}
 
-                {{#HasCapability 'COLOR_TEMPERATURE'}}
-                <li><a href="#"><span class='glyphicon glyphicon glyphicon-tint'></span>
-                  <input type="range" min="153" max="500" value="{{color_temperature}}"></a></li>
-                {{/HasCapability}}
+          {{#HasCapability 'COLOR_TEMPERATURE'}}
+          <li><a href="#"><span class='glyphicon glyphicon glyphicon-tint'></span>
+            <input type="range" min="153" max="500" value="{{color_temperature}}"></a></li>
+          {{/HasCapability}}
 
-                {{#HasCapability 'PRESENCE'}}
-                {{#if present}}
-                <li><a href="#" class="device-set" data-key="present" data-value="false">Fake Absent</a></li>
-                {{else}}
-                <li><a href="#" class="device-set" data-key="present" data-value="true">Fake Present</a></li>
-                {{/if}}
-                {{/HasCapability}}
+          {{#HasCapability 'PRESENCE'}}
+          {{#if present}}
+          <li><a href="#" class="device-set" data-key="present" data-value="false">Fake Absent</a></li>
+          {{else}}
+          <li><a href="#" class="device-set" data-key="present" data-value="true">Fake Present</a></li>
+          {{/if}}
+          {{/HasCapability}}
 
-                <li class="divider"></li>
-                <li><a href="#" class='device-change-room'>Change room</a></li>
-                <li><a href="#" class='device-change-name'>Change name</a></li>
-                <li><a href="#" class='device-delete'>Delete</a></li>
-              </ul>
-            </div>
-          </p>
-        </div>
+          <li class="divider"></li>
+          <li><a href="#" class='device-change-room'>Change room</a></li>
+          <li><a href="#" class='device-change-name'>Change name</a></li>
+          <li><a href="#" class='device-delete'>Delete</a></li>
+        </ul>
       </div>
     </div>
   </script>
@@ -535,32 +537,31 @@
     {{#if loading}}
       {{> loading}}
     {{else}}
-    <h2 class="page-header">
-      Rooms and Devices
 
-      <div class="btn-group btn-group-xs pull-right" role="group" aria-label="...">
-        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-          <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-right" role="menu">
-          <li><a href="#" class='create-new-room'>Create new room</a></li>
-          <li><a href="#" class='add-new-device'>Add new device</a></li>
-        </ul>
-      </div>
-    </h2>
+    <div class="btn-group btn-group-xs pull-right" role="group">
+      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right" role="menu">
+        <li><a href="#" class='create-new-room'>Create new room</a></li>
+        <li><a href="#" class='add-new-device'>Add new device</a></li>
+      </ul>
+    </div>
 
     <div class="row devices">
     {{#HomelessDevices}}
-      {{> device}}
+      <div class="col-sm-3 col-md-3">
+        {{> device}}
+      </div>
     {{/HomelessDevices}}
     </div>
 
-    {{#NameSort objects.room}}
-    <div class="room" data-room-id="{{@key}}">
-      <h3>
-        {{Name this}}
+    <div class="row">
+      {{#NameSort objects.room}}
+      <div class="room col-sm-3 col-md-3" data-room-id="{{id}}">
+        <h3>{{Name this}}</h3>
 
-        <div class="btn-group btn-group-xs pull-right" role="group" aria-label="...">
+        <div class="btn-group btn-group-xs" role="group" aria-label="...">
           <button type="button" class="btn btn-default all-on">
             <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
             All on
@@ -578,17 +579,17 @@
             <li><a href="#" class='room-delete'>Delete</a></li>
           </ul>
         </div>
-      </h3>
 
-      <div class="row devices">
-      {{#DevicesForRoom id}}
-        {{> device}}
-      {{else}}
-        <i>No devices found.</i>
-      {{/DevicesForRoom}}
+        <div class="devices">
+        {{#DevicesForRoom id}}
+          {{> device}}
+        {{else}}
+          <i>No devices found.</i>
+        {{/DevicesForRoom}}
+        </div>
       </div>
+      {{/NameSort}}
     </div>
-    {{/NameSort}}
     {{/if}}
   </script>
 
@@ -635,7 +636,9 @@
     <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
         <ul class="nav nav-sidebar">
-          <li class="active" data-mode="devices"><a href="#">Rooms and Devices <span class="sr-only">(current)</span></a></li>
+          <li class="active" data-mode="devices"><a href="#">
+            Rooms and Devices
+          </a></li>
           <li data-mode="accounts"><a href="#">Accounts <span class="sr-only">(current)</span></a></li>
         </ul>
       </div>

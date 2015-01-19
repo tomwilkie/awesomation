@@ -198,6 +198,10 @@ var AWESOMATION = (function() {
       return moment(millis).format('LLL');
     },
 
+    'PercentOf': function(numerator, denominator) {
+      return sprintf('%d', numerator * 100. / denominator);
+    },
+
     'DevicesForAccount': function(account_id, options) {
       var devices = $.map(cache.objects.device, function(device) {
         if (device.account === account_id) {

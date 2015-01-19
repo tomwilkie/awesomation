@@ -5,6 +5,7 @@
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
   padding-top: 0px;
+  background-color: rgb(229, 229, 229);
 }
 
 
@@ -44,7 +45,7 @@ body {
     padding: 20px;
     overflow-x: hidden;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    background-color: #f5f5f5;
+    background-color: #FFFFFF;
     border-right: 1px solid #eee;
   }
 }
@@ -88,24 +89,51 @@ body {
  * Placeholder dashboard ideas
  */
 
-.devices {
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-.device {
-  height: 140px;
-}
-
-.devices h4 {
-  margin-bottom: 0;
-}
-
-.devices button.device-name {
-  width: 130px;
+.room > h3 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.device {
+  position: relative;
+  box-sizing: border-box;
+  margin-top: 15px;
+  padding: 5px;
+  height: 140px;
+  width: 100%;
+
+  text-align: center;
+  font: Helvetica Neue;
+
+  border-radius: 3px;
+  border: 1px solid #F5F5F5;
+  background-color: #FFFFFF;
+  box-shadow: rgba(0,0,0,.098) 0 2px 4px, rgba(0,0,0,.098) 0 0 3px;
+  color: #424242;
+}
+
+.device .device-name {
+  padding-left: 5px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  font-size: 1.5em;
+}
+
+.device .btn-group {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+}
+
+.device button.dropdown-toggle {
+  color: inherit;
+  background: inherit;
+  border: none;
+  border-radius: 3px 0px 3px 0px;
 }
 
 /*
