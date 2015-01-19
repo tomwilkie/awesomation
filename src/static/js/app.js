@@ -251,13 +251,17 @@ var AWESOMATION = (function() {
     $(window).bind('hashchange', render);
     render();
 
+    $('body').on('click', 'a[href=#]', function(event) {
+      event.preventDefault();
+    });
+
+    $('body').on('submit', 'form', function(event) {
+      event.preventDefault();
+    });
+
     $('.nav-sidebar li').on('click', function() {
       var mode = $(this).data('mode');
       $.bbq.pushState({mode: mode});
-    });
-
-    $('body').on('click', 'a[href=#]', function(event) {
-      event.preventDefault();
     });
 
     $('div.main').on('click', 'div.room .all-on', function() {
@@ -340,6 +344,19 @@ var AWESOMATION = (function() {
         if (result === undefined || result === true) {
           hide();
         }
+      });
+
+      modal.on('submit', 'form', function() {
+        // If there is a primary button in the form,
+        // click that.  Otherwise click the primary button
+        // in the modal.
+        var form_button = $(this).find('.btn-primary');
+        if (form_button.length > 0) {
+          form_button.trigger('click');
+          return;
+        }
+
+        modal.find('.btn-primary').trigger('click');
       });
 
       return {
