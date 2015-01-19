@@ -93,10 +93,19 @@ class Room(model.Base):
                  self.name, brightness, color_temperature)
 
     for light in lights:
-      light.brightness = brightness
+      need_sync = False
+
+      if light.brightness != brightness:
+        light.brightness = brightness
+        need_sync = True
+
       if 'COLOR_TEMPERATURE' in light.capabilities:
-        light.color_temperature = color_temperature
-      light.sync()
+        if light.color_temperature != color_temperature:
+          light.color_temperature = color_temperature
+          need_sync = True
+
+      if need_sync:
+        light.sync()
 
     ndb.put_multi(lights)
 
