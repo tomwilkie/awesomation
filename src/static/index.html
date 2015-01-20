@@ -560,7 +560,7 @@
 
     <div class="row">
     {{#HomelessDevices}}
-      <div class="room col-xs-12 col-md-4 col-lg-2">
+      <div class="room col-xs-6 col-sm-4 col-lg-2">
         {{> device}}
       </div>
     {{/HomelessDevices}}
@@ -569,7 +569,7 @@
     <div class="row devices">
     {{#NameSort objects.room}}
 
-      <div class="room col-xs-12 col-md-4 col-lg-2" data-room-id="{{id}}">
+      <div class="room col-xs-6 col-sm-4 col-lg-2" data-room-id="{{id}}">
         <div class="room-name">{{Name this}}</div>
 
         <div class="btn-group btn-group-xs" role="group" aria-label="...">
@@ -597,6 +597,18 @@
           <i>No devices found.</i>
         {{/DevicesForRoom}}
       </div>
+
+      {{#IfMod @index 2}}
+        <div class="clearfix visible-xs-block"></div>
+      {{/IfMod}}
+
+      {{#IfMod @index 3}}
+        <div class="clearfix visible-sm-block visible-md-block"></div>
+      {{/IfMod}}
+
+      {{#IfMod @index 6}}
+        <div class="clearfix visible-lg-block"></div>
+      {{/IfMod}}
     {{/NameSort}}
     </div>
     {{/if}}

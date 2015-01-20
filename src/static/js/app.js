@@ -141,8 +141,8 @@ var AWESOMATION = (function() {
 
     'NameSort': function(objects, options) {
       if (objects) {
-        var result = $.map(sort_by_name(objects), options.fn);
-        return result.join('');
+        objects = sort_by_name(objects);
+        return Handlebars.helpers.each(objects, options);
       }
 
       return options.inverse(this);
@@ -150,6 +150,15 @@ var AWESOMATION = (function() {
 
     'IfEquals': function(a, b, options) {
       if (a === b) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
+    },
+
+    'IfMod': function(a, b, options) {
+      var test = ((a + 1) % b) === 0;
+      if (test) {
         return options.fn(this);
       } else {
         return options.inverse(this);
