@@ -458,12 +458,11 @@
   </script>
 
   <script type="text/x-handlebars-template" class="handlebars-partial" id="device">
-    <div class="device" data-device-id="{{id}}">
-      <div class="caption">
-        <p class="device-name">
-          {{Name this}}
-        </p>
-        <p>
+    <div class="device card" data-device-id="{{id}}">
+      <div class="content">
+        <div class="watermark lighting"><span class="glyphicon glyphicon glyphicon-certificate" aria-hidden="true"></span></div>
+        <div class="device-name">{{Name this}}</div>
+        <div class="device-details">
           {{#HasCapability 'PRESENCE'}}
           {{#if present}}
           <span class="label label-success">present: yes</span>
@@ -487,7 +486,7 @@
           <span class="label label-warning">brightness: {{PercentOf brightness 255}}%</span>
           {{/if}}
           {{/HasCapability}}
-        </p>
+        </div>
       </div>
       <div class="btn-group btn-group" role="group" aria-label="...">
         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -538,27 +537,18 @@
       {{> loading}}
     {{else}}
 
-    <div class="btn-group btn-group-xs pull-right" role="group">
-      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-right" role="menu">
-        <li><a href="#" class='create-new-room'>Create new room</a></li>
-        <li><a href="#" class='add-new-device'>Add new device</a></li>
-      </ul>
-    </div>
-
-    <div class="row devices">
+    <div class="row">
     {{#HomelessDevices}}
-      <div class="col-sm-3 col-md-3">
+      <div class="room col-xs-12 col-md-4 col-lg-2">
         {{> device}}
       </div>
     {{/HomelessDevices}}
     </div>
 
-    <div class="row">
-      {{#NameSort objects.room}}
-      <div class="room col-sm-3 col-md-3" data-room-id="{{id}}">
+    <div class="row devices">
+    {{#NameSort objects.room}}
+
+      <div class="room col-xs-12 col-md-4 col-lg-2" data-room-id="{{id}}">
         <h3>{{Name this}}</h3>
 
         <div class="btn-group btn-group-xs" role="group" aria-label="...">
@@ -580,15 +570,13 @@
           </ul>
         </div>
 
-        <div class="devices">
         {{#DevicesForRoom id}}
           {{> device}}
         {{else}}
           <i>No devices found.</i>
         {{/DevicesForRoom}}
-        </div>
       </div>
-      {{/NameSort}}
+    {{/NameSort}}
     </div>
     {{/if}}
   </script>
@@ -597,54 +585,57 @@
     {{#if loading}}
       {{> loading}}
     {{else}}
-    <h2 class="page-header">
-      Accounts
-
-      <div class="btn-group btn-group-xs pull-right" role="group" aria-label="...">
-        <button type="button" class="btn btn-default add-new-device" aria-expanded="false" data-accounts-only="true">
-          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-          Add new account
-        </button>
-      </div>
-    </h2>
-
     {{#NameSort objects.account}}
-    <div class="account" data-account-id="{{id}}">
-      <h4>
-        {{human_type}} account
+    <div class="row">
+      <div class="col-xs-12 room">
+        <div class="account card"  data-account-id="{{id}}">
+          <h4>
+            {{human_type}} account
 
-        <div class="btn-group btn-group-xs pull-right" role="group">
-          <button type="button" class="btn btn-default delete-account">
-            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-            Delete
-          </button>
-          <button type="button" class="btn btn-default account-command" data-command="refresh_devices">
-            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
-            Refresh
-          </button>
+            <div class="btn-group btn-group-xs pull-right" role="group">
+              <button type="button" class="btn btn-default delete-account">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                Delete
+              </button>
+              <button type="button" class="btn btn-default account-command" data-command="refresh_devices">
+                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                Refresh
+              </button>
+            </div>
+          </h4>
+
+          <p>Last updated: {{HumanTime last_updated}}</p>
+          <p>Devices: {{#DevicesForAccount id}}{{Name this}}{{else}}<i>None</i>{{/DevicesForAccount}}</p>
         </div>
-      </h4>
-
-      <p>Last updated: {{HumanTime last_updated}}</p>
-      <p>Devices: {{#DevicesForAccount id}}{{Name this}}{{else}}<i>None</i>{{/DevicesForAccount}}</p>
+      </div>
     </div>
     {{/NameSort}}
     {{/if}}
   </script>
 
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-sm-3 col-md-2 sidebar">
-        <ul class="nav nav-sidebar">
-          <li class="active" data-mode="devices"><a href="#">
-            Rooms and Devices
-          </a></li>
-          <li data-mode="accounts"><a href="#">Accounts <span class="sr-only">(current)</span></a></li>
+  <div>
+    <div class="header">
+      <h1>Awesomation
+
+      <div class="btn-group pull-right" role="group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+          <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+          <li><a href="#" class='create-new-room'>Create new room</a></li>
+          <li><a href="#" class='add-new-device'>Add new device</a></li>
         </ul>
       </div>
+      </h1>
 
-      <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-      </div>
+      <ul class="nav nav-pills">
+        <li class="active" data-mode="devices"><a href="#">
+          Rooms and Devices
+        </a></li>
+        <li data-mode="accounts"><a href="#">Accounts <span class="sr-only">(current)</span></a></li>
+      </ul>
+    </div>
+    <div id="main" class="container-fluid">
     </div>
   </div>
 

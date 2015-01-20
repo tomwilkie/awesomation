@@ -241,14 +241,14 @@ var AWESOMATION = (function() {
       var mode = $.bbq.getState('mode') || 'devices';
 
       // Update the selected status on the left.
-      $('.nav-sidebar li').removeClass('active');
-      $(sprintf('.nav-sidebar li[data-mode=%s]', mode)).addClass('active');
+      $('.nav li').removeClass('active');
+      $(sprintf('.nav li[data-mode=%s]', mode)).addClass('active');
 
       // Rendem the main view.
       var template = $(sprintf('script#%s-template', mode)).text();
       template = Handlebars.compile(template);
       var rendered = template(cache);
-      $('div.main').html(rendered);
+      $('div#main').html(rendered);
     }
 
     $('body').on('cache_updated', render);
@@ -263,12 +263,12 @@ var AWESOMATION = (function() {
       event.preventDefault();
     });
 
-    $('.nav-sidebar li').on('click', function() {
+    $('.nav li').on('click', function() {
       var mode = $(this).data('mode');
       $.bbq.pushState({mode: mode});
     });
 
-    $('div.main').on('click', 'div.room .all-on', function() {
+    $('div#main').on('click', 'div.room .all-on', function() {
       var room_id = $(this).closest('div.room').data('room-id');
 
       net.post(sprintf('/api/room/%s/command', room_id), {
@@ -276,7 +276,7 @@ var AWESOMATION = (function() {
       });
     });
 
-    $('div.main').on('click', 'div.room .all-off', function() {
+    $('div#main').on('click', 'div.room .all-off', function() {
       var room_id = $(this).closest('div.room').data('room-id');
 
       net.post(sprintf('/api/room/%s/command', room_id), {
@@ -284,7 +284,7 @@ var AWESOMATION = (function() {
       });
     });
 
-    $('div.main').on('click', 'div.room .room-set', function() {
+    $('div#main').on('click', 'div.room .room-set', function() {
       var room_id = $(this).closest('div.room').data('room-id');
       var data = {};
       data[$(this).data('key')] = $(this).data('value');
@@ -292,7 +292,7 @@ var AWESOMATION = (function() {
       net.post(sprintf('/api/room/%s', room_id), data);
     });
 
-    $('div.main').on('click', 'div.device .device-set', function() {
+    $('div#main').on('click', 'div.device .device-set', function() {
       var device_id = $(this).closest('div.device').data('device-id');
       var data = {};
       data[$(this).data('key')] = $(this).data('value');
@@ -300,7 +300,7 @@ var AWESOMATION = (function() {
       net.post(sprintf('/api/device/%s', device_id), data);
     });
 
-    $('div.main').on('click', 'div.device .device-command', function() {
+    $('div#main').on('click', 'div.device .device-command', function() {
       var device_id = $(this).closest('div.device').data('device-id');
       var command = $(this).data('command');
 
@@ -309,7 +309,7 @@ var AWESOMATION = (function() {
       });
     });
 
-    $('div.main').on('click', 'div.account .account-command', function() {
+    $('div#main').on('click', 'div.account .account-command', function() {
       var account_id = $(this).closest('div.account').data('account-id');
       var command = $(this).data('command');
 
@@ -389,7 +389,7 @@ var AWESOMATION = (function() {
       return ("0000" + (Math.random() * Math.pow(36,4) << 0).toString(36)).slice(-4);
     }
 
-    $('div.main').on('click', '.create-new-room', function() {
+    $('.create-new-room').on('click', function() {
       dialog.show('script#create-new-room-dialog-template', {}, function() {
         var room_id = random_id();
         var room_name = $(this).find('input#room-name').val();
@@ -402,7 +402,7 @@ var AWESOMATION = (function() {
 
     // Dialog: add new device
 
-    $('div.main').on('click', '.add-new-device', function() {
+    $('.add-new-device').on('click', function() {
       var accounts_only = $(this).data('accounts-only');
 
       function new_device(event) {
@@ -496,7 +496,7 @@ var AWESOMATION = (function() {
 
     // Dialog: change room name
 
-    $('div.main').on('click', 'div.room .room-change-name', function() {
+    $('div#main').on('click', 'div.room .room-change-name', function() {
       var room_id = $(this).closest('div.room').data('room-id');
       var room = cache.objects.room[room_id];
 
@@ -510,7 +510,7 @@ var AWESOMATION = (function() {
 
     // Dialog: setup auto dimming
 
-    $('div.main').on('click', 'div.room .configure-auto-dim', function() {
+    $('div#main').on('click', 'div.room .configure-auto-dim', function() {
       var room_id = $(this).closest('div.room').data('room-id');
       var room = cache.objects.room[room_id];
 
@@ -539,7 +539,7 @@ var AWESOMATION = (function() {
 
     // Dialog: delete room
 
-    $('div.main').on('click', 'div.room .room-delete', function() {
+    $('div#main').on('click', 'div.room .room-delete', function() {
       var room_id = $(this).closest('div.room').data('room-id');
       var room = cache.objects.room[room_id];
 
@@ -550,7 +550,7 @@ var AWESOMATION = (function() {
 
     // Dialog: device change room
 
-    $('div.main').on('click', 'div.device .device-change-room', function() {
+    $('div#main').on('click', 'div.device .device-change-room', function() {
       var device_id = $(this).closest('div.device').data('device-id');
       var state = {rooms: cache.objects.room, device: cache.objects.device[device_id]};
 
@@ -564,7 +564,7 @@ var AWESOMATION = (function() {
 
     // Dialog: change device name
 
-    $('div.main').on('click', 'div.device .device-change-name', function() {
+    $('div#main').on('click', 'div.device .device-change-name', function() {
       var device_id = $(this).closest('div.device').data('device-id');
       var device = cache.objects.device[device_id];
 
@@ -578,7 +578,7 @@ var AWESOMATION = (function() {
 
     // Dialog: delete device
 
-    $('div.main').on('click', 'div.device .device-delete', function() {
+    $('div#main').on('click', 'div.device .device-delete', function() {
       var device_id = $(this).closest('div.device').data('device-id');
       var device = cache.objects.device[device_id];
 
@@ -589,7 +589,7 @@ var AWESOMATION = (function() {
 
     // Dialog: delete account
 
-    $('div.main').on('click', 'div.account .delete-account', function() {
+    $('div#main').on('click', 'div.account .delete-account', function() {
       var account_id = $(this).closest('div.account').data('account-id');
       var account = cache.objects.account[account_id];
 
