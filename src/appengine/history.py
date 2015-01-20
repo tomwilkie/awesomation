@@ -87,7 +87,7 @@ FIELDS_TO_IGNORE = {'class', 'id', 'owner', 'last_update', 'capabilities',
                     'zwave_command_class_values', 'capabilities'}
 
 def get_history_table():
-  if os.environ.get('SERVER_SOFTWARE','').startswith('Development'):
+  if os.environ.get('SERVER_SOFTWARE', '').startswith('Development'):
     logging.info('Using local dynamodb.')
     connection = layer1.DynamoDBConnection(
         region='anything',
@@ -160,7 +160,7 @@ def store_batch():
     #  https://github.com/boto/boto/issues/1531
     for key in version.keys():
       value = version[key]
-      if isinstance(value, list):
+      if isinstance(value, (list, dict)):
         version[key] = flask.json.dumps(value)
       elif isinstance(value, float):
         del version[key]

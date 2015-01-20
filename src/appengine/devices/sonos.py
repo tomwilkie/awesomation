@@ -9,6 +9,8 @@ from appengine import device, pushrpc
 class SonosDevice(device.Device):
   """A hue light."""
   uid = ndb.StringProperty(required=True)
+  state = ndb.StringProperty()
+  currently_playing = ndb.JsonProperty()
 
   def get_categories(self):
     return ['MUSIC']
@@ -21,6 +23,5 @@ class SonosDevice(device.Device):
 
   def handle_event(self, event):
     """Handle a device update event."""
-    self.device_name = event['name']
-    self.uid = event['uid']
+    self.populate(**event)
 

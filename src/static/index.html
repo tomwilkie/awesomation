@@ -497,6 +497,16 @@
           {{#if noise}} <span class="label label-success">Noise: {{noise}}db</span>{{/if}}
           {{#if lux}} <span class="label label-success">Brigthness: {{lux}}lux</span>{{/if}}
           {{/Category}}
+
+          {{#Category 'MUSIC'}}
+          {{#IfEquals state 'PLAYING'}}
+          <span class="label label-success">
+            playing: {{currently_playing.title}} by {{currently_playing.artist}}
+          </span>
+          {{else}}
+          <span class="label label-warning">paused</span>
+          {{/IfEquals}}
+          {{/Category}}
         </div>
       </div>
       <div class="btn-group btn-group" role="group" aria-label="...">
