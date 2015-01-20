@@ -6,8 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
   <link rel="shortcut icon" href="/static/imgs/favicon.png">
-  <link href="/static/css/bootstrap.css" rel="stylesheet">
-  <link href="/static/css/screen.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/static/css/bootstrap.css" >
+  <link rel="stylesheet" href="/static/css/glyphicons-bootstrap.css">
+  <link rel="stylesheet" href="/static/css/glyphicons.css">
+  <link rel="stylesheet" href="/static/css/screen.css">
 
   <script type="text/javascript" src="/static/js/jquery.js"></script>
   <script type="text/javascript" src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
@@ -17,7 +20,6 @@
   <script type="text/javascript" src="/static/js/handlebars.js"></script>
   <script type="text/javascript" src="/static/js/bootstrap.js"></script>
   <script type="text/javascript" src="/static/js/moment.js"></script>
-  <script type="text/javascript" src="/_ah/channel/jsapi"></script>
   <script type="text/javascript" src="/static/js/app.js"></script>
 </head>
 <body>
@@ -460,7 +462,7 @@
   <script type="text/x-handlebars-template" class="handlebars-partial" id="device">
     <div class="device card" data-device-id="{{id}}">
       <div class="content">
-        <div class="watermark lighting"><span class="glyphicon glyphicon glyphicon-certificate" aria-hidden="true"></span></div>
+        <div class="watermark lighting"><span class="glyphicons glyphicons-lightbulb x4" aria-hidden="true"></span></div>
         <div class="device-name">{{Name this}}</div>
         <div class="device-details">
           {{#HasCapability 'PRESENCE'}}

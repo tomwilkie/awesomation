@@ -89,11 +89,23 @@ dist/static/js/moment.js: third_party/static/moment/moment.js
 
 # final actual targets
 py_files := $(patsubst src/%,dist/%,$(shell find src -name *.py))
-static_files := $(patsubst src/static/%,dist/static/%,$(shell find src/static -type f))
-static_third_party = $(patsubst %,dist/static/%,js/jquery.js js/sprintf.js js/handlebars.js js/bootstrap.js css/bootstrap.css css/bootstrap.css.map fonts/glyphicons-halflings-regular.eot fonts/glyphicons-halflings-regular.svg fonts/glyphicons-halflings-regular.ttf fonts/glyphicons-halflings-regular.woff js/jquery.ba-bbq.js js/moment.js)
+static_files = $(patsubst src/static/%,dist/static/%,$(shell find src/static -type f))
+static_files := $(static_files) $(patsubst %,dist/static/%,js/jquery.js js/sprintf.js js/handlebars.js js/jquery.ba-bbq.js js/moment.js)
 
+define INCLUDE_STATIC_SUBDIR
+static_files := $(static_files) $(patsubst $(1)/%,dist/static/$(2)/%,$(shell find $(1) -type f))
+dist/static/$(2)/%: $(1)/%
+	@mkdir -p $$(@D)
+	cp $$< $$@
+endef
 
-dist/static: $(static_files) $(static_third_party)
+$(eval $(call INCLUDE_STATIC_SUBDIR,third_party/static/bootstrap/dist/css,css))
+$(eval $(call INCLUDE_STATIC_SUBDIR,third_party/static/bootstrap/dist/js,js))
+$(eval $(call INCLUDE_STATIC_SUBDIR,third_party/static/bootstrap/dist/fonts,fonts))
+$(eval $(call INCLUDE_STATIC_SUBDIR,third_party/static/glyphicons_pro/glyphicons/web/bootstrap_example/css,css))
+$(eval $(call INCLUDE_STATIC_SUBDIR,third_party/static/glyphicons_pro/glyphicons/web/bootstrap_example/fonts,fonts))
+
+dist/static: $(static_files)
 
 dist: dist/app.yaml dist/cron.yaml $(py_files) $(third_party_pyfiles) dist/static
 

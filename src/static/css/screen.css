@@ -113,14 +113,9 @@ div#main {
 }
 
 .device .watermark {
-  font-size: 200px;
-  text-align: center;
-
   position: absolute;
-  height: 200px;
-  width: 200px;
-  bottom: -60px;
-  right: -60px;
+  left: -15px;
+  bottom: -5px;
 }
 
 .watermark.lighting {
