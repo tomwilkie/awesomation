@@ -4,12 +4,14 @@ import logging
 
 from google.appengine.ext import ndb
 
-from appengine import device, pushrpc, rest, room
+from appengine import device, pushrpc, rest
 
 
 NODE_ADDED = 'NodeAdded'
 NODE_INFO_UPDATE = 'NodeInfoUpdate'
-
+NODE_VALUE_ADDED = 'ValueAdded'
+NODE_VALUE_CHANGED = 'ValueChanged'
+NODE_VALUE_REMOVED = 'ValueRemoved'
 
 ZWAVE_DRIVERS = {}
 
@@ -113,6 +115,7 @@ class ZWaveDevice(device.Device):
 
   # Haven't found a good way to fake out the properites yet
   state = ndb.BooleanProperty()
+  occupied = ndb.BooleanProperty(default=False)
 
   def __init__(self, **kwargs):
     super(ZWaveDevice, self).__init__(**kwargs)
@@ -163,8 +166,9 @@ class ZWaveDevice(device.Device):
     if 'nodeId' in event:
       self.zwave_node_id = event['nodeId']
 
-    if notification_type in {'ValueAdded', 'ValueChanged'}:
-      value = event['valueId']
+    if notification_type in {NODE_VALUE_ADDED, NODE_VALUE_CHANGED}:
+      # Make a copy of the value dict and mutate that
+      value = dict(event['valueId'])
       command_class = value.pop('commandClass')
       index = value.pop('index')
       value['read_only'] = value.pop('readOnly')
@@ -179,10 +183,7 @@ class ZWaveDevice(device.Device):
       logging.info('%s.%s[%d] <- %s', self.zwave_node_id,
                    command_class, index, value)
 
-      if command_class == 'COMMAND_CLASS_SENSOR_BINARY':
-        self.lights(value['value'])
-
-    elif notification_type in 'ValueRemoved':
+    elif notification_type == NODE_VALUE_REMOVED:
       command_class = value.pop('commandClass')
       index = value.pop('index')
       ccv = self.get_command_class_value(command_class, index)
@@ -191,7 +192,7 @@ class ZWaveDevice(device.Device):
       logging.info('deleted %s.%s[%d]', self.zwave_node_id,
                    command_class, index)
 
-    elif notification_type == 'NodeInfoUpdate':
+    elif notification_type == NODE_INFO_UPDATE:
       # event['basic']
       # event['generic']
       # event['specific']
@@ -210,18 +211,6 @@ class ZWaveDevice(device.Device):
 
   def sync(self):
     self.driver().sync()
-
-  @rest.command
-  def lights(self, state):
-    """Turn the lights on/off in the room this sensor is in."""
-    if not self.room:
-      return
-
-    room_obj = room.Room.get_by_id(self.room)
-    if not room_obj:
-      return
-
-    room_obj.set_lights(state)
 
   @classmethod
   @device.static_command

@@ -25,8 +25,12 @@ def _update_per_namespace():
       logging.error('Error refreshing account %s',
                     acc.key.string_id(), exc_info=sys.exc_info())
 
-  for _room in room.Room.query(room.Room.auto_dim_lights == True).iter():
-    _room.update_auto_dim()
+  for _room in room.Room.query().iter():
+    try:
+      _room.update_lights()
+    except:
+      logging.error('Error updating room %s',
+                    _room.name, exc_info=sys.exc_info())
 
 
 def update_per_namespace():
