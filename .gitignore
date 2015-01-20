@@ -7,3 +7,4 @@ dist/
 \#*
 src/common/creds
 src/common/creds.py
+third_party/static/glypicons_pro

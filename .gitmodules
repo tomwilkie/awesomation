@@ -70,6 +70,3 @@
 [submodule "third_party/py/SoCo"]
 	path = third_party/py/SoCo
 	url = https://github.com/SoCo/SoCo.git
-[submodule "third_party/static/glyphicons_pro"]
-	path = third_party/static/glyphicons_pro
-	url = https://github.com/tomwilkie/glyphicons_pro.git
