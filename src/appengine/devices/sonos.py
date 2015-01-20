@@ -10,6 +10,9 @@ class SonosDevice(device.Device):
   """A hue light."""
   uid = ndb.StringProperty(required=True)
 
+  def get_categories(self):
+    return ['MUSIC']
+
   @classmethod
   @device.static_command
   def scan(cls):

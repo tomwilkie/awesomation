@@ -229,6 +229,29 @@ var AWESOMATION = (function() {
     'InvertColorTemp': function(ct) {
       return 500 - ct;
     },
+
+    'Category': function(category, options) {
+      if (this.categories && this.categories.indexOf(category) >= 0) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
+    },
+
+    'IconFor': function() {
+      this.categories.sort();
+      var result = $.map(this.categories, function(category) {
+        switch(category) {
+          case 'PRESENCE': return 'glyphicons-iphone';
+          case 'LIGHTING': return 'glyphicons-lightbulb';
+          case 'MUSIC': return 'glyphicons-music';
+          case 'CLIMATE': return 'glyphicons-cloud';
+        }
+      });
+      if (result.length > 0) {
+        return result[0];
+      }
+    }
   });
 
   $(function () {

@@ -10,6 +10,9 @@ class TKBMultilevelPowerSwitch(zwave.Driver):
   def get_capabilities(self):
     return ['SWITCH']
 
+  def get_categories(self):
+    return ['LIGHTING']
+
   def sync(self):
     ccv = self._device.get_command_class_value(
         'COMMAND_CLASS_SWITCH_MULTILEVEL', 0)

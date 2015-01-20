@@ -54,10 +54,19 @@ class Device(model.Base):
 
   last_update = ndb.DateTimeProperty(required=False, auto_now=True)
   room = ndb.StringProperty()
+
+  # What can I do with this device? ie SWITCH, DIMMABLE, COLOR_TEMP etc
   capabilities = ndb.ComputedProperty(lambda self: self.get_capabilities(),
                                       repeated=True)
 
+  # What broad category does this device belong to?  LIGHTING, CLIMATE, MUSIC
+  categories = ndb.ComputedProperty(lambda self: self.get_categories(),
+                                    repeated=True)
+
   def get_capabilities(self):
+    return []
+
+  def get_categories(self):
     return []
 
   @classmethod
@@ -108,6 +117,8 @@ class Switch(Device):
   def get_capabilities(self):
     return ['SWITCH']
 
+  def get_categories(self):
+    return ['LIGHTING']
 
 # pylint: disable=invalid-name
 blueprint = flask.Blueprint('device', __name__)

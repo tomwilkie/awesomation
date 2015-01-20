@@ -37,6 +37,9 @@ class Driver(object):
   def get_capabilities(self):
     return []
 
+  def get_categories(self):
+    return []
+
   def handle_event(self, event):
     pass
 
@@ -143,6 +146,9 @@ class ZWaveDevice(device.Device):
 
   def get_capabilities(self):
     return self.driver().get_capabilities()
+
+  def get_categories(self):
+    return self.driver().get_categories()
 
   def is_configured(self):
     return self.driver().is_configured()

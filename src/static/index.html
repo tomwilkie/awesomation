@@ -462,7 +462,7 @@
   <script type="text/x-handlebars-template" class="handlebars-partial" id="device">
     <div class="device card" data-device-id="{{id}}">
       <div class="content">
-        <div class="watermark lighting"><span class="glyphicons glyphicons-lightbulb x4" aria-hidden="true"></span></div>
+        <div class="watermark {{IconFor category}}"><span class="glyphicons {{IconFor category}} x4" aria-hidden="true"></span></div>
         <div class="device-name">{{Name this}}</div>
         <div class="device-details">
           {{#HasCapability 'PRESENCE'}}
@@ -488,6 +488,15 @@
           <span class="label label-warning">brightness: {{PercentOf brightness 255}}%</span>
           {{/if}}
           {{/HasCapability}}
+
+          {{#Category 'CLIMATE'}}
+          {{#if temperature}} <span class="label label-success">temperature: {{temperature}}C</span>{{/if}}
+          {{#if humidity}} <span class="label label-success">humidity: {{humidity}}%</span>{{/if}}
+          {{#if co2}} <span class="label label-success">CO<sub>2</sub>: {{co2}}ppm</span>{{/if}}
+          {{#if pressure}} <span class="label label-success">Pressure: {{pressure}}mb</span>{{/if}}
+          {{#if noise}} <span class="label label-success">Noise: {{noise}}db</span>{{/if}}
+          {{#if lux}} <span class="label label-success">Brigthness: {{lux}}lux</span>{{/if}}
+          {{/Category}}
         </div>
       </div>
       <div class="btn-group btn-group" role="group" aria-label="...">
@@ -551,7 +560,7 @@
     {{#NameSort objects.room}}
 
       <div class="room col-xs-12 col-md-4 col-lg-2" data-room-id="{{id}}">
-        <h3>{{Name this}}</h3>
+        <div class="room-name">{{Name this}}</div>
 
         <div class="btn-group btn-group-xs" role="group" aria-label="...">
           <button type="button" class="btn btn-default all-on">

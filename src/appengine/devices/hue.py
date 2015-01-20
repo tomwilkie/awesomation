@@ -16,6 +16,9 @@ class HueBridge(device.Device):
   def get_capabilities(self):
     return ['SCAN']
 
+  def get_categories(self):
+    return ['LIGHTING']
+
   @classmethod
   @device.static_command
   def scan(cls):

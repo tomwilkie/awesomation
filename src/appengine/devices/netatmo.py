@@ -20,6 +20,9 @@ class NetatmoWeatherStation(device.Device):
   pressure = ndb.FloatProperty()
   noise = ndb.FloatProperty()
 
+  def get_categories(self):
+    return ['CLIMATE']
+
   def handle_event(self, event):
     self.device_name = event['module_name']
     self.account = event['account']

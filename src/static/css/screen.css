@@ -74,10 +74,12 @@ div#main {
   padding-right: 8px;
 }
 
-.room > h3 {
+.room > .room-name {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 1.5em;
+  color: #424242;
 }
 
 .card {
@@ -90,7 +92,6 @@ div#main {
   background-color: #FFFFFF;
   box-shadow: rgba(0,0,0,.098) 0 2px 4px, rgba(0,0,0,.098) 0 0 3px;
   color: #424242;
-
 }
 
 .card .content {
@@ -118,8 +119,20 @@ div#main {
   bottom: -5px;
 }
 
-.watermark.lighting {
+.watermark.glyphicons-lightbulb {
   color: #FFECB3;
+}
+
+.watermark.glyphicons-iphone {
+  color: #9CCC65;
+}
+
+.watermark.glyphicons-cloud {
+  color: #EEEEEE;
+}
+
+.watermark.glyphicons-music {
+  color: #EF9A9A;
 }
 
 .device .device-name {

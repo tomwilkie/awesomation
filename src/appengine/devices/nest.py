@@ -17,6 +17,9 @@ class NestThermostat(device.Device):
   humidity = ndb.FloatProperty()
   account = ndb.StringProperty()
 
+  def get_categories(self):
+    return ['CLIMATE']
+
   def handle_event(self, event):
     self.account = event['account']
     self.humidity = event['humidity']
@@ -28,6 +31,9 @@ class NestThermostat(device.Device):
 class NestProtect(device.Device):
   """Class represents a Nest protect (smoke alarm)."""
   account = ndb.StringProperty()
+
+  def get_categories(self):
+    return ['CLIMATE']
 
   def handle_event(self, event):
     self.account = event['account']

@@ -37,6 +37,9 @@ class NetworkDevice(device.Device):
   def get_capabilities(self):
     return ['PRESENCE']
 
+  def get_categories(self):
+    return ['PRESENCE']
+
   @classmethod
   def handle_static_event(cls, event):
     """Handle a device update event."""

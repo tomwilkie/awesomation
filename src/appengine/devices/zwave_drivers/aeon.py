@@ -15,6 +15,9 @@ class AeonLabsMultiSensor(zwave.Driver):
   def get_capabilities(self):
     return ['OCCUPIED']
 
+  def get_categories(self):
+    return ['CLIMATE']
+
   def value_changed(self, event):
     """We've been told a value changed; deal with it."""
     value = event['valueId']
