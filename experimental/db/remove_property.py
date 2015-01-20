@@ -1,10 +1,20 @@
+""" Remove a property from the datastore.
+How to use:
+
+$ cd experimental/db/
+$ PYTHONPATH=. remote_api_shell.py -s homeawesomation.appspot.com
+> import remove_property
+"""
+
 from google.appengine.api import namespace_manager
+from google.appengine.ext import db
 
 class Base(db.Expando): pass
 
-for namespace in namespace_manager.list_namespaces():
+def remove(namespace, field):
   namespace_manager.set_namespace(namespace)
   for base in Base.all().run():
-    if hasattr(base, 'category'):
+    if hasattr(base, field):
+      print "%s %s" %(base.id, base.name)
       del base.category
       base.put()
