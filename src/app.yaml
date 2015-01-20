@@ -19,3 +19,5 @@ libraries:
 - name: ssl
   version: latest
 
+builtins:
+- remote_api: on
