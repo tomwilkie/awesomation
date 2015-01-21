@@ -98,16 +98,19 @@ class Device(model.Base):
       flask.abort(400)
     func(**command_dict)
 
-  def list_commands(self):
-    """List commands on this device."""
-    methods = (getattr(self, method)
-               for method in dir(self))
-    methods = (method for method in methods
-               if callable(method)
-               and method.is_command)
-    methods = [{'name': method.__name__}
-               for method in methods]
-    return methods
+  def find_room(self):
+    """Resolve the room for this device.  May return null."""
+    if not self.room:
+      return None
+
+    # This is a horrible hack, but room imports devices,
+    # so need to be lazy here.
+    from appengine import room
+    room_obj = room.Room.get_by_id(self._device.room)
+    if not room_obj:
+      return None
+
+    return room_obj
 
 
 class Switch(Device):

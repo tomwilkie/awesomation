@@ -248,6 +248,14 @@ var AWESOMATION = (function() {
       if (result.length > 0) {
         return result[0];
       }
+    },
+
+    'Int': function(i) {
+      return sprintf('%d', i);
+    },
+
+    'Float': function(d) {
+      return sprintf('%.1f', d);
     }
   });
 

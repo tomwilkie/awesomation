@@ -490,12 +490,12 @@
           {{/HasCapability}}
 
           {{#Category 'CLIMATE'}}
-          {{#if temperature}} <span class="label label-success">temperature: {{temperature}}C</span>{{/if}}
-          {{#if humidity}} <span class="label label-success">humidity: {{humidity}}%</span>{{/if}}
-          {{#if co2}} <span class="label label-success">CO<sub>2</sub>: {{co2}}ppm</span>{{/if}}
-          {{#if pressure}} <span class="label label-success">Pressure: {{pressure}}mb</span>{{/if}}
-          {{#if noise}} <span class="label label-success">Noise: {{noise}}db</span>{{/if}}
-          {{#if lux}} <span class="label label-success">Brigthness: {{lux}}lux</span>{{/if}}
+          {{#if temperature}} <span class="label label-success">temperature: {{Float temperature}}C</span>{{/if}}
+          {{#if humidity}} <span class="label label-success">humidity: {{Int humidity}}%</span>{{/if}}
+          {{#if co2}} <span class="label label-success">CO<sub>2</sub>: {{Int co2}} ppm</span>{{/if}}
+          {{#if pressure}} <span class="label label-success">Pressure: {{Int pressure}} mb</span>{{/if}}
+          {{#if noise}} <span class="label label-success">Noise: {{Int noise}} db</span>{{/if}}
+          {{#if lux}} <span class="label label-success">Brigthness: {{Int lux}} lux</span>{{/if}}
           {{/Category}}
 
           {{#Category 'MUSIC'}}

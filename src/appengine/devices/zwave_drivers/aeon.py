@@ -1,5 +1,4 @@
 """Drivers for Aeon Labs zwave devices."""
-from appengine import room
 from appengine.devices import zwave
 
 
@@ -21,20 +20,19 @@ class AeonLabsMultiSensor(zwave.Driver):
   def value_changed(self, event):
     """We've been told a value changed; deal with it."""
     value = event['valueId']
-    if value['commandClass'] != 'COMMAND_CLASS_SENSOR_BINARY':
-      return
+    if value['commandClass'] == 'COMMAND_CLASS_SENSOR_MULTILEVEL':
+      if value['index'] == 1:
+        self._device.temperature = value['value']
+      elif value['index'] == 3:
+        self._device.lux = value['value']
+      elif value['index'] == 5:
+        self._device.humidity = value['value']
 
-    self._device.occupied = value['value']
-
-    # Now tell the room to update its lights
-    if not self._device.room:
-      return
-
-    room_obj = room.Room.get_by_id(self._device.room)
-    if not room_obj:
-      return
-
-    room_obj.update_lights()
+    if value['commandClass'] == 'COMMAND_CLASS_SENSOR_BINARY':
+      self._device.occupied = value['value']
+      room = self._device.find_room()
+      if room:
+        room.update_lights()
 
   def handle_event(self, event):
     if event['notificationType'] in {zwave.NODE_ADDED, zwave.NODE_INFO_UPDATE}:

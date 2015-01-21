@@ -119,6 +119,9 @@ class ZWaveDevice(device.Device):
   # Haven't found a good way to fake out the properites yet
   state = ndb.BooleanProperty()
   occupied = ndb.BooleanProperty(default=False)
+  temperature = ndb.FloatProperty()
+  humidity = ndb.FloatProperty()
+  lux = ndb.FloatProperty()
 
   def __init__(self, **kwargs):
     super(ZWaveDevice, self).__init__(**kwargs)
