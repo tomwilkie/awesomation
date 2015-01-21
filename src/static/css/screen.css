@@ -28,9 +28,10 @@ body {
   margin-top: 0;
   font-size: 21px;
   font-weight: normal;
+  float: left;
 }
 
-.header h1 button.dropdown-toggle {
+.header button.dropdown-toggle {
   color: inherit;
   background: inherit;
   border: none;
@@ -41,6 +42,10 @@ div#main {
 }
 
 /* Top navigation */
+.nav {
+  clear: left;
+}
+
 .nav > li > a {
   padding-right: 20px;
   padding-left: 20px;
