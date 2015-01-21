@@ -17,6 +17,8 @@ git diff --cached --name-only | while read filename; do
 		;;
     js) /usr/local/bin/jshint ${filename}
     ;;
+    html) java -jar ~/bin/vnu.jar ${filename}
+    ;;
 	esac
 done
 
