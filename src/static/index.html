@@ -7,7 +7,7 @@
 
   <link rel="shortcut icon" href="/static/imgs/favicon.png">
 
-  <link rel="stylesheet" href="/static/css/bootstrap.css" >
+  <link rel="stylesheet" href="/static/css/bootstrap.css">
   <link rel="stylesheet" href="/static/css/glyphicons-bootstrap.css">
   <link rel="stylesheet" href="/static/css/glyphicons.css">
   <link rel="stylesheet" href="/static/css/screen.css">
@@ -567,47 +567,151 @@
     </div>
 
     <div class="row devices">
-    {{#NameSort objects.room}}
-
+      {{#NameSort objects.room}}
       <div class="room col-xs-6 col-sm-4 col-lg-2" data-room-id="{{id}}">
-        <div class="room-name">{{Name this}}</div>
 
-        <div class="btn-group btn-group-xs" role="group" aria-label="...">
-          <button type="button" class="btn btn-default all-on">
-            <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
-            All on
-          </button>
-          <button type="button" class="btn btn-default all-off">
-            <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
-            All off
-          </button>
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-right" role="menu">
-            <li><a href="#" class="configure-auto-dim">Configure auto dimming</a></li>
-            <li><a href="#" class='room-change-name'>Change name</a></li>
-            <li><a href="#" class='room-delete'>Delete</a></li>
-          </ul>
+        <div class="room-name">
+          {{Name this}}
+          <div class="btn-group btn-group" role="group" aria-label="...">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+              <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+              <li><a href="#" class='room-change-name'>Change name</a></li>
+              <li><a href="#" class='room-delete'>Delete</a></li>
+            </ul>
+          </div>
         </div>
 
-        {{#DevicesForRoom id}}
+        {{#RoomHasDevicesInCategory "LIGHTING"}}
+        <div class="device card">
+          <div class="content">
+            <div class="watermark glyphicons-lightbulb">
+              <span class="glyphicons glyphicons-lightbulb x4" aria-hidden="true"></span>
+            </div>
+            <div class="device-name">Lighting</div>
+            <div class="device-details">
+              {{#LightingCategory}}
+                {{#if state}}
+                  <span class="label label-success">state: on</span>
+                  {{#if show_brightness}}
+                    <span class="label label-success">brigthness: {{PercentOf brightness 255}}%</span>
+                  {{/if}}
+                  {{else}}
+                  <span class="label label-warning">state: off</span>
+                  {{#if show_brightness}}
+                    <span class="label label-warning">brightness: {{PercentOf brightness 255}}%</span>
+                  {{/if}}
+                {{/if}}
+              {{/LightingCategory}}
+            </div>
+          </div>
+          <div class="btn-group btn-group" role="group" aria-label="...">
+            <button type="button" class="btn state-set" data-key="show-lighting-{{id}}"
+                data-value="{{#IfRoomExpandCapability @root.state 'lighting'}}false{{else}}true{{/IfRoomExpandCapability}}">
+              {{#IfRoomExpandCapability @root.state 'lighting'}}
+                <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+              {{else}}
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+              {{/IfRoomExpandCapability}}
+            </button>
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+              <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+              <li><a href="#" class="configure-auto-dim">Configure auto dimming</a></li>
+            </ul>
+          </div>
+        </div>
+
+        {{#IfRoomExpandCapability @root.state 'lighting'}}
+          {{#DevicesInCategory 'LIGHTING'}}
+            {{> device}}
+          {{/DevicesInCategory}}
+        {{/IfRoomExpandCapability}}
+        {{/RoomHasDevicesInCategory}}
+
+        {{#RoomHasDevicesInCategory "CLIMATE"}}
+        <div class="device card">
+          <div class="content">
+            <div class="watermark glyphicons-cloud">
+              <span class="glyphicons glyphicons-cloud x4" aria-hidden="true"></span>
+            </div>
+            <div class="device-name">Climate</div>
+            <div class="device-details"></div>
+          </div>
+          <div class="btn-group btn-group" role="group" aria-label="...">
+            <button type="button" class="btn state-set" data-key="show-climate-{{id}}"
+                data-value="{{#IfRoomExpandCapability @root.state 'climate'}}false{{else}}true{{/IfRoomExpandCapability}}">
+              {{#IfRoomExpandCapability @root.state 'climate'}}
+                <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+              {{else}}
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+              {{/IfRoomExpandCapability}}
+            </button>
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+              <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+            </ul>
+          </div>
+        </div>
+
+        {{#IfRoomExpandCapability @root.state 'climate'}}
+          {{#DevicesInCategory 'CLIMATE'}}
+            {{> device}}
+          {{/DevicesInCategory}}
+        {{/IfRoomExpandCapability}}
+        {{/RoomHasDevicesInCategory}}
+
+        {{#RoomHasDevicesInCategory "MUSIC"}}
+        <div class="device card">
+          <div class="content">
+            <div class="watermark glyphicons-music">
+              <span class="glyphicons glyphicons-music x4" aria-hidden="true"></span>
+            </div>
+            <div class="device-name">Music</div>
+            <div class="device-details"></div>
+          </div>
+          <div class="btn-group btn-group" role="group" aria-label="...">
+            <button type="button" class="btn state-set" data-key="show-music-{{id}}"
+                data-value="{{#IfRoomExpandCapability @root.state 'music'}}false{{else}}true{{/IfRoomExpandCapability}}">
+              {{#IfRoomExpandCapability @root.state 'music'}}
+                <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+              {{else}}
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+              {{/IfRoomExpandCapability}}
+            </button>
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+              <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+            </ul>
+          </div>
+        </div>
+
+        {{#IfRoomExpandCapability @root.state 'music'}}
+          {{#DevicesInCategory 'MUSIC'}}
+            {{> device}}
+          {{/DevicesInCategory}}
+        {{/IfRoomExpandCapability}}
+        {{/RoomHasDevicesInCategory}}
+
+        {{#DevicesNotInCategories}}
           {{> device}}
-        {{else}}
-          <i>No devices found.</i>
-        {{/DevicesForRoom}}
+        {{/DevicesNotInCategories}}
       </div>
 
       {{#IfMod @index 2}}
-        <div class="clearfix visible-xs-block"></div>
+      <div class="clearfix visible-xs-block"></div>
       {{/IfMod}}
 
       {{#IfMod @index 3}}
-        <div class="clearfix visible-sm-block visible-md-block"></div>
+      <div class="clearfix visible-sm-block visible-md-block"></div>
       {{/IfMod}}
 
       {{#IfMod @index 6}}
-        <div class="clearfix visible-lg-block"></div>
+      <div class="clearfix visible-lg-block"></div>
       {{/IfMod}}
     {{/NameSort}}
     </div>

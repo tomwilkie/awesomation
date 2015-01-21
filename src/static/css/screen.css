@@ -82,6 +82,18 @@ div#main {
   color: #424242;
 }
 
+.room > .room-name > .btn-group {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+}
+
+.room > .room-name > .btn-group > button {
+  border: none;
+  background: none;
+}
+
 .card {
   padding: 5px;
   margin-bottom: 8px;
@@ -166,7 +178,7 @@ div#main {
   bottom: 0px;
 }
 
-.device button.dropdown-toggle {
+.device button {
   color: inherit;
   background: inherit;
   border: none;

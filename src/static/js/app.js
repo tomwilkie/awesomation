@@ -26,6 +26,9 @@ var AWESOMATION = (function() {
   var cache = (function() {
     var types = ['room', 'device', 'account'];
     var objects = {};
+    $.each(types, function(i, type) {
+      objects[type] = {};
+    });
     var cache = {
       loading: true,
       objects: objects
@@ -105,42 +108,59 @@ var AWESOMATION = (function() {
     return cache;
   }());
 
-  function object_name(obj) {
-    if (obj.name) {
-      return obj.name;
+  var utils = {
+    'object_name': function(obj) {
+      if (obj.name) {
+        return obj.name;
+      }
+
+      if (obj.device_name) {
+        return obj.device_name;
+      }
+
+      if (obj.class == 'Room') {
+        return sprintf('Room %s', obj.id);
+      }
+
+      if (obj.human_type) {
+        return sprintf('%s account', obj.human_type);
+      }
+
+      return sprintf('%s (%s)', obj.id, obj.class);
+    },
+
+    'sort_by_name': function(objects) {
+      objects = $.map(objects, function(obj) {
+        return obj;
+      });
+      objects.sort(function (obj1, obj2) {
+        return String.prototype.localeCompare.call(
+          utils.object_name(obj1), utils.object_name(obj2));
+      });
+      return objects;
+    },
+
+    'has_intersection': function(a, b) {
+      a.sort(); b.sort();
+      var i=0, j=0;
+      while( i < a.length && j < b.length )
+      {
+         if      (a[i] < b[j] ){ i++; }
+         else if (a[i] > b[j] ){ j++; }
+         else /* they're equal */
+         {
+           return true;
+         }
+      }
+      return false;
     }
-
-    if (obj.device_name) {
-      return obj.device_name;
-    }
-
-    if (obj.class == 'Room') {
-      return sprintf('Room %s', obj.id);
-    }
-
-    if (obj.human_type) {
-      return sprintf('%s account', obj.human_type);
-    }
-
-    return sprintf('%s (%s)', obj.id, obj.class);
-  }
-
-  function sort_by_name(objects) {
-    objects = $.map(objects, function(obj) {
-      return obj;
-    });
-    objects.sort(function (obj1, obj2) {
-      return String.prototype.localeCompare.call(
-        object_name(obj1), object_name(obj2));
-    });
-    return objects;
-  }
+  };
 
   Handlebars.registerHelper({
-    'Name': object_name,
+    'Name': utils.object_name,
 
     'NameSort': function(objects, options) {
-      objects = sort_by_name(objects);
+      objects = utils.sort_by_name(objects);
       return Handlebars.helpers.each(objects, options);
     },
 
@@ -155,6 +175,15 @@ var AWESOMATION = (function() {
     'IfMod': function(a, b, options) {
       var test = ((a + 1) % b) === 0;
       if (test) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
+    },
+
+    'IfRoomExpandCapability': function(state, capability, options) {
+      var key = sprintf('show-%s-%s', capability, this.id);
+      if (state[key]) {
         return options.fn(this);
       } else {
         return options.inverse(this);
@@ -176,19 +205,80 @@ var AWESOMATION = (function() {
         }
       });
 
-      devices = sort_by_name(devices);
+      devices = utils.sort_by_name(devices);
       return Handlebars.helpers.each(devices, options);
     },
 
-    'DevicesForRoom': function(room_id, options) {
+    'RoomHasDevicesInCategory': function(category, options) {
+      var room_id = this.id;
+      var found = false;
+      $.each(cache.objects.device, function(_, device) {
+        found = device.room == room_id && device.categories.indexOf(category) >= 0;
+        return !found; // break when we find the first one.
+      });
+
+      if (found) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
+    },
+
+    'DevicesInCategory': function(category, options) {
+      var room_id = this.id;
       var devices = $.map(cache.objects.device, function(device) {
-        if (device.room === room_id) {
+        if (device.room === room_id && device.categories.indexOf(category) >= 0) {
           return device;
         }
       });
 
-      devices = sort_by_name(devices);
+      devices = utils.sort_by_name(devices);
       return Handlebars.helpers.each(devices, options);
+    },
+
+    'DevicesNotInCategories': function(options) {
+      var room_id = this.id;
+      var categories = ['LIGHTING', 'CLIMATE', 'MUSIC'];
+      var devices = $.map(cache.objects.device, function(device) {
+        if (device.room === room_id && !utils.has_intersection(device.categories, categories)) {
+          return device;
+        }
+      });
+
+      devices = utils.sort_by_name(devices);
+      return Handlebars.helpers.each(devices, options);
+    },
+
+    'LightingCategory': function(options) {
+      var room_id = this.id;
+      var devices = $.map(cache.objects.device, function(device) {
+        if (device.room === room_id && device.categories.indexOf('LIGHTING') >= 0) {
+          return device;
+        }
+      });
+
+      var state = false,
+        brightness_count = 0,
+        brightness_sum = 0;
+      $.each(devices, function(_, device) {
+        if (device.capabilities.indexOf('SWITCH') >= 0) {
+          state |= device.state;
+        }
+
+        if (device.capabilities.indexOf('DIMMABLE') >= 0) {
+          brightness_count++;
+          brightness_sum += device.brightness;
+        }
+      });
+
+      var data = {state: state};
+      if (brightness_count > 0) {
+        data.show_brightness = true;
+        data.brightness = brightness_sum / brightness_count;
+      } else {
+        data.show_brightness = false;
+      }
+      return options.fn(data);
     },
 
     'HumanTime': function(millis) {
@@ -207,7 +297,7 @@ var AWESOMATION = (function() {
       });
 
       if (devices) {
-        var result = $.map(sort_by_name(devices), options.fn);
+        var result = $.map(utils.sort_by_name(devices), options.fn);
         return result.join(', ');
       }
 
@@ -266,7 +356,8 @@ var AWESOMATION = (function() {
     });
 
     function render() {
-      var mode = $.bbq.getState('mode') || 'devices';
+      var state = $.bbq.getState(true);
+      var mode = state.mode || 'devices';
 
       // Update the selected status on the left.
       $('.nav li').removeClass('active');
@@ -275,7 +366,12 @@ var AWESOMATION = (function() {
       // Rendem the main view.
       var template = $(sprintf('script#%s-template', mode)).text();
       template = Handlebars.compile(template);
-      var rendered = template(cache);
+
+      var data = {
+        objects: cache.objects,
+        state: state
+      };
+      var rendered = template(data);
       $('div#main').html(rendered);
     }
 
@@ -310,6 +406,12 @@ var AWESOMATION = (function() {
       net.post(sprintf('/api/room/%s/command', room_id), {
         command: "all_off",
       });
+    });
+
+    $('div#main').on('click', '.state-set', function() {
+      var data = {};
+      data[$(this).data('key')] = $(this).data('value');
+      $.bbq.pushState(data);
     });
 
     $('div#main').on('click', 'div.room .room-set', function() {
