@@ -16,6 +16,7 @@ class NestThermostat(device.Device):
   temperature = ndb.FloatProperty()
   humidity = ndb.FloatProperty()
   account = ndb.StringProperty()
+  target_temperature = ndb.FloatProperty()
 
   def get_categories(self):
     return ['CLIMATE']
@@ -25,6 +26,7 @@ class NestThermostat(device.Device):
     self.humidity = event['humidity']
     self.temperature = event['ambient_temperature_c']
     self.device_name = event['name_long']
+    self.target_temperature = event['target_temperature_c']
 
 
 @device.register('nest_protect')
