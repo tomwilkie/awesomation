@@ -40,8 +40,17 @@ class Driver(object):
   def get_categories(self):
     return []
 
-  def handle_event(self, event):
+  def value_changed(self, event):
     pass
+
+  def handle_event(self, event):
+    if event['notificationType'] in {NODE_ADDED, NODE_INFO_UPDATE}:
+      if not self.is_configured():
+        self.configure()
+
+    elif event['notificationType'] in {NODE_VALUE_CHANGED,
+                                       NODE_VALUE_ADDED}:
+      self.value_changed(event)
 
   def is_configured(self):
     """Test if this device is configured correctly."""
@@ -118,6 +127,7 @@ class ZWaveDevice(device.Device):
 
   # Haven't found a good way to fake out the properites yet
   state = ndb.BooleanProperty()
+  brightness = ndb.IntegerProperty()
   occupied = ndb.BooleanProperty(default=False)
   temperature = ndb.FloatProperty()
   humidity = ndb.FloatProperty()

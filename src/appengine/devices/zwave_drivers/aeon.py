@@ -34,12 +34,3 @@ class AeonLabsMultiSensor(zwave.Driver):
       if room:
         room.update_lights()
 
-  def handle_event(self, event):
-    if event['notificationType'] in {zwave.NODE_ADDED, zwave.NODE_INFO_UPDATE}:
-      if not self.is_configured():
-        self.configure()
-
-    elif event['notificationType'] in {zwave.NODE_VALUE_CHANGED,
-                                       zwave.NODE_VALUE_ADDED}:
-      self.value_changed(event)
-
