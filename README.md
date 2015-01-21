@@ -7,7 +7,11 @@ A Python 2 based home automation system.
 The 'architecture' is client-server, with a Raspberry Pi based proxy running in the home and the 'logic' running in the Cloud (on Google App Engine).
 
 Currently supports the following devices:
-* ZWave motion sensors (Using the Aeon Labs Multisensor for testing)
+* ZWave
+** [Aeon Labs Z Stick S2](raw/master/docs/Aeonstick2.pdf)
+** [Aeon Labs Multisensor](raw/master/docs/aeotec_multisensor_tech.pdf)
+** [TKB TZ67-E Wall Plug Dimmer](raw/master/docs/TKB_TZ67-E.pdf)
+** [Fibaro Motion Sensor](raw/master/docs/Fibaro Motion-Sensor_EN_5.3.14.pdf)
 * Philips Hue lights
 * Belkin Wemo switches
 * 433Mhz RF Switches (testing with [Brennenstuhl remote control mains sockets](http://www.amazon.co.uk/dp/B003BIFLSY))
