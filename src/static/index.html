@@ -490,8 +490,8 @@
           {{/HasCapability}}
 
           {{#Category 'CLIMATE'}}
-          {{#if temperature}} <span class="label label-success">temperature: {{Float temperature}}C</span>{{/if}}
-          {{#if humidity}} <span class="label label-success">humidity: {{Int humidity}}%</span>{{/if}}
+          {{#if temperature}} <span class="label label-success">Temperature: {{Float temperature}}C</span>{{/if}}
+          {{#if humidity}} <span class="label label-success">Humidity: {{Int humidity}}%</span>{{/if}}
           {{#if co2}} <span class="label label-success">CO<sub>2</sub>: {{Int co2}} ppm</span>{{/if}}
           {{#if pressure}} <span class="label label-success">Pressure: {{Int pressure}} mb</span>{{/if}}
           {{#if noise}} <span class="label label-success">Noise: {{Int noise}} db</span>{{/if}}
@@ -571,7 +571,7 @@
       <div class="room col-xs-6 col-sm-4 col-lg-2" data-room-id="{{id}}">
 
         <div class="room-name">
-          {{Name this}}
+          <div>{{Name this}}</div>
           <div class="btn-group btn-group" role="group" aria-label="...">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
               <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
@@ -591,7 +591,7 @@
             </div>
             <div class="device-name">Lighting</div>
             <div class="device-details">
-              {{#LightingCategory}}
+              {{#CategoryInfo 'LIGHTING'}}
                 {{#if state}}
                   <span class="label label-success">state: on</span>
                   {{#if show_brightness}}
@@ -603,7 +603,7 @@
                     <span class="label label-warning">brightness: {{PercentOf brightness 255}}%</span>
                   {{/if}}
                 {{/if}}
-              {{/LightingCategory}}
+              {{/CategoryInfo}}
             </div>
           </div>
           <div class="btn-group btn-group" role="group" aria-label="...">
@@ -625,9 +625,11 @@
         </div>
 
         {{#IfRoomExpandCapability @root.state 'lighting'}}
+          <div class="devices">
           {{#DevicesInCategory 'LIGHTING'}}
             {{> device}}
           {{/DevicesInCategory}}
+          </div>
         {{/IfRoomExpandCapability}}
         {{/RoomHasDevicesInCategory}}
 
@@ -638,7 +640,51 @@
               <span class="glyphicons glyphicons-cloud x4" aria-hidden="true"></span>
             </div>
             <div class="device-name">Climate</div>
-            <div class="device-details"></div>
+            <div class="device-details">
+              {{#CategoryInfo 'CLIMATE'}}
+                {{#if temperature}}
+                  <span class="label label-success">Temperature: {{Float temperature}}C</span>
+                {{/if}}
+                {{#if temperature-max}}
+                  <span class="label label-success">Temperature: {{Float temperature-min}}
+                    - {{Float temperature-max}} C</span>
+                {{/if}}
+                {{#if humidity}}
+                  <span class="label label-success">Humidity: {{Int humidity}}%</span>
+                {{/if}}
+                {{#if humidity-max}}
+                  <span class="label label-success">Humidity: {{Int humidity-min}}
+                    - {{Int humidity-max}} %</span>
+                {{/if}}
+                {{#if co2}}
+                  <span class="label label-success">CO<sub>2</sub>: {{Int co2}} ppm</span>
+                {{/if}}
+                {{#if co2-max}}
+                  <span class="label label-success">CO<sub>2</sub>: {{Int co2-min}}
+                    - {{Int co2-max}} ppm</span>
+                {{/if}}
+                {{#if pressure}}
+                  <span class="label label-success">Pressure: {{Int pressure}} mb</span>
+                {{/if}}
+                {{#if pressure-max}}
+                  <span class="label label-success">Pressure: {{Int pressure-min}}
+                    - {{Int pressure-max}} mb</span>
+                {{/if}}
+                {{#if noise}}
+                  <span class="label label-success">Noise: {{Int noise}} db</span>
+                {{/if}}
+                {{#if noise-max}}
+                  <span class="label label-success">Noise: {{Int noise-min}}
+                    - {{Int noise-max}} db</span>
+                {{/if}}
+                {{#if lux}}
+                  <span class="label label-success">Brigthness: {{Int lux}} lux</span>
+                {{/if}}
+                {{#if lux-max}}
+                  <span class="label label-success">Brigthness: {{Int lux-min}} - {{Int lux-max}} lux</span>
+                {{/if}}
+              {{/CategoryInfo}}
+            </div>
           </div>
           <div class="btn-group btn-group" role="group" aria-label="...">
             <button type="button" class="btn state-set" data-key="show-climate-{{id}}"
@@ -653,14 +699,17 @@
               <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
             </button>
             <ul class="dropdown-menu dropdown-menu-right" role="menu">
+              <li><a href="#" class='disabled'>Empty</a></li>
             </ul>
           </div>
         </div>
 
         {{#IfRoomExpandCapability @root.state 'climate'}}
+          <div class="devices">
           {{#DevicesInCategory 'CLIMATE'}}
             {{> device}}
           {{/DevicesInCategory}}
+          </div>
         {{/IfRoomExpandCapability}}
         {{/RoomHasDevicesInCategory}}
 
@@ -671,7 +720,19 @@
               <span class="glyphicons glyphicons-music x4" aria-hidden="true"></span>
             </div>
             <div class="device-name">Music</div>
-            <div class="device-details"></div>
+            <div class="device-details">
+              {{#DevicesInCategory 'MUSIC'}}
+                {{#Category 'MUSIC'}}
+                {{#IfEquals state 'PLAYING'}}
+                <span class="label label-success">
+                  playing: {{currently_playing.title}} by {{currently_playing.artist}}
+                </span>
+                {{else}}
+                <span class="label label-warning">paused</span>
+                {{/IfEquals}}
+                {{/Category}}
+              {{/DevicesInCategory}}
+            </div>
           </div>
           <div class="btn-group btn-group" role="group" aria-label="...">
             <button type="button" class="btn state-set" data-key="show-music-{{id}}"
@@ -686,14 +747,17 @@
               <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
             </button>
             <ul class="dropdown-menu dropdown-menu-right" role="menu">
+              <li><a href="#" class='disabled'>Empty</a></li>
             </ul>
           </div>
         </div>
 
         {{#IfRoomExpandCapability @root.state 'music'}}
+          <div class="devices">
           {{#DevicesInCategory 'MUSIC'}}
             {{> device}}
           {{/DevicesInCategory}}
+          </div>
         {{/IfRoomExpandCapability}}
         {{/RoomHasDevicesInCategory}}
 

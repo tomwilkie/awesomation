@@ -249,35 +249,69 @@ var AWESOMATION = (function() {
       return Handlebars.helpers.each(devices, options);
     },
 
-    'LightingCategory': function(options) {
+    'CategoryInfo': function(category, options) {
       var room_id = this.id;
       var devices = $.map(cache.objects.device, function(device) {
-        if (device.room === room_id && device.categories.indexOf('LIGHTING') >= 0) {
+        if (device.room === room_id && device.categories.indexOf(category) >= 0) {
           return device;
         }
       });
 
-      var state = false,
-        brightness_count = 0,
-        brightness_sum = 0;
-      $.each(devices, function(_, device) {
-        if (device.capabilities.indexOf('SWITCH') >= 0) {
-          state |= device.state;
-        }
+      var data = {};
 
-        if (device.capabilities.indexOf('DIMMABLE') >= 0) {
-          brightness_count++;
-          brightness_sum += device.brightness;
-        }
-      });
+      switch(category) {
+      case 'LIGHTING':
+        data.state = false;
+        var brightness_count = 0,
+          brightness_sum = 0;
 
-      var data = {state: state};
-      if (brightness_count > 0) {
-        data.show_brightness = true;
-        data.brightness = brightness_sum / brightness_count;
-      } else {
-        data.show_brightness = false;
+        $.each(devices, function(_, device) {
+          if (device.capabilities.indexOf('SWITCH') >= 0) {
+            data.state |= device.state;
+          }
+
+          if (device.capabilities.indexOf('DIMMABLE') >= 0) {
+            brightness_count++;
+            brightness_sum += device.brightness;
+          }
+        });
+
+        if (brightness_count > 0) {
+          data.show_brightness = true;
+          data.brightness = brightness_sum / brightness_count;
+        } else {
+          data.show_brightness = false;
+        }
+        break;
+
+      case 'CLIMATE':
+        var keys = ['temperature', 'humidity', 'co2', 'pressure', 'noise', 'lux'];
+
+        $.each(devices, function(_, device) {
+          $.each(keys, function(_, key) {
+            value = device[key];
+            if (value === undefined) return;
+
+            if (data[sprintf('%s-min', key)] === undefined) {
+              data[sprintf('%s-min', key)] = value;
+              data[sprintf('%s-max', key)] = value;
+            } else {
+              data[sprintf('%s-min', key)] = Math.min(value, data[sprintf('%s-min', key)]);
+              data[sprintf('%s-max', key)] = Math.max(value, data[sprintf('%s-max', key)]);
+            }
+          });
+        });
+
+        $.each(keys, function(_, key) {
+          if (data[sprintf('%s-min', key)] === data[sprintf('%s-max', key)]) {
+            data[key] = data[sprintf('%s-max', key)];
+            delete data[sprintf('%s-min', key)];
+            delete data[sprintf('%s-max', key)];
+          }
+        });
+        break;
       }
+
       return options.fn(data);
     },
 

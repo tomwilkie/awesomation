@@ -75,23 +75,30 @@ div#main {
 }
 
 .room > .room-name {
+  font-size: 1.5em;
+  color: #424242;
+}
+
+.room > .room-name  > div:first-child {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 1.5em;
-  color: #424242;
+  padding-right: 30px;
 }
 
 .room > .room-name > .btn-group {
   position: absolute;
   top: 0px;
   right: 0px;
-  bottom: 0px;
 }
 
 .room > .room-name > .btn-group > button {
   border: none;
-  background: none;
+  background: inherit;
+}
+
+.devices {
+  padding-left: 8px;
 }
 
 .card {
