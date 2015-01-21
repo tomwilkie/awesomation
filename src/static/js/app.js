@@ -153,7 +153,11 @@ var AWESOMATION = (function() {
          }
       }
       return false;
-    }
+    },
+
+    'random_id': function() {
+      return ("0000" + (Math.random() * Math.pow(36,4) << 0).toString(36)).slice(-4);
+    },
   };
 
   Handlebars.registerHelper({
@@ -426,22 +430,6 @@ var AWESOMATION = (function() {
       $.bbq.pushState({mode: mode});
     });
 
-    $('div#main').on('click', 'div.room .all-on', function() {
-      var room_id = $(this).closest('div.room').data('room-id');
-
-      net.post(sprintf('/api/room/%s/command', room_id), {
-        command: "all_on",
-      });
-    });
-
-    $('div#main').on('click', 'div.room .all-off', function() {
-      var room_id = $(this).closest('div.room').data('room-id');
-
-      net.post(sprintf('/api/room/%s/command', room_id), {
-        command: "all_off",
-      });
-    });
-
     $('div#main').on('click', '.state-set', function() {
       var data = {};
       data[$(this).data('key')] = $(this).data('value');
@@ -478,6 +466,25 @@ var AWESOMATION = (function() {
       var command = $(this).data('command');
 
       net.post(sprintf('/api/account/%s/command', account_id), {
+        command: command,
+      });
+    });
+
+    $('div#main').on('click', 'div.room .lighting-toggle', function() {
+      var room_id = $(this).closest('div.room').data('room-id');
+      var devices = $.map(cache.objects.device, function(device) {
+        if (device.room === room_id &&
+            device.categories.indexOf('LIGHTING') >= 0 &&
+            device.capabilities.indexOf('SWITCH') >= 0 &&
+            device.state) {
+          return device;
+        }
+      });
+
+      // If we found a light that is on, turn them all off.
+      var command = devices.length > 0 ? 'all_off' : 'all_on';
+
+      net.post(sprintf('/api/room/%s/command', room_id), {
         command: command,
       });
     });
@@ -549,13 +556,9 @@ var AWESOMATION = (function() {
 
     // Dialog: create new room
 
-    function random_id() {
-      return ("0000" + (Math.random() * Math.pow(36,4) << 0).toString(36)).slice(-4);
-    }
-
     $('.create-new-room').on('click', function() {
       dialog.show('script#create-new-room-dialog-template', {}, function() {
-        var room_id = random_id();
+        var room_id = utils.random_id();
         var room_name = $(this).find('input#room-name').val();
 
         net.post(sprintf('/api/room/%s', room_id), {
@@ -567,8 +570,6 @@ var AWESOMATION = (function() {
     // Dialog: add new device
 
     $('.add-new-device').on('click', function() {
-      var accounts_only = $(this).data('accounts-only');
-
       function new_device(event) {
         var that = $(this);
         var type = $(event.target).data('type');
@@ -576,7 +577,7 @@ var AWESOMATION = (function() {
 
         case 'rfswitch':
           (function() {
-            var device_id = random_id();
+            var device_id = utils.random_id();
             var device_name = that.find('input#device-name').val();
             var system_code = that.find('input#system-code').val();
             var device_code = parseInt(that.find('input#device-code').val());
@@ -654,7 +655,7 @@ var AWESOMATION = (function() {
       }
 
       dialog.show('script#new-device-dialog-template',
-             {rooms: cache.objects.room, accounts_only: accounts_only},
+             {rooms: cache.objects.room},
              new_device);
     });
 

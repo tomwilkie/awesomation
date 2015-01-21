@@ -1,6 +1,7 @@
 """ROOMs"""
 import datetime
 import logging
+import time
 
 from google.appengine.ext import ndb
 
@@ -20,6 +21,10 @@ class Room(model.Base):
   target_color_temperature = ndb.IntegerProperty()
   dim_start_time = ndb.IntegerProperty() # seconds from midnight
   dim_end_time = ndb.IntegerProperty() # seconds from midnight
+
+  # force the lights in this room on?
+  force_lights_state = ndb.BooleanProperty()
+  force_lights_until = ndb.IntegerProperty()
 
   @classmethod
   def _event_classname(cls):
@@ -90,6 +95,12 @@ class Room(model.Base):
         occupied = True
     logging.info('  occupied = %s from %d sensors', occupied, len(sensors))
 
+    if self.force_lights_until is not None and \
+        self.force_lights_until > time.time():
+      occupied = self.force_lights_state
+      logging.info('  state forced to %s until %d',
+                   occupied, self.force_lights_until)
+
     # Work out target brightness, color temperature
     target_brightness, target_color_temp = self.calculate_dimming()
 
@@ -99,12 +110,8 @@ class Room(model.Base):
     switches_to_put = []
 
     for switch in switches:
-      updated = False
-
-      # Only turn lights off iff there are motion sensors
-      if len(sensors) > 0:
-        updated = (switch.state != occupied)
-        switch.state = occupied
+      updated = (switch.state != occupied)
+      switch.state = occupied
 
       if (target_brightness is not None) \
           and ('DIMMABLE' in switch.capabilities):
@@ -125,11 +132,15 @@ class Room(model.Base):
 
   @rest.command
   def all_on(self):
-    self.set_lights(True)
+    self.force_lights_state = True
+    self.force_lights_until = int(time.time() + 3600)
+    self.update_lights()
 
   @rest.command
   def all_off(self):
-    self.set_lights(False)
+    self.force_lights_state = False
+    self.force_lights_until = int(time.time() + 3600)
+    self.update_lights()
 
 
 def create_room(room_id, user_id, _):
