@@ -8,10 +8,10 @@ The 'architecture' is client-server, with a Raspberry Pi based proxy running in 
 
 Currently supports the following devices:
 * ZWave
-** [Aeon Labs Z Stick S2](raw/master/docs/Aeonstick2.pdf)
-** [Aeon Labs Multisensor](raw/master/docs/aeotec_multisensor_tech.pdf)
-** [TKB TZ67-E Wall Plug Dimmer](raw/master/docs/TKB_TZ67-E.pdf)
-** [Fibaro Motion Sensor](raw/master/docs/Fibaro Motion-Sensor_EN_5.3.14.pdf)
+  * [Aeon Labs Z Stick S2](docs/Aeonstick2.pdf)
+  * [Aeon Labs Multisensor](docs/aeotec_multisensor_tech.pdf)
+  * [TKB TZ67-E Wall Plug Dimmer](docs/TKB_TZ67-E.pdf)
+  * [Fibaro Motion Sensor](docs/Fibaro Motion-Sensor_EN_5.3.14.pdf)
 * Philips Hue lights
 * Belkin Wemo switches
 * 433Mhz RF Switches (testing with [Brennenstuhl remote control mains sockets](http://www.amazon.co.uk/dp/B003BIFLSY))
