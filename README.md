@@ -12,13 +12,16 @@ Currently supports the following devices:
   * [Aeon Labs Multisensor](docs/aeotec_multisensor_tech.pdf)
   * [TKB TZ67-E Wall Plug Dimmer](docs/TKB_TZ67-E.pdf)
   * [Fibaro Motion Sensor](docs/Fibaro Motion-Sensor_EN_5.3.14.pdf)
-* Philips Hue lights
-* Belkin Wemo switches
-* 433Mhz RF Switches (testing with [Brennenstuhl remote control mains sockets](http://www.amazon.co.uk/dp/B003BIFLSY))
-* Nest Thermostats and Protects
-* Netatmo weather stations
-* Arbitrary wifi devices (ie your phone, for presence)
-* Sonos devices (basic detection right now)
+* Local Wifi
+  * Philips Hue lights
+  * Belkin Wemo switches
+  * Arbitrary wifi devices (ie your phone, for presence)
+  * Sonos devices (basic detection right now)
+* 433Mhz
+  * RF Switches (testing with [Brennenstuhl remote control mains sockets](http://www.amazon.co.uk/dp/B003BIFLSY))
+* Internet / OAuth
+  * Nest Thermostats and Protects
+  * Netatmo weather stations
 
 The server-side logic has the concept of rooms, and when motion is sensed in a room the lights in that room are turned on.
 
