@@ -158,6 +158,10 @@ var AWESOMATION = (function() {
     'random_id': function() {
       return ("0000" + (Math.random() * Math.pow(36,4) << 0).toString(36)).slice(-4);
     },
+
+    'reverse_color_temp': function(ct) {
+      return 500 - ct;
+    }
   };
 
   Handlebars.registerHelper({
@@ -444,6 +448,17 @@ var AWESOMATION = (function() {
       net.post(sprintf('/api/room/%s', room_id), data);
     });
 
+    $('div#main').on('change', 'div.device input.on-change-device-set', function() {
+      var that = $(this),
+        device_id = that.closest('div.device').data('device-id'),
+        modify = that.data('modify'),
+        key = that.data('key'),
+        value = parseInt(that.val()),
+        data = {};
+      data[key] = modify ? utils[modify](value) : value;
+      net.post(sprintf('/api/device/%s', device_id), data);
+    });
+
     $('div#main').on('click', 'div.device .device-set', function() {
       var device_id = $(this).closest('div.device').data('device-id');
       var data = {};
@@ -691,7 +706,7 @@ var AWESOMATION = (function() {
         net.post(sprintf('/api/room/%s', room_id), {
           auto_dim_lights: enable,
           target_brightness: parseInt(target_brightness),
-          target_color_temperature: 500 - parseInt(target_color_temperature),
+          target_color_temperature: utils.reverse_color_temp(parseInt(target_color_temperature)),
           dim_start_time: (start_hours * 3600) + (start_mins * 60),
           dim_end_time: (end_hours * 3600) + (end_mins * 60),
         }).always(function() {

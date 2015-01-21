@@ -192,6 +192,17 @@ div#main {
   border-radius: 3px 0px 3px 0px;
 }
 
+ul.dropdown-menu a .menucontrol {
+  position: relative;
+  padding-left: 20px;
+}
+
+ul.dropdown-menu a .menucontrol .glyphicon {
+  position: absolute;
+  top: 0;
+  left: 0px;
+}
+
 /*
  * Spinning loading icon
  */

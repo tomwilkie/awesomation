@@ -525,13 +525,24 @@
           {{/HasCapability}}
 
           {{#HasCapability 'DIMMABLE'}}
-          <li><a href="#"><span class='glyphicon glyphicon glyphicon-adjust'></span>
-            <input type="range" min="0" max="255" value="{{brightness}}"></a></li>
+          <li><a href="#">
+            <div class="menucontrol">
+              <span class="glyphicon glyphicon glyphicon-adjust"></span>
+              <input class="on-change-device-set" data-key="brightness" type="range"
+                     min="0" max="255" value="{{brightness}}">
+            </div>
+          </a></li>
           {{/HasCapability}}
 
           {{#HasCapability 'COLOR_TEMPERATURE'}}
-          <li><a href="#"><span class='glyphicon glyphicon glyphicon-tint'></span>
-            <input type="range" min="153" max="500" value="{{color_temperature}}"></a></li>
+          <li><a href="#">
+            <div class="menucontrol">
+              <span class="glyphicon glyphicon glyphicon-tint"></span>
+              <input class="on-change-device-set" data-key="color-temperature" type="range"
+                     min="0" max="347" value="{{InvertColorTemp color_temperature}}"
+                     data-modify="reverse_color_temp">
+            </div>
+          </a></li>
           {{/HasCapability}}
 
           {{#HasCapability 'PRESENCE'}}
@@ -621,6 +632,13 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-right" role="menu">
               <li><a href="#" class="configure-auto-dim">Configure auto dimming</a></li>
+              <li><a href="#">
+                <div class="menucontrol">
+                  <span class="glyphicon glyphicon glyphicon-adjust"></span>
+                  <input class="on-change-device-set" data-key="brightness" type="range"
+                         min="0" max="255" value="{{brightness}}">
+                </div>
+              </a></li>
             </ul>
           </div>
         </div>
