@@ -140,12 +140,8 @@ var AWESOMATION = (function() {
     'Name': object_name,
 
     'NameSort': function(objects, options) {
-      if (objects) {
-        objects = sort_by_name(objects);
-        return Handlebars.helpers.each(objects, options);
-      }
-
-      return options.inverse(this);
+      objects = sort_by_name(objects);
+      return Handlebars.helpers.each(objects, options);
     },
 
     'IfEquals': function(a, b, options) {
@@ -180,12 +176,8 @@ var AWESOMATION = (function() {
         }
       });
 
-      if (devices) {
-        var result = $.map(sort_by_name(devices), options.fn);
-        return result.join('');
-      }
-
-      return options.inverse(this);
+      devices = sort_by_name(devices);
+      return Handlebars.helpers.each(devices, options);
     },
 
     'DevicesForRoom': function(room_id, options) {
@@ -195,12 +187,8 @@ var AWESOMATION = (function() {
         }
       });
 
-      if (devices) {
-        var result = $.map(sort_by_name(devices), options.fn);
-        return result.join('');
-      }
-
-      return options.inverse(this);
+      devices = sort_by_name(devices);
+      return Handlebars.helpers.each(devices, options);
     },
 
     'HumanTime': function(millis) {
