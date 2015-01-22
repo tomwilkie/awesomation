@@ -4,7 +4,7 @@
 
 A Python 2 based home automation system.
 
-The 'architecture' is client-server, with a Raspberry Pi based proxy running in the home and the 'logic' running in the Cloud (on Google App Engine).
+![Screenshot](/docs/screenshot.png?raw=true)
 
 Currently supports the following devices:
 * ZWave
@@ -23,7 +23,6 @@ Currently supports the following devices:
   * Nest Thermostats and Protects
   * Netatmo weather stations
 
-The server-side logic has the concept of rooms, and when motion is sensed in a room the lights in that room are turned on.
 
 ### Behaviours
 
@@ -78,7 +77,11 @@ This step is totally optional - you are more than welcome to use my hosted code 
 
 ### Architecture
 
+The 'architecture' is client-server, with a Raspberry Pi based proxy running in the home and the 'logic' running in the Cloud (on Google App Engine).  This allows the cloud app to access local wifi, zwave and 433Mhz devices.
+
 The client/server model was chosen as I wanted to integrate with internet enabled apis/devices, like the Nest and Netatmo.  These APIs require pre-registered OAuth callbacks, and as far as I can tell, cannot be made to work if the callback address is different for different users.
+
+The server-side logic has the concept of rooms, and when motion is sensed in a room the lights in that room are turned on.
 
 [Pusher](https://pusher.com/) is used to send commands from the server app to the client app.  Credentials for the Pusher account are stored in a private subrepo; you will need to setup your own.
 
