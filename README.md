@@ -36,7 +36,17 @@ Planned features:
 
 ### Getting Started
 
-All you'll need is a Raspberry Pi running [Raspbian](http://www.raspberrypi.org/downloads/) - I used the 2014-12-24 build.  On the Pi, run:
+You can run the 'local' proxy code on any unix machine (tested on Mac OS X and Debian), and if you don't have any zwave or 433Mhz devices, its as easy as:
+
+    sudo pip install netifaces
+
+    git clone https://github.com/tomwilkie/awesomation.git
+    cd awesomation
+    git submodule init; git submodule update
+
+    make runpi
+
+If you want to use 433Mhz or zwave devices, you'll need is a Raspberry Pi running [Raspbian](http://www.raspberrypi.org/downloads/) - I used the 2014-12-24 build.  On the Pi, run:
 
     sudo apt-get install libudev-dev cython python-dev swig python-setuptools
     sudo easy_install pip

@@ -10,3 +10,5 @@ src/common/creds.py
 third_party/static/glyphicons_pro
 *.orig
 *.rej
+*.log
+*.cfg

@@ -5,7 +5,7 @@ import logging
 import sys
 
 from pi import daemon, events, hue, network
-from pi import pushrpc, rfswitch, sonos, wemo, zwave
+from pi import pushrpc, sonos, wemo
 
 
 LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
@@ -33,20 +33,15 @@ class Control(daemon.Daemon):
                           self._device_event_callback),
         'sonos': sonos.Sonos(self._args.hue_scan_interval_secs,
                              self._device_event_callback),
+        'network': network.NetworkMonitor(
+            self._device_event_callback,
+            self._args.network_scan_interval_secs,
+            self._args.network_scan_timeout_secs)
     }
 
-    # This module needs root, so might not work
+    # This module needs a 433Mhz transmitter, wiringPi etc, so might not work
     try:
-      self._proxies['network'] = network.NetworkMonitor(
-          self._device_event_callback,
-          self._args.network_scan_interval_secs,
-          self._args.network_scan_timeout_secs)
-    except:
-      logging.error('Failed to initialize network module',
-                    exc_info=sys.exc_info())
-
-    # This module needs root, so might not work
-    try:
+      from appengine import rfswitch
       self._proxies['rfswitch'] = rfswitch.RFSwitch(self._args.rfswtich_pin)
     except:
       logging.error('Failed to initialize rfswitch module',
@@ -54,6 +49,7 @@ class Control(daemon.Daemon):
 
     # This module needs a zwave usb stick
     try:
+      from appengine import zwave
       self._proxies['zwave'] = zwave.ZWave(
           self._args.zwave_device, self._device_event_callback)
     except:
