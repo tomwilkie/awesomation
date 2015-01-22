@@ -38,7 +38,13 @@ body {
 }
 
 #main {
-  margin-top: 100px;
+  margin-top: 108px;
+}
+
+#main .help {
+  font-family: 'Indie Flower', cursive;
+  font-size: 2em;
+  text-align: center;
 }
 
 /* Top navigation */

@@ -9,10 +9,11 @@
 
   <link rel="shortcut icon" href="/static/imgs/favicon.png">
 
-  <link rel="stylesheet" href="/static/css/bootstrap.css">
-  <link rel="stylesheet" href="/static/css/glyphicons-bootstrap.css">
-  <link rel="stylesheet" href="/static/css/glyphicons.css">
-  <link rel="stylesheet" href="/static/css/screen.css">
+  <link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Indie+Flower'>
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="/static/css/glyphicons-bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="/static/css/glyphicons.css">
+  <link rel="stylesheet" type="text/css" href="/static/css/screen.css">
 
   <script type="text/javascript" src="/static/js/jquery.js"></script>
   <script type="text/javascript" src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
@@ -570,6 +571,15 @@
     {{else}}
 
     <div class="row">
+    {{#each objects.device}}
+      {{#each object.room}}
+      {{else}}
+        <p class="help">No rooms?  Use the cog in the top right to add some.</p>
+      {{/each}}
+    {{else}}
+      <p class="help">No devices?  Use the cog in the top right to add some.</p>
+    {{/each}}
+
     {{#HomelessDevices}}
       <div class="room col-xs-6 col-sm-4 col-lg-2">
         {{> device}}
@@ -831,6 +841,9 @@
         </div>
       </div>
     </div>
+    {{else}}
+    <p class="help">No accounts?  Add third party services list Nest and Netatmo
+      by clicking the cog in the top right.</p>
     {{/NameSort}}
     {{/if}}
   </script>
