@@ -189,6 +189,14 @@ var AWESOMATION = (function() {
       }
     },
 
+    'IsEmpty': function(obj, options) {
+      if ($.isEmptyObject(obj)) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
+    },
+
     'IfRoomExpandCapability': function(state, capability, options) {
       var key = sprintf('show-%s-%s', capability, this.id);
       if (state[key]) {
@@ -420,6 +428,13 @@ var AWESOMATION = (function() {
     $('body').on('cache_updated', render);
     $(window).bind('hashchange', render);
     render();
+
+    $(window).on('scroll', function(e) {
+      var distanceY = window.pageYOffset || document.documentElement.scrollTop,
+        shrinkOn = 50;
+
+      $(".header").toggleClass('smaller', distanceY > shrinkOn);
+    });
 
     $('body').on('click', 'a[href=#]', function(event) {
       event.preventDefault();

@@ -22,6 +22,22 @@ body {
   background-color: rgb(3, 169, 244);
   border-bottom: 1px solid #eee;
   color: #FFF;
+
+  overflow: hidden;
+
+  -webkit-transition: height 0.3s;
+  -moz-transition: height 0.3s;
+  -ms-transition: height 0.3s;
+  -o-transition: height 0.3s;
+  transition: height 0.3s;
+}
+
+.header.smaller {
+  height: 50px;
+}
+
+.header.smaller .nav {
+  display: none;
 }
 
 .header h1 {

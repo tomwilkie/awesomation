@@ -571,14 +571,13 @@
     {{else}}
 
     <div class="row">
-    {{#each objects.device}}
-      {{#each object.room}}
-      {{else}}
-        <p class="help">No rooms?  Use the cog in the top right to add some.</p>
-      {{/each}}
-    {{else}}
+    {{#IsEmpty objects.device}}
       <p class="help">No devices?  Use the cog in the top right to add some.</p>
-    {{/each}}
+    {{else}}
+      {{#IsEmpty objects.room}}
+        <p class="help">No rooms?  Use the cog in the top right to add some.</p>
+      {{/IsEmpty}}
+    {{/IsEmpty}}
 
     {{#HomelessDevices}}
       <div class="room col-xs-6 col-sm-4 col-lg-2">
@@ -817,6 +816,11 @@
     {{#if loading}}
       {{> loading}}
     {{else}}
+    {{#IsEmpty objects.account}}
+      <p class="help">No accounts?  Add third party services list Nest and Netatmo
+        by clicking the cog in the top right.</p>
+    {{/IsEmpty}}
+
     {{#NameSort objects.account}}
     <div class="row">
       <div class="col-xs-12 room">
@@ -841,9 +845,6 @@
         </div>
       </div>
     </div>
-    {{else}}
-    <p class="help">No accounts?  Add third party services list Nest and Netatmo
-      by clicking the cog in the top right.</p>
     {{/NameSort}}
     {{/if}}
   </script>

@@ -24,7 +24,7 @@ git diff --cached --name-only | while read filename; do
       bootlint -d W002 ${filename}
     ;;
     css)
-      csslint --ignore=box-model,ids,box-sizing,vendor-prefix,qualified-headings ${filename}
+      csslint --ignore=adjoining-classes,box-model,ids,box-sizing,vendor-prefix,qualified-headings ${filename}
     ;;
 	esac
 done
