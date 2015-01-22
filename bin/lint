@@ -13,16 +13,20 @@ git diff --cached --name-only | while read filename; do
 
 	ext=${filename##*\.}
 	case "$ext" in
-		py) /usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=$PYLINT_DISABLE ${filename} | sort --key=2,5 -n
+		py)
+      /usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=$PYLINT_DISABLE ${filename} | sort --key=2,5 -n
 		;;
-    js) /usr/local/bin/jshint ${filename}
+    js)
+      /usr/local/bin/jshint ${filename}
     ;;
     html)
       java -jar ~/bin/vnu.jar ${filename}
-      bootlint ${filename}
+      bootlint -d W002 ${filename}
+    ;;
+    css)
+      csslint --ignore=box-model,ids,box-sizing,vendor-prefix,qualified-headings ${filename}
     ;;
 	esac
 done
 
 #git stash pop -q
-

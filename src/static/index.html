@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+  <!--[if IE]><meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'><![endif]-->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
   <title>Awesomation</title>
@@ -462,7 +462,7 @@
   <script type="text/x-handlebars-template" class="handlebars-partial" id="device">
     <div class="device card" data-device-id="{{id}}">
       <div class="content">
-        <div class="watermark {{IconFor category}}"><span class="glyphicons {{IconFor category}} x4" aria-hidden="true"></span></div>
+        <div class="watermark"><span class="glyphicons {{IconFor category}} x4" aria-hidden="true"></span></div>
         <div class="device-name">{{Name this}}</div>
         <div class="device-details">
           {{#HasCapability 'PRESENCE'}}
@@ -597,7 +597,7 @@
         {{#RoomHasDevicesInCategory "LIGHTING"}}
         <div class="device card">
           <div class="content">
-            <div class="watermark glyphicons-lightbulb">
+            <div class="watermark">
               <span class="glyphicons glyphicons-lightbulb x4" aria-hidden="true"></span>
             </div>
             <div class="device-name">Lighting</div>
@@ -657,7 +657,7 @@
         {{#RoomHasDevicesInCategory "CLIMATE"}}
         <div class="device card">
           <div class="content">
-            <div class="watermark glyphicons-cloud">
+            <div class="watermark">
               <span class="glyphicons glyphicons-cloud x4" aria-hidden="true"></span>
             </div>
             <div class="device-name">Climate</div>
@@ -737,7 +737,7 @@
         {{#RoomHasDevicesInCategory "MUSIC"}}
         <div class="device card">
           <div class="content">
-            <div class="watermark glyphicons-music">
+            <div class="watermark">
               <span class="glyphicons glyphicons-music x4" aria-hidden="true"></span>
             </div>
             <div class="device-name">Music</div>

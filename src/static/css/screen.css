@@ -4,7 +4,7 @@
 
 body {
   font: RobotoDraft, 'Helvetica Neue', Helvetica, Arial;
-  padding-top: 0px;
+  padding-top: 0;
   background-color: rgb(229, 229, 229);
 }
 
@@ -31,13 +31,13 @@ body {
   float: left;
 }
 
-.header button.dropdown-toggle {
+.header .btn {
   color: inherit;
   background: inherit;
   border: none;
 }
 
-div#main {
+#main {
   margin-top: 100px;
 }
 
@@ -68,10 +68,7 @@ div#main {
  */
 
 .row {
-  padding-top: 8px;
-  padding-left: 8px;
-  padding-bottom: 0px;
-  padding-right: 0px;
+  padding: 8px 0 0 8px;
 }
 
 .room {
@@ -93,8 +90,8 @@ div#main {
 
 .room > .room-name > .btn-group {
   position: absolute;
-  top: 0px;
-  right: 0px;
+  top: 0;
+  right: 0;
 }
 
 .room > .room-name > .btn-group > button {
@@ -143,19 +140,19 @@ div#main {
   bottom: -5px;
 }
 
-.watermark.glyphicons-lightbulb {
+.glyphicons-lightbulb {
   color: #FFECB3;
 }
 
-.watermark.glyphicons-iphone {
+.glyphicons-iphone {
   color: #9CCC65;
 }
 
-.watermark.glyphicons-cloud {
+.glyphicons-cloud {
   color: #EEEEEE;
 }
 
-.watermark.glyphicons-music {
+.glyphicons-music {
   color: #EF9A9A;
 }
 
@@ -186,15 +183,15 @@ div#main {
 
 .device .btn-group {
   position: absolute;
-  right: 0px;
-  bottom: 0px;
+  right: 0;
+  bottom: 0;
 }
 
 .device button {
   color: inherit;
   background: inherit;
   border: none;
-  border-radius: 3px 0px 3px 0px;
+  border-radius: 3px 0 3px 0;
 }
 
 ul.dropdown-menu a .menucontrol {
@@ -205,15 +202,16 @@ ul.dropdown-menu a .menucontrol {
 ul.dropdown-menu a .menucontrol .glyphicon {
   position: absolute;
   top: 0;
-  left: 0px;
+  left: 0;
 }
 
 /*
  * Spinning loading icon
  */
 .glyphicon-refresh-animate {
-    -animation: spin 1s infinite linear;
-    -webkit-animation: spin2 1s infinite linear;
+    -animation: spin 0.5s infinite linear;
+    -webkit-animation: spin2 0.5s infinite linear;
+    -moz-animation: spin 0.5s infinite linear;
 }
 
 @-webkit-keyframes spin2 {
