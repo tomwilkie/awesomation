@@ -418,6 +418,7 @@ var AWESOMATION = (function() {
       template = Handlebars.compile(template);
 
       var data = {
+        loading: cache.loading,
         objects: cache.objects,
         state: state
       };
