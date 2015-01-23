@@ -2,6 +2,7 @@
 
 import collections
 import logging
+import os
 import platform
 import re
 import subprocess
@@ -22,8 +23,8 @@ LINUX_RE = re.compile(LINUX_RE)
 
 # This regex matches the output of `arp -a`
 MAC_RE = (r'^\? \((?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\) at '
-          r'(?P<mac>([0-9a-f]{1,2}[:-]){5}([0-9a-f]{1,2})|\(incomplete\)) on [a-z0-9]+ '
-          r'(ifscope )?(permanent )?\[ethernet\]$')
+          r'(?P<mac>([0-9a-f]{1,2}[:-]){5}([0-9a-f]{1,2})|\(incomplete\)) '
+          r'on [a-z0-9]+ (ifscope )?(permanent )?\[ethernet\]$')
 MAC_RE = re.compile(MAC_RE)
 
 
@@ -31,6 +32,9 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
   """Monitor devices appearing on the network."""
 
   def __init__(self, callback, scan_period_sec, timeout_secs):
+    assert os.geteuid() == 0, \
+        'You need to have root privileges to use this module.'
+
     self._callback = callback
     self._timeout_secs = timeout_secs
     self._ping_frequency_secs = 60
@@ -63,16 +67,16 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
 
     super(NetworkMonitor, self).__init__(scan_period_sec)
 
-  def _ping(self, ipaddr, now):
+  def _ping(self, ip_address, now):
     """Ping a device, but rate limit.
 
     Don't ping more often than self._ping_frequency_secs.
     """
-    if self._last_ping[ipaddr] + self._ping_frequency_secs > now:
+    if self._last_ping[ip_address] + self._ping_frequency_secs > now:
       return
 
-    pyping.ping(ipaddr, timeout=1, count=1)
-    self._last_ping[ipaddr] = now
+    pyping.ping(ip_address, timeout=1, count=1)
+    self._last_ping[ip_address] = now
 
   def ping_subnet(self, now):
     """Ping broadcase address for all interfaces."""
@@ -116,10 +120,10 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
           continue
 
         mac = match.group('mac')
-        ipaddr = match.group('ip')
+        ip_address = match.group('ip')
         state = 'INVALID' if mac == '(incomplete)' else 'REACHABLE'
 
-        yield (mac, ipaddr, state)
+        yield (mac, ip_address, state)
 
     elif system == 'Linux':
       process = subprocess.Popen(['ip', '-s', 'neighbor', 'list'],
@@ -136,22 +140,20 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
           continue
 
         mac = match.group('mac')
-        ipaddr = match.group('ip')
+        ip_address = match.group('ip')
         state = match.group('state')
-        yield (mac, ipaddr, state)
+        yield (mac, ip_address, state)
 
   def _scan_once(self):
     """Scan the network for devices."""
     now = time.time()
-
-    # TODO: probably need to ping the subnet?
     self.ping_subnet(now)
 
     # Now look at contents of arp table
-    for mac, ipaddr, state in self._arp():
+    for mac, ip_address, state in self._arp():
 
       # ping everything in the table once a minute.
-      self._ping(ipaddr, now)
+      self._ping(ip_address, now)
 
       if state != 'REACHABLE':
         continue
