@@ -79,6 +79,7 @@ var AWESOMATION = (function() {
     (function () {
       var pusher = new Pusher('58c733f69ae8d5b639e0', {encrypted: true,
         authEndpoint: '/api/user/channel_auth'});
+      var socket;
 
       pusher.connection.bind('error', function(err) {
         console.log(err);
@@ -92,16 +93,28 @@ var AWESOMATION = (function() {
       });
 
       net.get('/api/user').done(function (data) {
-        var channel = pusher.subscribe(sprintf('private-%s', data.id));
+        if ('ws' in data) {
+          // running locally, so just use plain old websocket
+          socket = new WebSocket(data.ws);
+          socket.onopen = function (event) {
+            socket.send(JSON.stringify({channel: sprintf('private-%s', data.id)}));
+            fetch();
+          };
+          socket.onmessage = function (event) {
+            handle_events(JSON.parse(event.data));
+          };
+        } else {
+          var channel = pusher.subscribe(sprintf('private-%s', data.id));
 
-        channel.bind('events', function(data) {
-          handle_events(data);
-        });
+          channel.bind('events', function(data) {
+            handle_events(data);
+          });
 
-        channel.bind('pusher:subscription_succeeded', function() {
-          console.log('subscribed to push channel.');
-          fetch();
-        });
+          channel.bind('pusher:subscription_succeeded', function() {
+            console.log('subscribed to push channel.');
+            fetch();
+          });
+        }
       });
     }());
 

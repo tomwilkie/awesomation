@@ -1,5 +1,4 @@
 """Code to push events to users."""
-
 import logging
 
 import flask
@@ -8,9 +7,8 @@ import pusher
 from google.appengine.api import namespace_manager
 from google.appengine.ext import ndb
 
-from common import creds
 from common import public_creds
-from appengine import user
+from appengine import user, pusher_client
 
 
 # pylint: disable=invalid-name
@@ -120,10 +118,12 @@ def pusher_client_auth_callback():
     logging.error('Proxy %s is not allowed channel %s!', proxy, channel_name)
     flask.abort(401)
 
-  pusher_client = pusher.Pusher(
+  # Hack, but some people won't have this (when running locally)
+  from common import creds
+  client = pusher.Pusher(
       app_id=creds.pusher_app_id,
       key=public_creds.pusher_key, secret=creds.pusher_secret)
-  auth = pusher_client[channel_name].authenticate(socket_id)
+  auth = client[channel_name].authenticate(socket_id)
 
   return flask.jsonify(**auth)
 
@@ -145,10 +145,7 @@ def push_batch():
     return
 
   logging.info('Sending %d events to proxy', len(batch))
-
-  pusher_client = pusher.Pusher(
-      app_id=creds.pusher_app_id,
-      key=public_creds.pusher_key, secret=creds.pusher_secret)
+  pusher_shim = pusher_client.get_client()
 
   # Now figure out what channel to post these to.
   # Can't use user.get_user as we might not be in
@@ -163,7 +160,7 @@ def push_batch():
     for proxy in proxies:
       channel_id = 'private-%s' % proxy.key.string_id()
       logging.info('Pushing %d events to channel %s', len(batch), channel_id)
-      pusher_client[channel_id].trigger('events', batch)
+      pusher_shim.push(channel_id, batch)
   finally:
     namespace_manager.set_namespace(user_id)
 

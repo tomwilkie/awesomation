@@ -7,16 +7,19 @@ import sys
 import threading
 import uuid
 
-from common import public_creds
 from pusherclient import Pusher
 import requests
+import websocket
+
+from common import public_creds
+from pi import simple_pusher
 
 
 CONFIG_FILE = 'proxy.cfg'
-EVENT_URL = ('https://%s.appspot.com/api/device/events'
-             % public_creds.appengine_app_id)
-AUTH_URL = ('https://%s.appspot.com/api/proxy/channel_auth'
-            % public_creds.appengine_app_id)
+APPENGINE_ADDRESS = 'https://%s.appspot.com' % public_creds.appengine_app_id
+LOCAL_ADDRESS = 'http://localhost:8080'
+EVENT_PATH = '/api/device/events'
+AUTH_PATH = '/api/proxy/channel_auth'
 
 
 def read_or_make_config():
@@ -34,11 +37,13 @@ def read_or_make_config():
 
 class PushRPC(object):
   """Wrapper for pusher integration."""
+  # pylint: disable=too-many-instance-attributes
 
-  def __init__(self, callback):
+  def __init__(self, callback, args):
     self._proxy_id, self._proxy_secret = read_or_make_config()
     logging.info('I am proxy \'%s\'', self._proxy_id)
 
+    self._args = args
     self._exiting = False
 
     self._events = Queue.Queue()
@@ -48,24 +53,41 @@ class PushRPC(object):
 
     self._callback = callback
 
-    self._pusher = Pusher(public_creds.pusher_key,
-                          auth_callback=self._pusher_auth_callback,
-                          log_level=logging.ERROR)
-    self._pusher.connection.bind(
-        'pusher:connection_established',
-        self._connect_handler)
-    self._pusher.connect()
+    if args.local:
+      self._websocket_connection = None
+      self._websocket_thread = threading.Thread(target=self._local_websocket)
+      self._websocket_thread.start()
+
+    else:
+      self._pusher = Pusher(public_creds.pusher_key,
+                            auth_callback=self._pusher_auth_callback,
+                            log_level=logging.ERROR)
+      self._pusher.connection.bind(
+          'pusher:connection_established',
+          self._connect_handler)
+      self._pusher.connect()
+
+  def _local_websocket(self):
+    """Connect to local websocket server."""
+    self._websocket_connection = websocket.create_connection(
+        "ws://localhost:%d/" % simple_pusher.WEBSOCKET_PORT)
+    request = json.dumps({'channel': 'private-%s' % self._proxy_id})
+    self._websocket_connection.send(request)
+
+    while True:
+      result = self._websocket_connection.recv()
+      self._callback_handler(result)
 
   def _pusher_auth_callback(self, socket_id, channel_name):
     params = {'socket_id': socket_id, 'channel_name': channel_name}
-    response = self._make_request(AUTH_URL, params=params)
+    response = self._make_request(APPENGINE_ADDRESS, AUTH_PATH, params=params)
     response = response.json()
     return response['auth']
 
-  def _make_request(self, url, method='GET', **kwargs):
+  def _make_request(self, server, path, method='GET', **kwargs):
     """Make a request to the server with this proxy's auth."""
     response = requests.request(
-        method, url,
+        method, server + path,
         auth=(self._proxy_id, self._proxy_secret),
         headers={'content-type': 'application/json',
                  'awesomation-proxy': 'true'},
@@ -136,7 +158,9 @@ class PushRPC(object):
     logging.info('Posting %d events to server', len(events))
 
     try:
-      self._make_request(EVENT_URL, method='POST', data=json.dumps(events))
+      server_address = LOCAL_ADDRESS if self._args.local else APPENGINE_ADDRESS
+      self._make_request(server_address, EVENT_PATH,
+                         method='POST', data=json.dumps(events))
     except:
       logging.error('Posting events failed', exc_info=sys.exc_info())
 
@@ -146,4 +170,8 @@ class PushRPC(object):
     self._events.put(None)
     self._events_thread.join()
 
-    self._pusher.disconnect()
+    if self._args.local:
+      self._websocket_connection.close()
+      self._websocket_thread.join()
+    else:
+      self._pusher.disconnect()

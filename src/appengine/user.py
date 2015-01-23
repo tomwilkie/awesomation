@@ -8,7 +8,9 @@ from google.appengine.ext import ndb
 import flask
 import pusher
 
+from appengine import pusher_client
 from common import creds, public_creds, utils
+from pi import simple_pusher
 
 
 # pylint: disable=invalid-name
@@ -44,6 +46,15 @@ def get_user_request():
   person = Person.get_by_id(user_id)
   values = person.to_dict()
   values['id'] = user_id
+
+  # If we are running in local mode,
+  # tell the UI to connect somewhere
+  # special for push updates.
+  # TODO get hostname (socket doesn't work)
+  if pusher_client.should_use_local():
+    values['ws'] = 'ws://localhost:%d/' % (
+        simple_pusher.WEBSOCKET_PORT)
+
   return flask.jsonify(**values)
 
 
@@ -73,16 +84,12 @@ def push_events():
 
   # Push them to pusher, as we've migrated
   # the UI to that.
-  pusher_client = pusher.Pusher(
-      app_id=creds.pusher_app_id,
-      key=public_creds.pusher_key,
-      secret=creds.pusher_secret,
-      encoder=flask.json.JSONEncoder)
+  pusher_shim = pusher_client.get_client(encoder=flask.json.JSONEncoder)
 
   for batch in utils.limit_json_batch(events, max_size=8000):
     logging.info('Sending %d events to user on channel %s',
                  len(batch), channel_id)
-    pusher_client[channel_id].trigger('events', batch)
+    pusher_shim.push(channel_id, batch)
 
 
 # UI calls /api/user/channel_auth with its
@@ -102,9 +109,9 @@ def pusher_client_auth_callback():
     logging.error('User %s is not allowed channel %s!', user_id, channel_name)
     flask.abort(401)
 
-  pusher_client = pusher.Pusher(
+  client = pusher.Pusher(
       app_id=creds.pusher_app_id,
       key=public_creds.pusher_key, secret=creds.pusher_secret)
-  auth = pusher_client[channel_name].authenticate(socket_id)
+  auth = client[channel_name].authenticate(socket_id)
 
   return flask.jsonify(**auth)

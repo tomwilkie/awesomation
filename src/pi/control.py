@@ -4,8 +4,7 @@ import argparse
 import logging
 import sys
 
-from pi import daemon, events, hue, network
-from pi import pushrpc, sonos, wemo
+from pi import daemon, events, hue, pushrpc, sonos, wemo
 
 
 LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
@@ -18,11 +17,11 @@ class Control(daemon.Daemon):
   def __init__(self, args):
     super(Control, self).__init__(PIDFILE, daemonize=args.daemonize)
     self._args = args
-    self._pusher = None
+    self._push_rpc = None
     self._proxies = {}
 
   def run(self):
-    self._pusher = pushrpc.PushRPC(self._push_event_callback)
+    self._push_rpc = pushrpc.PushRPC(self._push_event_callback, self._args)
 
     # These modules should work 100% of the time -
     # they don't need special hardware, or root
@@ -33,28 +32,37 @@ class Control(daemon.Daemon):
                           self._device_event_callback),
         'sonos': sonos.Sonos(self._args.hue_scan_interval_secs,
                              self._device_event_callback),
-        'network': network.NetworkMonitor(
-            self._device_event_callback,
-            self._args.network_scan_interval_secs,
-            self._args.network_scan_timeout_secs)
     }
+
+    try:
+      from pi import network
+      self._proxies['network'] = network.NetworkMonitor(
+          self._device_event_callback,
+          self._args.network_scan_interval_secs,
+          self._args.network_scan_timeout_secs)
+    except:
+      logging.debug('Exception was:', exc_info=sys.exc_info())
+      logging.error('Failed to initialize network module - did you '
+                    'run as root?')
 
     # This module needs a 433Mhz transmitter, wiringPi etc, so might not work
     try:
-      from appengine import rfswitch
+      from pi import rfswitch
       self._proxies['rfswitch'] = rfswitch.RFSwitch(self._args.rfswtich_pin)
     except:
-      logging.error('Failed to initialize rfswitch module',
-                    exc_info=sys.exc_info())
+      logging.debug('Exception was:', exc_info=sys.exc_info())
+      logging.error('Failed to initialize rfswitch module - have you '
+                    'installed rcswitch?')
 
     # This module needs a zwave usb stick
     try:
-      from appengine import zwave
+      from pi import zwave
       self._proxies['zwave'] = zwave.ZWave(
           self._args.zwave_device, self._device_event_callback)
     except:
-      logging.error('Failed to initialize zwave module',
-                    exc_info=sys.exc_info())
+      logging.debug('Exception was:', exc_info=sys.exc_info())
+      logging.error('Failed to initialize zwave module - have you '
+                    'installed libopenzwave?')
 
     # Just sit in a loop sleeping for now
     try:
@@ -63,7 +71,7 @@ class Control(daemon.Daemon):
       logging.info('Shutting down')
 
     # Now try and shut everything down gracefully
-    self._pusher.stop()
+    self._push_rpc.stop()
 
     for proxy in self._proxies.itervalues():
       proxy.stop()
@@ -87,7 +95,7 @@ class Control(daemon.Daemon):
     """Handle event from a device."""
     event = {'device_type': device_type, 'device_id': device_id,
              'event': event_body}
-    self._pusher.send_event(event)
+    self._push_rpc.send_event(event)
 
 
 def main():
@@ -99,12 +107,17 @@ def main():
   logging.getLogger().addHandler(file_handler)
   logging.getLogger('requests.packages.urllib3.connectionpool'
                    ).setLevel(logging.ERROR)
+  logging.getLogger('soco.services').setLevel(logging.ERROR)
 
   # Command line arguments
   parser = argparse.ArgumentParser()
   parser.add_argument('--daemonize', dest='daemonize', action='store_true')
   parser.add_argument('--nodaemonize', dest='daemonize', action='store_false')
   parser.set_defaults(daemonize=True)
+
+  parser.add_argument('--local', dest='local', action='store_true')
+  parser.add_argument('--nolocal', dest='local', action='store_false')
+  parser.set_defaults(daemonize=False)
 
   parser.add_argument('--zwave_device',
                       default='/dev/ttyUSB0')
