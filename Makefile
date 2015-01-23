@@ -116,7 +116,10 @@ upload-dev: dist
 	appcfg.py --oauth2 --application=awesomation-dev update dist
 
 devapp: dist
-	PYTHONPATH=${PYTHONPATH}:./dist:./dist/third_party dev_appserver.py --use_mtime_file_watcher=true dist/app.yaml
+	PYTHONPATH=${PYTHONPATH}:./dist:./dist/third_party dev_appserver.py --use_mtime_file_watcher=true --host=0.0.0.0 dist/app.yaml
+
+pusher: dist
+	PYTHONPATH=${PYTHONPATH}:./dist:./dist/third_party python dist/pi/simple_pusher.py
 
 runpi: dist
 	sudo PYTHONPATH=$${PYTHONPATH}:dist:dist/third_party python dist/pi/control.py --nodaemonize restart
