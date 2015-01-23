@@ -20,7 +20,11 @@ class Sonos(scanning_proxy.ScanningProxy):
     self._previous_details = {}
 
   def _scan_once(self):
-    devices = list(soco.discover())
+    devices = soco.discover()
+    if devices is None:
+      return
+
+    devices = list(devices)
 
     logging.info('Found %d sonos devices.', len(devices))
 
