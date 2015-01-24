@@ -2,6 +2,7 @@
 import logging
 import sys
 
+from google.appengine.api import namespace_manager, users
 from google.appengine.ext import db
 
 import flask
@@ -122,8 +123,36 @@ class CommandView(flask.views.MethodView):
     return flask.jsonify(result=result)
 
 
+def default_user_authentication():
+  """Ensure user is authenticated, and switch to
+     appropriate building namespace."""
+  user_object = users.get_current_user()
+  if not user_object:
+    return flask.redirect(users.create_login_url(flask.request.url))
+
+  # Need to pick a building for this user request
+  person = user.get_person()
+  buildings = list(person.buildings)
+  assert len(buildings) > 0
+  buildings.sort()
+
+  if 'building-id' in flask.request.headers:
+    building_id = flask.request.headers['building-id']
+    if building_id not in buildings:
+      flask.abort(401)
+  else:
+    building_id = buildings[0]
+
+  namespace_manager.set_namespace(building_id)
+
+
 def register_class(blueprint, cls, create_callback):
   """Register a ndb model for rest endpoints."""
+
+  # Everthing using rest module has to be namespaced.
+  blueprint.before_request(default_user_authentication)
+
+  # register some handlers
   class_view_func = ClassView.as_view('%s_crud' % cls.__name__,
                                       blueprint.name, cls, create_callback)
   blueprint.add_url_rule('/', defaults={'object_id': None},

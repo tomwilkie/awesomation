@@ -5,7 +5,6 @@ import logging
 import os
 import sys
 
-from google.appengine.api import namespace_manager, users
 from google.appengine.ext import ndb
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
@@ -75,42 +74,6 @@ def root():
 def custom400(error):
   response = flask.jsonify({'message': error.description})
   return response, 400
-
-
-@app.before_request
-def before_request():
-  """Ensure user is authenticated."""
-
-  # Proxies use basic authentication, and are only allowed a few endpoints
-  if flask.request.endpoint.startswithc('pushrpc.'):
-    if flask.request.headers.get('awesomation-proxy', None) != 'true':
-      flask.abort(401)
-
-    proxy = pushrpc.authenticate()
-    if proxy is None:
-      flask.abort(401)
-
-    # we don't set the namespace to the owner,
-    # as we need to authenticate proxy requests
-    # before owner is set (ie proxies are unclaimed)
-    # namespace_manager.set_namespace(proxy.owner)
-    return
-
-  # Cron jobs are authenticated as a special case
-  if flask.request.endpoint.startswith('tasks.'):
-    if flask.request.headers.get('X-AppEngine-Cron', None) != 'true':
-      flask.abort(401)
-    return
-
-  if flask.request.endpoint.startswith('user.'):
-    pass
-
-  # Otherwise, we just use good-ole google authentication
-  user_object = users.get_current_user()
-  if not user_object:
-    return flask.redirect(users.create_login_url(flask.request.url))
-
-  namespace_manager.set_namespace(user_object.user_id())
 
 
 @app.after_request

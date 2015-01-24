@@ -8,11 +8,29 @@ from google.appengine.api import namespace_manager
 from google.appengine.ext import ndb
 
 from common import public_creds
-from appengine import pusher_client
+from appengine import pusher_client, rest
 
 
 # pylint: disable=invalid-name
 blueprint = flask.Blueprint('pushrpc', __name__)
+
+
+@blueprint.before_request
+def before_request():
+  """Requst here should use authenticated using special device code."""
+
+  # this endpoing needs normal users
+  if flask.request.endpoint in {'pushrpc.claim_proxy'}:
+    rest.default_user_authentication()
+    return
+
+  # the rest in this module should be proxy-auth
+  if flask.request.headers.get('awesomation-proxy', None) != 'true':
+    flask.abort(401)
+
+  proxy = authenticate()
+  if proxy is None:
+    flask.abort(401)
 
 
 # Proxies have ids and a secret.

@@ -14,6 +14,13 @@ from appengine import account, pushrpc, room, user
 blueprint = flask.Blueprint('tasks', __name__)
 
 
+@blueprint.before_request
+def before_request():
+  # Cron jobs are authenticated as a special case
+  if flask.request.headers.get('X-AppEngine-Cron', None) != 'true':
+    flask.abort(401)
+
+
 def _update_per_namespace():
   """Do a bunch of periodic stuff for a user."""
 
