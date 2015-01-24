@@ -10,7 +10,7 @@ from boto.dynamodb2 import layer1
 
 import flask
 
-from appengine import user
+from appengine import building
 from common import creds
 
 
@@ -37,7 +37,7 @@ from common import creds
 #
 # Given all this, we have a couple of design choices:
 #
-# 0) hashkey = user_id, range key = time uid,
+# 0) hashkey = building_id, range key = time uid,
 #    item = all the stuff flushed in this request
 #
 #  - 1 write per request
@@ -129,8 +129,8 @@ def store_version(version):
     batch = []
     setattr(flask.g, 'history', batch)
 
-  user_id = user.get_user_from_namespace()
-  batch.append((user_id, version))
+  building_id = building.get_id()
+  batch.append((building_id, version))
 
 
 def store_batch():
@@ -148,9 +148,9 @@ def store_batch():
   dt = long(time.time() * 1000)
   items = {}
 
-  for user_id, version in history:
+  for building_id, version in history:
     version['hash_key'] = '%s-%s-%s' % (
-        user_id, version['class'], version['id'])
+        building_id, version['class'], version['id'])
     version['range_key'] = dt
     for key in FIELDS_TO_IGNORE:
       version.pop(key, None)
@@ -175,10 +175,10 @@ def store_batch():
 
 
 def get_range(cls, object_id, start, end, field):
-  user_id = user.get_user_from_namespace()
+  building_id = building.get_id()
   history_table = get_history_table()
   values = history_table.query_2(
-      hash_key__eq='%s-%s-%s' % (user_id, cls, object_id),
+      hash_key__eq='%s-%s-%s' % (building_id, cls, object_id),
       range_key__gt=start,
       range_ket__lte=end)
 

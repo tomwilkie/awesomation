@@ -12,7 +12,6 @@ from appengine import device, model, rest
 
 class Room(model.Base):
   """A room in a property."""
-  owner = ndb.StringProperty(required=True)
   name = ndb.StringProperty(required=False)
 
   # automatically dim lights in this room?
@@ -143,8 +142,8 @@ class Room(model.Base):
     self.update_lights()
 
 
-def create_room(room_id, user_id, _):
-  return Room(id=room_id, owner=user_id)
+def create_room(room_id, _):
+  return Room(id=room_id)
 
 
 # pylint: disable=invalid-name

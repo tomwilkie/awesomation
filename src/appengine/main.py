@@ -53,13 +53,17 @@ class Encoder(flask.json.JSONEncoder):
 app = flask.Flask('awesomation', static_folder=static_dir())
 app.debug = True
 app.json_encoder = Encoder
+
+# These are not namespaced
 app.register_blueprint(user.blueprint, url_prefix='/api/user')
+app.register_blueprint(pushrpc.blueprint, url_prefix='/api/proxy')
+app.register_blueprint(tasks.blueprint, url_prefix='/tasks')
+
+# There are all namespaced
+app.register_blueprint(account.blueprint, url_prefix='/api/account')
 app.register_blueprint(device.blueprint, url_prefix='/api/device')
 app.register_blueprint(driver.blueprint, url_prefix='/api/driver')
 app.register_blueprint(room.blueprint, url_prefix='/api/room')
-app.register_blueprint(pushrpc.blueprint, url_prefix='/api/proxy')
-app.register_blueprint(tasks.blueprint, url_prefix='/tasks')
-app.register_blueprint(account.blueprint, url_prefix='/api/account')
 
 
 @app.route('/')
@@ -78,7 +82,10 @@ def before_request():
   """Ensure user is authenticated."""
 
   # Proxies use basic authentication, and are only allowed a few endpoints
-  if flask.request.headers.get('awesomation-proxy', None) == 'true':
+  if flask.request.endpoint.startswithc('pushrpc.'):
+    if flask.request.headers.get('awesomation-proxy', None) != 'true':
+      flask.abort(401)
+
     proxy = pushrpc.authenticate()
     if proxy is None:
       flask.abort(401)
@@ -90,10 +97,13 @@ def before_request():
     return
 
   # Cron jobs are authenticated as a special case
-  if flask.request.endpoint in {'tasks.update'}:
+  if flask.request.endpoint.startswith('tasks.'):
     if flask.request.headers.get('X-AppEngine-Cron', None) != 'true':
       flask.abort(401)
     return
+
+  if flask.request.endpoint.startswith('user.'):
+    pass
 
   # Otherwise, we just use good-ole google authentication
   user_object = users.get_current_user()

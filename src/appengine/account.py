@@ -13,7 +13,7 @@ from google.appengine.ext import ndb
 
 import flask
 
-from appengine import model, rest, user
+from appengine import model, rest
 
 
 REDIRECT_URL = 'https://homeawesomation.appspot.com/api/account/redirect'
@@ -40,7 +40,6 @@ class Account(model.Base):
   expires = ndb.IntegerProperty(required=False)
   refresh_token = ndb.StringProperty(required=False)
 
-  owner = ndb.StringProperty(required=True)
   human_type = ndb.ComputedProperty(lambda a: a.get_human_type())
   last_update = ndb.DateTimeProperty(required=False, auto_now=True)
 
@@ -130,7 +129,7 @@ def oauth_start_flow():
     flask.about(400)
 
   key = str(uuid.uuid4())
-  instance = cls(id=key, owner=user.get_user())
+  instance = cls(id=key)
   instance.put()
 
   return flask.redirect(instance.AUTH_URL %

@@ -5,7 +5,7 @@ import urllib
 
 from google.appengine.ext import ndb
 
-from appengine import account, device, rest, user
+from appengine import account, device, rest
 from common import creds
 
 
@@ -96,5 +96,4 @@ class NetatmoAccount(account.Account):
           'event': details,
       })
 
-    user_id = user.get_user_from_namespace()
-    device.process_events(events, user_id)
+    device.process_events(events)

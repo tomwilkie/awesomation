@@ -8,7 +8,7 @@ from google.appengine.api import namespace_manager
 from google.appengine.ext import ndb
 
 from common import public_creds
-from appengine import user, pusher_client
+from appengine import pusher_client
 
 
 # pylint: disable=invalid-name
@@ -26,7 +26,7 @@ blueprint = flask.Blueprint('pushrpc', __name__)
 # not the per-user one (so users can't see them).
 class Proxy(ndb.Model):
   secret = ndb.StringProperty()
-  owner = ndb.StringProperty()
+  building_id = ndb.StringProperty()
 
 
 # Step 1. Create a proxy object with id & secret.
@@ -80,8 +80,7 @@ def claim_proxy():
   # this will run as a user, so we don't need to authenticate
   # it (already done in main).  Running in users namespace.
   assert namespace_manager.get_namespace() != ''
-
-  user_id = user.get_user()
+  building_id = namespace_manager.get_namespace()
 
   # We need to reset the namespace to access the proxies
   namespace_manager.set_namespace(None)
@@ -90,10 +89,10 @@ def claim_proxy():
     logging.info('Proxy \'%s\' not found', proxy_id)
     flask.abort(404)
 
-  if proxy.owner is not None:
+  if proxy.building_id is not None:
     flask.abort(400, 'Proxy already claimed')
 
-  proxy.owner = user_id
+  proxy.building_id = building_id
   proxy.put()
   return ('', 201)
 
@@ -148,19 +147,19 @@ def push_batch():
   pusher_shim = pusher_client.get_client()
 
   # Now figure out what channel to post these to.
-  # Can't use user.get_user as we might not be in
-  # a user's request (might be a device update
-  # from the proxy).  So we use the namespace
-  # instead.  Horrid.
-  user_id = user.get_user_from_namespace()
+  # Building id should always be in the namespace
+  # for any request which triggers events.
+  # So we use the namespace.  Horrid.
+  assert namespace_manager.get_namespace() != ''
+  building_id = namespace_manager.get_namespace()
 
   try:
     namespace_manager.set_namespace(None)
-    proxies = Proxy.query(Proxy.owner == user_id).iter()
+    proxies = Proxy.query(Proxy.building_id == building_id).iter()
     for proxy in proxies:
       channel_id = 'private-%s' % proxy.key.string_id()
       logging.info('Pushing %d events to channel %s', len(batch), channel_id)
       pusher_shim.push(channel_id, batch)
   finally:
-    namespace_manager.set_namespace(user_id)
+    namespace_manager.set_namespace(building_id)
 

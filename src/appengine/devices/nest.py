@@ -6,7 +6,7 @@ import logging
 from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 
-from appengine import account, device, rest, user
+from appengine import account, device, rest
 from common import creds
 
 
@@ -108,5 +108,4 @@ class NestAccount(account.Account):
             'event': thermostat_info,
         })
 
-    user_id = user.get_user_from_namespace()
-    device.process_events(events, user_id)
+    device.process_events(events)

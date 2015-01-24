@@ -27,7 +27,7 @@ def register(device_type):
   return class_rebuilder
 
 
-def create_device(device_id, user_id, body, device_type=None):
+def create_device(device_id, body, device_type=None):
   """Factory for creating new devices."""
   if device_type is None:
     device_type = body.pop('type', None)
@@ -39,12 +39,11 @@ def create_device(device_id, user_id, body, device_type=None):
   if constructor is None:
     logging.error('No device type \'%s\'', device_type)
     flask.abort(400)
-  return constructor(id=device_id, owner=user_id)
+  return constructor(id=device_id)
 
 
 class Device(model.Base):
   """Base class for all device drivers."""
-  owner = ndb.StringProperty(required=True)
 
   # This is the name the user sets
   name = ndb.StringProperty(required=False)
@@ -128,7 +127,7 @@ blueprint = flask.Blueprint('device', __name__)
 rest.register_class(blueprint, Device, create_device)
 
 
-def process_events(events, user_id):
+def process_events(events):
   """Process a set of events."""
 
   device_cache = {}
@@ -147,7 +146,7 @@ def process_events(events, user_id):
     else:
       device = Device.get_by_id(device_id)
       if not device:
-        device = create_device(device_id, user_id, None,
+        device = create_device(device_id, None,
                                device_type=device_type)
       device_cache[device_id] = device
 
@@ -164,17 +163,17 @@ def handle_events():
     flask.abort(401)
 
   # If proxy hasn't been claimed, not much we can do.
-  if proxy.owner is None:
+  if proxy.building_id is None:
     logging.info('Dropping events as this proxy is not claimed')
     return ('', 204)
 
   # We need to set namespace - not done by main.py
-  namespace_manager.set_namespace(proxy.owner)
+  namespace_manager.set_namespace(proxy.building_id)
 
   events = flask.request.get_json()
   logging.info('Processing %d events', len(events))
 
-  process_events(events, proxy.owner)
+  process_events(events)
 
   return ('', 204)
 

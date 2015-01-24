@@ -38,19 +38,15 @@ class ClassView(flask.views.MethodView):
 
     else:
       # Return json repr of given object
-      user_id = user.get_user()
       obj = self._cls.get_by_id(object_id)
 
       if not obj:
         flask.abort(404)
-      elif obj.owner != user_id:
-        flask.abort(403)
 
       return flask.jsonify(**obj.to_dict())
 
   def post(self, object_id):
     """Using json body to create or update a object."""
-    user_id = user.get_user()
     body = flask.request.get_json()
     if body is None:
       flask.abort(400, 'JSON body and mime type required.')
@@ -61,10 +57,7 @@ class ClassView(flask.views.MethodView):
     if not obj and self._create_callback is None:
       flask.abort(403)
     elif not obj:
-      obj = self._create_callback(object_id, user_id, body)
-
-    elif obj.owner != user_id:
-      flask.abort(403)
+      obj = self._create_callback(object_id, body)
 
     # Update the object; abort with 400 on unknown field
     try:
@@ -87,13 +80,10 @@ class ClassView(flask.views.MethodView):
 
   def delete(self, object_id):
     """Delete an object."""
-    user_id = user.get_user()
     obj = self._cls.get_by_id(object_id)
 
     if not obj:
       flask.abort(404)
-    elif obj.owner != user_id:
-      flask.abort(403)
 
     obj.key.delete()
     user.send_event(cls=self._classname, id=object_id, event='delete')
@@ -110,7 +100,6 @@ class CommandView(flask.views.MethodView):
 
   def post(self, object_id):
     """Run a command on a object."""
-    user_id = user.get_user()
     body = flask.request.get_json()
     if body is None:
       flask.abort(400, 'JSON body and mime type required.')
@@ -120,8 +109,6 @@ class CommandView(flask.views.MethodView):
 
     if not obj:
       flask.abort(404)
-    elif obj.owner != user_id:
-      flask.abort(403)
 
     func_name = body.pop('command', None)
     func = getattr(obj, func_name, None)
