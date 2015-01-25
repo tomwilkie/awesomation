@@ -83,20 +83,6 @@ class Device(model.Base):
   def get_by_capability(cls, capability):
     return cls.query(Device.capabilities == capability)
 
-  @classmethod
-  def handle_static_command(cls, command_dict):
-    """Dispatch command to appropriate handler."""
-    logging.info(command_dict)
-    func_name = command_dict.pop('command', None)
-    func = getattr(cls, func_name, None)
-    logging.info('%s %s %s', func, type(func), func.is_command)
-    if func is None or not getattr(func, 'is_command', False) \
-        or not getattr(func, 'is_static', False):
-      logging.error('Command %s does not exist or is not a command',
-                    func_name)
-      flask.abort(400)
-    func(**command_dict)
-
   def find_room(self):
     """Resolve the room for this device.  May return null."""
     if not self.room:

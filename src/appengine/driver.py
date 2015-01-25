@@ -1,33 +1,46 @@
 """List drivers and send them commands."""
+import logging
+
 import flask
 
-from appengine import device, user
+from appengine import device, rest
+
+
+class Query(object):
+  def iter(self):
+    for name, cls in device.DEVICE_TYPES.iteritems():
+      yield Driver(name, cls)
+
+
+class Driver(object):
+  """This is a fake for compatibility with the rest module"""
+
+  def __init__(self, name, cls):
+    self._name = name
+    self._cls = cls
+
+  def to_dict(self):
+    return {'name': self._name}
+
+  # This is a trampoline through to the driver
+  # mainly for commands
+  def __getattr__(self, name):
+    func = getattr(self._cls, name)
+    if func is None or not getattr(func, 'is_static', False):
+      logging.error('Command %s does not exist or is not a static command',
+                    name)
+      flask.abort(400)
+    return func
+
+  @staticmethod
+  def query():
+    return Query()
+
+  @staticmethod
+  def get_by_id(_id):
+    return Driver(_id, device.DEVICE_TYPES[_id])
 
 
 # pylint: disable=invalid-name
 blueprint = flask.Blueprint('driver', __name__)
-
-
-@blueprint.route('/', methods=['GET'])
-def list_drivers():
-  """Return json list of drivers."""
-  devices = [{'name': k} for k in device.DEVICE_TYPES.iterkeys()]
-  return flask.jsonify(devices=devices)
-
-
-@blueprint.route('/<driver>/command', methods=['POST'])
-def driver_command(driver):
-  """Using json body to send command to driver."""
-  body = flask.request.get_json()
-  if body is None:
-    flask.abort(400, 'JSON body and mime type required.')
-
-  driver = device.DEVICE_TYPES.get(driver, None)
-
-  if not driver:
-    flask.abort(404)
-
-  driver.handle_static_command(body)
-
-  return ('', 204)
-
+rest.register_class(blueprint, Driver, None)
