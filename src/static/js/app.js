@@ -93,23 +93,26 @@ var AWESOMATION = (function() {
       });
 
       net.get('/api/user').done(function (data) {
+        // For now we'll just always connect to the
+        // first building.
+        var building_id = data.buildings[0];
+        var channel_id = sprintf('private-%s', building_id);
+
         if ('ws' in data) {
           // running locally, so just use plain old websocket
           socket = new WebSocket(data.ws);
           socket.onopen = function (event) {
-            socket.send(JSON.stringify({channel: sprintf('private-%s', data.id)}));
+            socket.send(JSON.stringify({channel: channel_id}));
             fetch();
           };
           socket.onmessage = function (event) {
             handle_events(JSON.parse(event.data));
           };
         } else {
-          var channel = pusher.subscribe(sprintf('private-%s', data.id));
-
+          var channel = pusher.subscribe(channel_id);
           channel.bind('events', function(data) {
             handle_events(data);
           });
-
           channel.bind('pusher:subscription_succeeded', function() {
             console.log('subscribed to push channel.');
             fetch();
