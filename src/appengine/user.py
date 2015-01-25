@@ -13,10 +13,6 @@ from common import creds, public_creds, utils
 from pi import simple_pusher
 
 
-# pylint: disable=invalid-name
-blueprint = flask.Blueprint('user', __name__)
-
-
 # We're not going to put these in a namespace.
 class Person(ndb.Model):
   # key_name is userid
@@ -24,11 +20,24 @@ class Person(ndb.Model):
   buildings = ndb.StringProperty(repeated=True)
 
 
+# pylint: disable=invalid-name
+blueprint = flask.Blueprint('user', __name__)
+
+
+@blueprint.before_request
+def authentication():
+  """Ensure user is authenticated, but don't switch namespace."""
+  user_object = users.get_current_user()
+  if not user_object:
+    return flask.redirect(users.create_login_url(flask.request.url))
+
+
 def get_person():
   """Return the user_id for the current logged in user."""
   user = users.get_current_user()
   assert user is not None
   assert user.email() is not None
+  assert namespace_manager.get_namespace() == ''
 
   user_id = user.user_id()
   person = Person.get_or_insert(

@@ -53,12 +53,12 @@ app = flask.Flask('awesomation', static_folder=static_dir())
 app.debug = True
 app.json_encoder = Encoder
 
-# These are not namespaced
+# These are not namespaced, and do their own auth
 app.register_blueprint(user.blueprint, url_prefix='/api/user')
 app.register_blueprint(pushrpc.blueprint, url_prefix='/api/proxy')
 app.register_blueprint(tasks.blueprint, url_prefix='/tasks')
 
-# There are all namespaced
+# There are all namespaced, and auth is done in the rest module
 app.register_blueprint(account.blueprint, url_prefix='/api/account')
 app.register_blueprint(device.blueprint, url_prefix='/api/device')
 app.register_blueprint(driver.blueprint, url_prefix='/api/driver')
