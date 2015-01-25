@@ -740,7 +740,7 @@ var AWESOMATION = (function() {
           dim_end_time: (end_hours * 3600) + (end_mins * 60),
         }).always(function() {
           net.post(sprintf('/api/room/%s/command', room_id), {
-            command: 'update_auto_dim'
+            command: 'update_lights'
           });
         });
       });

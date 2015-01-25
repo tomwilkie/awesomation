@@ -79,6 +79,7 @@ class Room(model.Base):
 
     return (brightness, color_temperature)
 
+  @rest.command
   def update_lights(self):
     """Update state of the lights in this room."""
     logging.info('Updating light in \'%s\'', self.name)
