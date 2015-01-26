@@ -35,7 +35,7 @@ def authentication():
   # The UI will make a request to /api/user first,
   # so we look for invites here, instead of every
   # API request.
-  invites = list(Invite.query(email=user_object.email()).iter())
+  invites = list(Invite.query(Invite.email==user_object.email()).iter())
   if not invites:
     return
 
