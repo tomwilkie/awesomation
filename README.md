@@ -76,6 +76,9 @@ your proxy with your account.
 Then, add other devices, rooms etc.  Also, you might want to run the proxy in a screen
 session, just in case the ssh connection drops.  Have fun!
 
+NB if you're following on, make sure you run `git submodule sync` after a pull - we
+regularly change submodule origins, and just running `git submodule update` will miss this.
+
 ### Run your own server instance
 
 This step is totally optional - you are more than welcome to use my hosted code as http://homeawesomation.appspot.com. If you wish to develop the server-side code, you'll need to host your own server instance.  To do this:
