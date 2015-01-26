@@ -5,6 +5,8 @@ import logging
 import os
 import sys
 
+
+from google.appengine.api import users
 from google.appengine.ext import ndb
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
@@ -67,6 +69,9 @@ app.register_blueprint(room.blueprint, url_prefix='/api/room')
 
 @app.route('/')
 def root():
+  user_object = users.get_current_user()
+  if not user_object:
+    return flask.redirect(users.create_login_url(flask.request.url))
   return flask.send_from_directory(static_dir(), 'index.html')
 
 
