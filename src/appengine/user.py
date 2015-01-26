@@ -1,6 +1,7 @@
 """Handle user related queries."""
 import logging
 
+from google.appengine.api import mail
 from google.appengine.api import namespace_manager
 from google.appengine.api import users
 from google.appengine.ext import ndb
@@ -30,6 +31,24 @@ def authentication():
   user_object = users.get_current_user()
   if not user_object:
     return flask.redirect(users.create_login_url(flask.request.url))
+
+  # The UI will make a request to /api/user first,
+  # so we look for invites here, instead of every
+  # API request.
+  invites = list(Invite.query(email=user_object.email()).iter())
+  if not invites:
+    return
+
+  invited_buildings = {invite.building for invite in invites}
+
+  person = get_person()
+  current_buildings = set(person.building)
+  all_buildings = current_buildings | invited_buildings
+  if all_buildings != current_buildings:
+    person.current_buildings.extend(current_buildings - all_buildings)
+    person.put()
+
+  ndb.delete_multi(invites)
 
 
 def get_person():
@@ -136,3 +155,47 @@ def pusher_client_auth_callback():
   auth = client[channel_name].authenticate(socket_id)
 
   return flask.jsonify(**auth)
+
+
+# Users are keyed by this magic id we get from appengine
+# we don't know this id yet, so we can't create a person
+# object for them.  Instead, we'll create an invite object
+# and create the person object when they first login.
+class Invite(ndb.Model):
+  email = ndb.StringProperty(required=False)
+  building = ndb.StringProperty(repeated=False)
+
+
+@blueprint.route('/invite', methods=['POST'])
+def invite_handler():
+  """Authenticate a given socket for a given channel."""
+  body = flask.request.get_json()
+  if body is None:
+    flask.abort(400, 'JSON body and mime type required.')
+
+  # We know the user is authenticated at this point
+  person = get_person()
+
+  # who is the invitee?
+  invitee_email = body.get('invitee', None)
+  if invitee_email is None:
+    flask.abort(400, 'Field invitee expected')
+
+  # figure out what building we're inviting someone too
+  building_id = flask.request.headers.get('building-id', person.buildings[0])
+  if building_id not in person.buildings:
+    flask.abort(401)
+
+  invite = Invite(email=invitee_email, building=building_id)
+  invite.put()
+
+  mail.send_mail(
+      sender=person.email, to=invitee_email,
+      subject="An Awesomation house has been shared with you.",
+      body="""
+Dear %s:
+
+An Awesomation house has been shared with you.  Visit
+http://homeawesomation.example.com/ and sign in using your Google Account
+for access.
+""")
