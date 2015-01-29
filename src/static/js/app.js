@@ -24,14 +24,21 @@ var AWESOMATION = (function() {
   }());
 
   var cache = (function() {
-    var types = ['room', 'device', 'account'];
+    var types = ['room', 'device', 'account', 'user'];
     var objects = {};
     $.each(types, function(i, type) {
       objects[type] = {};
     });
+    var logout_url = null;
+    function logout() {
+      if (logout_url) {
+        window.location.replace(logout_url);
+      }
+    }
     var cache = {
       loading: true,
-      objects: objects
+      objects: objects,
+      logout: logout,
     };
 
     function fetch() {
@@ -534,6 +541,10 @@ var AWESOMATION = (function() {
       net.post(sprintf('/api/room/%s/command', room_id), {
         command: command,
       });
+    });
+
+    $('.logout').on('click', function() {
+      cache.logout();
     });
 
     // Dialogs

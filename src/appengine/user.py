@@ -1,4 +1,5 @@
 """Handle user related queries."""
+import collections
 import logging
 
 from google.appengine.api import mail
@@ -76,6 +77,7 @@ def get_user_request():
   person = get_person()
   values = person.to_dict()
   values['id'] = person.key.string_id()
+  values['logout_url'] = users.create_logout_url('/')
 
   # If we are running in local mode,
   # tell the UI to connect somewhere
@@ -84,6 +86,21 @@ def get_user_request():
   if pusher_client.should_use_local():
     values['ws'] = 'ws://localhost:%d/' % (
         simple_pusher.WEBSOCKET_PORT)
+
+  # What buildings have we shared with whom?
+  values['sharing'] = collections.defaultdict(list)
+  for other_person in Person.query(
+      Person.buildings.IN(person.buildings)).iter():
+    for building in other_person.buildings:
+      values['sharing'][building].append(other_person.email)
+  for building_id in values['sharing'].keys():
+    if building_id not in person.buildings:
+      del values['sharing'][building_id]
+
+  # Are there any pending invites?
+  for invite in Invite.query(Invite.building.IN(
+      person.buildings)).iter():
+    values['sharing'][invite.building].append('%s (pending)' % invite.email)
 
   return flask.jsonify(**values)
 
