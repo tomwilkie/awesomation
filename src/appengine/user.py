@@ -102,7 +102,7 @@ def get_user_request():
       person.buildings)).iter():
     values['sharing'][invite.building].append('%s (pending)' % invite.email)
 
-  return flask.jsonify(**values)
+  return flask.jsonify(objects=[values])
 
 
 def send_event(**kwargs):

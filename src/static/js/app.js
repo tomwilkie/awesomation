@@ -99,9 +99,10 @@ var AWESOMATION = (function() {
         }
       });
 
-      net.get('/api/user').done(function (data) {
+      net.get('/api/user').done(function (response) {
         // For now we'll just always connect to the
         // first building.
+        var data = response.objects[0];
         var building_id = data.buildings[0];
         var channel_id = sprintf('private-%s', building_id);
 
