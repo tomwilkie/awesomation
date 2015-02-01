@@ -12,3 +12,13 @@ third_party/static/glyphicons_pro
 *.rej
 *.log
 *.cfg
+
+*.xccheckout
+*.pbxuser
+*.perspective
+*.perspectivev3
+*.swp
+*~.nib
+*.mode1v3
+*.mode2v3
+xcuserdata
