@@ -29,10 +29,15 @@ var AWESOMATION = (function() {
     $.each(types, function(i, type) {
       objects[type] = {};
     });
-    var logout_url = null;
     function logout() {
-      if (logout_url) {
-        window.location.replace(logout_url);
+      var url = null;
+      $.each(objects.user, function(id, user) {
+        url = user.logout_url;
+        return false;
+      });
+
+      if (url !== null) {
+        window.location.replace(url);
       }
     }
     var cache = {
