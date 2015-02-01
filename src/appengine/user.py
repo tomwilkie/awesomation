@@ -36,7 +36,7 @@ def authentication():
   # The UI will make a request to /api/user first,
   # so we look for invites here, instead of every
   # API request.
-  invites = list(Invite.query(Invite.email==user_object.email()).iter())
+  invites = list(Invite.query(Invite.email == user_object.email()).iter())
   if not invites:
     return
 
@@ -91,8 +91,8 @@ def get_user_request():
   values['sharing'] = collections.defaultdict(list)
   for other_person in Person.query(
       Person.buildings.IN(person.buildings)).iter():
-    for building in other_person.buildings:
-      values['sharing'][building].append(other_person.email)
+    for other_building in other_person.buildings:
+      values['sharing'][other_building].append(other_person.email)
   for building_id in values['sharing'].keys():
     if building_id not in person.buildings:
       del values['sharing'][building_id]
