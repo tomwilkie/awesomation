@@ -3,6 +3,7 @@ import collections
 import logging
 import re
 
+from google.appengine.api import app_identity
 from google.appengine.api import mail
 from google.appengine.api import namespace_manager
 from google.appengine.api import users
@@ -212,15 +213,20 @@ def invite_handler():
   invite = Invite(email=invitee_email, building=building_id)
   invite.put()
 
-  mail.send_mail(
-      sender=person.email, to=invitee_email,
-      subject="An Awesomation house has been shared with you.",
-      body="""
+  app_id = app_identity.get_application_id()
+  body = """
 Dear %s:
 
 An Awesomation house has been shared with you.  Visit
-http://homeawesomation.example.com/ and sign in using your Google Account
+http://%s.example.com/ and sign in using your Google Account
 for access.
-""")
+""" % (invitee_email, app_id)
+
+  logging.info("Sending email: '%s'", body)
+
+  mail.send_mail(
+      sender=person.email, to=invitee_email,
+      subject="An Awesomation house has been shared with you.",
+      body=body)
 
   return ('', 204)
