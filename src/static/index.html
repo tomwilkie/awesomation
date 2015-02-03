@@ -29,6 +29,43 @@
   <div class="modal fade" id="main_modal" tabindex="-1" role="dialog" aria-hidden="true">
   </div>
 
+  <script type="text/x-handlebars-template" id="configure-sharing-dialog-template">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Configure sharing</h4>
+        </div>
+        <div class="modal-body">
+          <p>This building is shared with:</p>
+          <ul>
+          {{#each sharing}}
+            {{#each this}}
+            <li>{{.}}</li>
+            {{/each}}
+          {{/each}}
+          </ul>
+          <hr>
+          <p>Invite new people to this building:</p>
+          <form class="form-horizontal">
+            <div class="form-group">
+              <label for="inputInvitee" class="col-sm-3 control-label">Email address</label>
+              <div class="col-sm-7">
+                <input type="email" class="form-control" id="invite-email" placeholder="foo@bar.com">
+              </div>
+              <div class="col-sm-2">
+                <button type="button" class="btn btn-primary pull-right">Invite</button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </script>
+
   <script type="text/x-handlebars-template" id="setup-auto-dimming-dialog-template">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -39,14 +76,14 @@
         <div class="modal-body">
           <form class="form-horizontal">
             <div class="form-group">
-                <div class="col-sm-offset-4 col-sm-8">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="enable-auto-dim" {{#if auto_dim_lights}}checked{{/if}}> Enable auto dimming
-                    </label>
-                  </div>
+              <div class="col-sm-offset-4 col-sm-8">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" id="enable-auto-dim" {{#if auto_dim_lights}}checked{{/if}}> Enable auto dimming
+                  </label>
                 </div>
               </div>
+            </div>
             <div class="form-group">
               <label for="inputEmail3" class="col-sm-4 control-label">Start time (hh:mm)</label>
               <div class="col-sm-3">
@@ -866,10 +903,10 @@
           <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span>
         </button>
         <ul class="dropdown-menu dropdown-menu-right" role="menu">
-          <li><a href="#" class='create-new-room'>Create new room</a></li>
-          <li><a href="#" class='add-new-device'>Add new device</a></li>
+          <li><a href="#" class='create-new-room'>Create new room...</a></li>
+          <li><a href="#" class='add-new-device'>Add new device...</a></li>
           <li class="divider"></li>
-          <li><a href="#" class='configure-sharing'>Configure sharing</a></li>
+          <li><a href="#" class='configure-sharing'>Configure sharing...</a></li>
           <li><a href="#" class='logout'>Logout</a></li>
         </ul>
       </div>

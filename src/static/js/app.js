@@ -35,21 +35,27 @@ var AWESOMATION = (function() {
     $.each(types, function(i, type) {
       objects[type] = {};
     });
-    function logout() {
-      var url = null;
-      $.each(objects.user, function(id, user) {
-        url = user.logout_url;
-        return false;
-      });
 
+    function getUser() {
+      for (var user_id in objects.user) {
+        if (objects.user.hasOwnProperty(user_id)) {
+          return objects.user[user_id];
+        }
+      }
+    }
+
+    function logout() {
+      var url = getUser().logout_url;
       if (url !== null) {
         window.location.replace(url);
       }
     }
+
     var cache = {
       loading: true,
       objects: objects,
       logout: logout,
+      getUser: getUser,
     };
 
     function fetch() {
@@ -727,6 +733,18 @@ var AWESOMATION = (function() {
       dialog.show('script#new-device-dialog-template',
              {rooms: cache.objects.room},
              new_device);
+    });
+
+    // Dialog: configuring sharing
+
+    $('.configure-sharing').on('click', function() {
+      dialog.show('script#configure-sharing-dialog-template', cache.getUser(), function() {
+        var email = $(this).find('input#invite-email').val();
+
+        net.post('/api/user/invite', {
+          email: email,
+        });
+      });
     });
 
     // Dialog: change room name

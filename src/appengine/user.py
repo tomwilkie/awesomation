@@ -23,6 +23,15 @@ class Person(ndb.Model):
   buildings = ndb.StringProperty(repeated=True)
 
 
+# Users are keyed by this magic id we get from appengine
+# we don't know this id yet, so we can't create a person
+# object for them.  Instead, we'll create an invite object
+# and create the person object when they first login.
+class Invite(ndb.Model):
+  email = ndb.StringProperty(required=False)
+  building = ndb.StringProperty(repeated=False)
+
+
 # pylint: disable=invalid-name
 blueprint = flask.Blueprint('user', __name__)
 
@@ -42,18 +51,20 @@ def authentication():
     return
 
   invited_buildings = {invite.building for invite in invites}
+  logging.info('Found invites for the buidings %s for user %s',
+               invited_buildings, user_object.user_id())
 
-  person = get_person()
-  current_buildings = set(person.building)
+  person = get_person(buildings=invited_buildings)
+  current_buildings = set(person.buildings)
   all_buildings = current_buildings | invited_buildings
   if all_buildings != current_buildings:
-    person.current_buildings.extend(current_buildings - all_buildings)
+    person.buildings.extend(current_buildings - all_buildings)
     person.put()
 
-  ndb.delete_multi(invites)
+  ndb.delete_multi([i.key for i in invites])
 
 
-def get_person():
+def get_person(buildings=None):
   """Return the user_id for the current logged in user."""
   user = users.get_current_user()
   assert user is not None
@@ -61,12 +72,15 @@ def get_person():
   assert namespace_manager.get_namespace() == ''
 
   user_id = user.user_id()
+  if buildings is None:
+    buildings = [user_id]
+
   person = Person.get_or_insert(
       user_id, email=user.email(),
       # if the person is not found,
       # we'll create a new one with the
       # building id set to the user id.
-      buildings=[user_id])
+      buildings=buildings)
   return person
 
 
@@ -175,15 +189,6 @@ def pusher_client_auth_callback():
   return flask.jsonify(**auth)
 
 
-# Users are keyed by this magic id we get from appengine
-# we don't know this id yet, so we can't create a person
-# object for them.  Instead, we'll create an invite object
-# and create the person object when they first login.
-class Invite(ndb.Model):
-  email = ndb.StringProperty(required=False)
-  building = ndb.StringProperty(repeated=False)
-
-
 @blueprint.route('/invite', methods=['POST'])
 def invite_handler():
   """Authenticate a given socket for a given channel."""
@@ -195,7 +200,7 @@ def invite_handler():
   person = get_person()
 
   # who is the invitee?
-  invitee_email = body.get('invitee', None)
+  invitee_email = body.get('email', None)
   if invitee_email is None:
     flask.abort(400, 'Field invitee expected')
 
@@ -217,3 +222,5 @@ An Awesomation house has been shared with you.  Visit
 http://homeawesomation.example.com/ and sign in using your Google Account
 for access.
 """)
+
+  return ('', 204)
