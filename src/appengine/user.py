@@ -1,6 +1,7 @@
 """Handle user related queries."""
 import collections
 import logging
+import re
 
 from google.appengine.api import mail
 from google.appengine.api import namespace_manager
@@ -158,7 +159,7 @@ def pusher_client_auth_callback():
   person = get_person()
   socket_id = flask.request.form.get('socket_id')
   channel_name = flask.request.form.get('channel_name')
-  match = r'private-(\d+)'.match(channel_name)
+  match = re.match(r'private-(\d+)', channel_name)
   building_id = match.group(1)
 
   if building_id not in person.buildings:
