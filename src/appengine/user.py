@@ -31,7 +31,7 @@ def authentication():
   """Ensure user is authenticated, but don't switch namespace."""
   user_object = users.get_current_user()
   if not user_object:
-    return flask.redirect(users.create_login_url(flask.request.url))
+    return flask.abort(401)
 
   # The UI will make a request to /api/user first,
   # so we look for invites here, instead of every

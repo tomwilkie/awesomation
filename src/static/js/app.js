@@ -1,24 +1,30 @@
 var AWESOMATION = (function() {
 
   var net = (function() {
+    function login(jqXHR, data, textStatus) {
+      if (jqXHR.statusCode().status == 401) {
+        window.location.replace('/_ah/login?continue=/');
+      }
+    }
+
     return {
       get: function(url, success) {
         return $.ajax(url, {
           method: "get",
           success: success
-        });
+        }).fail(login);
       },
       post: function(url, body) {
         return $.ajax(url, {
           method: "post",
           contentType: "application/json; charset=utf-8",
           data: JSON.stringify(body)
-        });
+        }).fail(login);
       },
       del: function(url) {
         return $.ajax(url, {
           method: 'delete',
-        });
+        }).fail(login);
       }
     };
   }());

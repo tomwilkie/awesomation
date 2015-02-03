@@ -128,7 +128,7 @@ def default_user_authentication():
      appropriate building namespace."""
   user_object = users.get_current_user()
   if not user_object:
-    return flask.redirect(users.create_login_url(flask.request.url))
+    return flask.abort(401)
 
   # Need to pick a building for this user request
   person = user.get_person()
