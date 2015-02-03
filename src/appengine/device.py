@@ -108,6 +108,7 @@ class Switch(Device):
   def get_categories(self):
     return ['LIGHTING']
 
+
 # pylint: disable=invalid-name
 blueprint = flask.Blueprint('device', __name__)
 rest.register_class(blueprint, Device, create_device)
@@ -144,6 +145,8 @@ def process_events(events):
 @blueprint.route('/events', methods=['POST'])
 def handle_events():
   """Handle events from devices."""
+
+  # This endpoint needs to authenticate itself.
   proxy = pushrpc.authenticate()
   if proxy is None:
     flask.abort(401)

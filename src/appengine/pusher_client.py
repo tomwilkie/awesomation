@@ -34,8 +34,10 @@ class SimplePusherWrapper(object):
     payload = self._encoder().encode(batch)
     urlfetch.fetch(url=url, payload=payload, method=urlfetch.POST)
 
+
 def should_use_local():
   return os.environ['APPLICATION_ID'].startswith('dev')
+
 
 def get_client(**kwargs):
   # If we are running in local mode,

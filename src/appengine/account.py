@@ -120,6 +120,9 @@ def oauth_start_flow():
   and redirect to appropriate server.  We use account
   id as random string for oauth flow.
   """
+  # Have to do authentication!
+  rest.default_user_authentication()
+
   account_type = flask.request.args.get('type')
   if account_type is None:
     flask.abort(400)
@@ -142,6 +145,9 @@ def oauth_redirect_callback():
   """Step 2: Nest (etc) server redirects back to us
   with an auth_code - use this refresh access token.
   """
+  # Have to do authentication!
+  rest.default_user_authentication()
+
   auth_code = flask.request.args.get('code', None)
   state = flask.request.args.get('state', None)
   if auth_code is None or state is None:

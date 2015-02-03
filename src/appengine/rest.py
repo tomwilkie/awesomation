@@ -28,6 +28,8 @@ class ClassView(flask.views.MethodView):
 
   def get(self, object_id):
     """List objects or just return a single object."""
+    default_user_authentication()
+
     if object_id is None:
       # Return json list of objects.
       object_list = self._cls.query().iter()
@@ -48,6 +50,8 @@ class ClassView(flask.views.MethodView):
 
   def post(self, object_id):
     """Using json body to create or update a object."""
+    default_user_authentication()
+
     body = flask.request.get_json()
     if body is None:
       flask.abort(400, 'JSON body and mime type required.')
@@ -81,6 +85,8 @@ class ClassView(flask.views.MethodView):
 
   def delete(self, object_id):
     """Delete an object."""
+    default_user_authentication()
+
     obj = self._cls.get_by_id(object_id)
 
     if not obj:
@@ -101,6 +107,8 @@ class CommandView(flask.views.MethodView):
 
   def post(self, object_id):
     """Run a command on a object."""
+    default_user_authentication()
+
     body = flask.request.get_json()
     if body is None:
       flask.abort(400, 'JSON body and mime type required.')
@@ -148,9 +156,6 @@ def default_user_authentication():
 
 def register_class(blueprint, cls, create_callback):
   """Register a ndb model for rest endpoints."""
-
-  # Everthing using rest module has to be namespaced.
-  blueprint.before_request(default_user_authentication)
 
   # register some handlers
   class_view_func = ClassView.as_view('%s_crud' % cls.__name__,
