@@ -11,8 +11,6 @@ from boto.dynamodb2 import layer1
 import flask
 
 from appengine import building
-from common import creds
-
 
 # Every time we put an object to the appengine datastore,
 # we're also going to save a copy to dynamodb.  This will
@@ -98,6 +96,7 @@ def get_history_table():
         is_secure=False
     )
   else:
+    from common import creds
     connection = boto.dynamodb2.connect_to_region(
         'us-east-1',
         aws_access_key_id=creds.AWS_ACCESS_KEY_ID,

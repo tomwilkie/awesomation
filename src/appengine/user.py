@@ -13,7 +13,7 @@ import flask
 import pusher
 
 from appengine import building, pusher_client
-from common import creds, public_creds, utils
+from common import public_creds, utils
 from pi import simple_pusher
 
 
@@ -175,6 +175,7 @@ def pusher_client_auth_callback():
                   person.key.string_id(), channel_name)
     flask.abort(401)
 
+  from common import creds
   client = pusher.Pusher(
       app_id=creds.pusher_app_id,
       key=public_creds.pusher_key, secret=creds.pusher_secret)

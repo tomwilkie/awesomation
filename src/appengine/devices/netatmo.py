@@ -6,7 +6,6 @@ import urllib
 from google.appengine.ext import ndb
 
 from appengine import account, device, rest
-from common import creds
 
 
 @device.register('netatmo_weather_station')
@@ -44,8 +43,12 @@ class NetatmoAccount(account.Account):
   API_URL = ('https://api.netatmo.net/api/devicelist?'
              'access_token=%(access_token)s')
 
-  CLIENT_ID = creds.NETATMO_CLIENT_ID
-  CLIENT_SECRET = creds.NETATMO_CLIENT_SECRET
+  def __init__(self, *args, **kwargs):
+    super(NetatmoAccount, self).__init__(*args, **kwargs)
+
+    from common import creds
+    self.CLIENT_ID = creds.NETATMO_CLIENT_ID
+    self.CLIENT_SECRET = creds.NETATMO_CLIENT_SECRET
 
   def get_human_type(self):
     return 'Netatmo'

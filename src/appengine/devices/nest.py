@@ -7,7 +7,6 @@ from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 
 from appengine import account, device, rest
-from common import creds
 
 
 @device.register('nest_thermostat')
@@ -56,8 +55,13 @@ class NestAccount(account.Account):
                     '?auth=%(access_token)s')
   SINGLE_STRUCTURE_URL = ('https://developer-api.nest.com/structures/'
                           '%(id)s?auth=%(access_token)s')
-  CLIENT_ID = creds.NEST_CLIENT_ID
-  CLIENT_SECRET = creds.NEST_CLIENT_SECRET
+
+  def __init__(self, *args, **kwargs):
+    super(NestAccount, self).__init__(*args, **kwargs)
+
+    from common import creds
+    self.CLIENT_ID = creds.NEST_CLIENT_ID
+    self.CLIENT_SECRET = creds.NEST_CLIENT_SECRET
 
   def get_human_type(self):
     return 'Nest'
