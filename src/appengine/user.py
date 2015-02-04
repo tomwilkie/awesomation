@@ -75,28 +75,18 @@ blueprint = flask.Blueprint('user', __name__)
 def authentication():
   """Ensure user is authenticated, but don't switch namespace."""
   user_object = users.get_current_user()
-  if not user_object:
-    return flask.abort(401)
-
-  # The UI will make a request to /api/user first,
-  # so we look for invites here, instead of every
-  # API request.
-  invites = list(Invite.query(Invite.email == user_object.email()).iter())
-  if not invites:
+  if user_object is not None:
     return
 
-  invited_buildings = {invite.building for invite in invites}
-  logging.info('Found invites for the buidings %s for user %s',
-               invited_buildings, user_object.user_id())
+  # Special case use_invite endpoint to login.
+  if flask.request.endpoint in {'user.use_invite'}:
+    return flask.redirect(users.create_login_url(flask.request.url))
 
-  person = get_person(buildings=invited_buildings)
-  current_buildings = set(person.buildings)
-  all_buildings = current_buildings | invited_buildings
-  if all_buildings != current_buildings:
-    person.buildings.extend(current_buildings - all_buildings)
-    person.put()
+  flask.abort(401)
 
-  ndb.delete_multi([i.key for i in invites])
+  # Intentially don't call get_person, just in case
+  # this is a call to /api/invite/<id>, in which
+  # case we don't want to create a new user and building.
 
 
 def get_person(buildings=None):
@@ -106,15 +96,15 @@ def get_person(buildings=None):
   assert user.email() is not None
   assert namespace_manager.get_namespace() == ''
 
+  # if the person is not found,
+  # we'll create a new one with the
+  # building id set to the user id.
   user_id = user.user_id()
   if buildings is None:
     buildings = [user_id]
 
   person = Person.get_or_insert(
       user_id, email=user.email(),
-      # if the person is not found,
-      # we'll create a new one with the
-      # building id set to the user id.
       buildings=buildings)
   return person
 
@@ -195,7 +185,7 @@ def pusher_client_auth_callback():
 
 @blueprint.route('/invite', methods=['POST'])
 def invite_handler():
-  """Authenticate a given socket for a given channel."""
+  """Invite a user to this building"""
   body = flask.request.get_json()
   if body is None:
     flask.abort(400, 'JSON body and mime type required.')
@@ -221,9 +211,9 @@ def invite_handler():
 Dear %s:
 
 An Awesomation house has been shared with you.  Visit
-http://%s.example.com/ and sign in using your Google Account
+http://%s.appspot.com/api/user/invite/%d and sign in using your Google Account
 for access.
-""" % (invitee_email, app_id)
+""" % (invitee_email, app_id, invite.key.id())
 
   logging.info("Sending email: '%s'", body)
 
@@ -236,6 +226,32 @@ for access.
              id=person.key.string_id(),
              event='update', obj=person.to_dict())
   return ('', 204)
+
+
+@blueprint.route('/invite/<int:invite_id>', methods=['GET'])
+def use_invite(invite_id):
+  """Given an invite, add the building to the current users account."""
+  invite = Invite.get_by_id(invite_id)
+  if not invite:
+    flask.abort(404)
+
+  # We don't check the email on the invite, as sometimes the domain
+  # doesn't match (ie @googlemail.com vs @gmail.com).  We just
+  # assume if they got this code then they can have access.
+
+  person = get_person(buildings=[invite.building])
+
+  # There is a chance the above call didn't add the building
+  # as it will only do so for people that don't alreay exist.
+  # In this case, we have to add it.
+  current_buildings = set(person.buildings)
+  all_buildings = current_buildings | set([invite.building])
+  if all_buildings != current_buildings:
+    person.buildings.extend(all_buildings - current_buildings)
+    person.put()
+
+  invite.key.delete()
+  return flask.redirect('/')
 
 
 @blueprint.route('/invite/<int:invite_id>', methods=['DELETE'])
@@ -253,5 +269,5 @@ def delete_invite(invite_id):
 
   send_event(building_id=invite.building,
              cls='user', id=person.key.string_id(),
-             event='update', obj=person.to_dict())
+             event='delete', obj=person.to_dict())
   return ('', 204)
