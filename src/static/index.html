@@ -37,14 +37,22 @@
           <h4 class="modal-title">Configure sharing</h4>
         </div>
         <div class="modal-body">
-          <p>This building is shared with:</p>
-          <ul>
           {{#each sharing}}
+            <p>Building {{@key}} is shared with:</p>
+            <ul building-id="{{@key}}">
             {{#each this}}
-            <li>{{.}}</li>
+            {{#if invite_id}}
+              <li data-invite-id="{{invite_id}}">
+                {{email}} (pending)
+                <div class="pull-right delete-invite"><span class="glyphicon glyphicon-trash">
+                </span></div>
+              </li>
+            {{else}}
+              <li data-user-id="{{user_id}}">{{email}}</li>
+            {{/if}}
             {{/each}}
+            </ul>
           {{/each}}
-          </ul>
           <hr>
           <p>Invite new people to this building:</p>
           <form class="form-horizontal">

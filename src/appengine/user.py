@@ -23,6 +23,40 @@ class Person(ndb.Model):
   email = ndb.StringProperty(required=False)
   buildings = ndb.StringProperty(repeated=True)
 
+  def to_dict(self):
+    """Return a dict representation of this object."""
+    values = super(Person, self).to_dict()
+    values['id'] = self.key.string_id()
+    values['logout_url'] = users.create_logout_url('/')
+
+    # If we are running in local mode,
+    # tell the UI to connect somewhere
+    # special for push updates.
+    # TODO get hostname (socket doesn't work)
+    if pusher_client.should_use_local():
+      values['ws'] = 'ws://localhost:%d/' % (
+          simple_pusher.WEBSOCKET_PORT)
+
+    # What buildings have we shared with whom?
+    values['sharing'] = collections.defaultdict(list)
+    for other_person in Person.query(
+        Person.buildings.IN(self.buildings)).iter():
+      for other_building in other_person.buildings:
+        if other_building not in self.buildings:
+          continue
+        values['sharing'][other_building].append(
+            {'email': other_person.email,
+             'user_id': other_person.key.string_id()})
+
+    # Are there any pending invites?
+    for invite in Invite.query(Invite.building.IN(
+        self.buildings)).iter():
+      values['sharing'][invite.building].append(
+          {'email': invite.email,
+           'invite_id': invite.key.id()})
+
+    return values
+
 
 # Users are keyed by this magic id we get from appengine
 # we don't know this id yet, so we can't create a person
@@ -92,42 +126,18 @@ def get_user_request():
 
   person = get_person()
   values = person.to_dict()
-  values['id'] = person.key.string_id()
-  values['logout_url'] = users.create_logout_url('/')
-
-  # If we are running in local mode,
-  # tell the UI to connect somewhere
-  # special for push updates.
-  # TODO get hostname (socket doesn't work)
-  if pusher_client.should_use_local():
-    values['ws'] = 'ws://localhost:%d/' % (
-        simple_pusher.WEBSOCKET_PORT)
-
-  # What buildings have we shared with whom?
-  values['sharing'] = collections.defaultdict(list)
-  for other_person in Person.query(
-      Person.buildings.IN(person.buildings)).iter():
-    for other_building in other_person.buildings:
-      values['sharing'][other_building].append(other_person.email)
-  for building_id in values['sharing'].keys():
-    if building_id not in person.buildings:
-      del values['sharing'][building_id]
-
-  # Are there any pending invites?
-  for invite in Invite.query(Invite.building.IN(
-      person.buildings)).iter():
-    values['sharing'][invite.building].append('%s (pending)' % invite.email)
 
   return flask.jsonify(objects=[values])
 
 
-def send_event(**kwargs):
+def send_event(building_id=None, **kwargs):
   """Post events back to the pi."""
   batch = flask.g.get('user_events', None)
   if batch is None:
     batch = []
     setattr(flask.g, 'user_events', batch)
-  building_id = building.get_id()
+  if building_id is None:
+    building_id = building.get_id()
   batch.append((building_id, kwargs))
 
 
@@ -138,27 +148,20 @@ def push_events():
   if events is None:
     return
 
-  # Now figure out what channel to post these to.
-  # Can't use user.get_user as we might not be in
-  # a user's request (might be a device update
-  # from the proxy).  So we use the namespace
-  # instead.  Horrid.
-  building_id = building.get_id()
-  channel_id = 'private-%s' % building_id
+  # partition events by building
+  events_by_building = collections.defaultdict(list)
+  for building_id, event in events:
+    events_by_building[building_id].append(event)
 
-  # check the events are all for this building
-  for _building_id, _ in events:
-    assert _building_id == building_id
-  events = [event for _, event in events]
-
-  # Push them to pusher, as we've migrated
-  # the UI to that.
   pusher_shim = pusher_client.get_client(encoder=flask.json.JSONEncoder)
 
-  for batch in utils.limit_json_batch(events, max_size=8000):
-    logging.info('Sending %d events to user on channel %s',
-                 len(batch), channel_id)
-    pusher_shim.push(channel_id, batch)
+  for building_id, events in events_by_building.iteritems():
+    channel_id = 'private-%s' % building_id
+
+    for batch in utils.limit_json_batch(events, max_size=8000):
+      logging.info('Sending %d events to user on channel %s',
+                   len(batch), channel_id)
+      pusher_shim.push(channel_id, batch)
 
 
 # UI calls /api/user/channel_auth with its
@@ -229,4 +232,26 @@ for access.
       subject="An Awesomation house has been shared with you.",
       body=body)
 
+  send_event(building_id=building_id, cls='user',
+             id=person.key.string_id(),
+             event='update', obj=person.to_dict())
+  return ('', 204)
+
+
+@blueprint.route('/invite/<int:invite_id>', methods=['DELETE'])
+def delete_invite(invite_id):
+  """Delete the given invite."""
+  invite = Invite.get_by_id(invite_id)
+  if not invite:
+    flask.abort(404)
+
+  person = get_person()
+  if invite.building not in person.buildings:
+    flask.abort(401)
+
+  invite.key.delete()
+
+  send_event(building_id=invite.building,
+             cls='user', id=person.key.string_id(),
+             event='update', obj=person.to_dict())
   return ('', 204)

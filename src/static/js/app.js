@@ -747,6 +747,11 @@ var AWESOMATION = (function() {
       });
     });
 
+    $('div#main_modal').on('click', '.delete-invite', function() {
+      var invite_id = $(this).closest('li[data-invite-id]').data('invite-id');
+      net.del(sprintf('/api/user/invite/%s', invite_id));
+    });
+
     // Dialog: change room name
 
     $('div#main').on('click', 'div.room .room-change-name', function() {
