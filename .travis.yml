@@ -3,7 +3,10 @@ python:
   - "2.7"
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install: make dist
+install:
+  - wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.17.zip
+  - unzip google_appengine_1.9.17.zip
+  - make dist
 
 # command to run tests, e.g. python setup.py test
-script:  make test
+script:  make test APPENGINE=google_appengine
