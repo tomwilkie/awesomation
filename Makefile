@@ -128,7 +128,11 @@ runonpi: dist
 	rsync -arvz dist/ pi@domicspi.local:~/dist/
 	ssh -t pi@domicspi.local 'sudo PYTHONPATH=$${PYTHONPATH}:~/dist:~/dist/third_party python ~/dist/pi/control.py --nodaemonize restart'
 
+APPENGINE=/Applications/GoogleAppEngineLauncher.app/Contents/Resources/GoogleAppEngine-default.bundle/Contents/Resources/google_appengine/
+
 test: dist
-	for test in $$(find src -name *_tests.py | sed 's,^src/,,'); do        \
-	  PYTHONPATH=${PYTHONPATH}:dist:dist/third_party python dist/$${test}; \
+	for test in $$(find src -name *_tests.py | sed 's,^src/,,' | grep -v appengine); do \
+	  PYTHONPATH=$${PYTHONPATH}:dist:dist/third_party python dist/$${test}; \
 	done
+
+	PYTHONPATH=$${PYTHONPATH}:dist:dist/third_party bin/appenginetest $(APPENGINE) appengine

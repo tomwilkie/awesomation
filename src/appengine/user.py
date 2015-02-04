@@ -228,10 +228,10 @@ for access.
   return ('', 204)
 
 
-@blueprint.route('/invite/<int:invite_id>', methods=['GET'])
-def use_invite(invite_id):
+@blueprint.route('/invite/<object_id>', methods=['GET'])
+def use_invite(object_id):
   """Given an invite, add the building to the current users account."""
-  invite = Invite.get_by_id(invite_id)
+  invite = Invite.get_by_id(int(object_id))
   if not invite:
     flask.abort(404)
 
@@ -254,10 +254,10 @@ def use_invite(invite_id):
   return flask.redirect('/')
 
 
-@blueprint.route('/invite/<int:invite_id>', methods=['DELETE'])
-def delete_invite(invite_id):
+@blueprint.route('/invite/<object_id>', methods=['DELETE'])
+def delete_invite(object_id):
   """Delete the given invite."""
-  invite = Invite.get_by_id(invite_id)
+  invite = Invite.get_by_id(int(object_id))
   if not invite:
     flask.abort(404)
 
