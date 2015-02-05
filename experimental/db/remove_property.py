@@ -15,6 +15,6 @@ def remove(namespace, field):
   namespace_manager.set_namespace(namespace)
   for base in Base.all().run():
     if hasattr(base, field):
-      print "%s %s" %(base.id, base.name)
-      del base.category
+      print "%s %s" % (base.key().id_or_name(), getattr(base, 'name', None))
+      delattr(base, field)
       base.put()
