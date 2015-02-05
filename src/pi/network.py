@@ -159,7 +159,7 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
         continue
 
       if mac not in self._hosts:
-        logging.info('Found new device - %s, %s, %s', ipaddr, mac, state)
+        logging.info('Found new device - %s, %s, %s', ip_address, mac, state)
         self._callback('network', None, {'appeared': mac})
 
       # update last seen time
