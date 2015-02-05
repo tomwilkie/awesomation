@@ -10,11 +10,16 @@ import UIKit
 import CoreLocation
 
 class ViewController: UIViewController, CLLocationManagerDelegate  {
-
+    
+    struct Constants {
+        static let KEYCHAIN_ITEM_NAME = "Awesomeation Credentials"
+        static let SCOPE = "https://www.googleapis.com/auth/userinfo.email"
+    }
+    
     let RADIUS: CLLocationDistance = 10;
     var locationManager: CLLocationManager!
     var currentLocation: CLLocation!
-    var auth: GTMOAuth2Authentication?;
+    var auth: GTMOAuth2Authentication?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,40 +37,58 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
     }
 
     func doAuth() {
-        var kKeychainItemName = "Awesomeation OAuth"
-        var scope = "https://www.googleapis.com/auth/userinfo.email"
         
         self.auth = GTMOAuth2ViewControllerTouch.authForGoogleFromKeychainForName(
-            kKeychainItemName,
+            Constants.KEYCHAIN_ITEM_NAME,
             clientID:Credentials.GOOGLE_CLIENT_ID,
             clientSecret:Credentials.GOOGLE_CLIENT_SECRET)
 
         if self.auth != nil && self.auth!.canAuthorize {
             println("Loaded auth cookie from keychain")
+            doRequest()
             return
         }
         
-        var viewController: GTMOAuth2ViewControllerTouch = GTMOAuth2ViewControllerTouch(
-            scope:scope,
+        var gtmOauthView = GTMOAuth2ViewControllerTouch(
+            scope:Constants.SCOPE,
             clientID:Credentials.GOOGLE_CLIENT_ID,
             clientSecret:Credentials.GOOGLE_CLIENT_SECRET,
-            keychainItemName:kKeychainItemName,
-            delegate:self,
-            finishedSelector:"viewController:finishedWithAuth:error:")
+            keychainItemName:Constants.KEYCHAIN_ITEM_NAME,
+            completionHandler: {(viewController, auth, error) in
+                println(auth)
+                
+                // Get rid of the login view.
+                // self.parentViewController was saved somewhere else and is the parent
+                // view controller of the view controller that shows the google login view.
+                self.navigationController?.dismissViewControllerAnimated(true, completion: nil)
+                viewController.removeFromParentViewController()
+                
+                if error != nil {
+                    // Authentication failed
+                } else {
+                    self.auth = auth
+                    self.doRequest()
+                }
+        })
         
-        self.presentViewController(viewController, animated: true, completion: nil)
+        self.navigationController!.presentViewController(gtmOauthView, animated: true, completion: nil)
     }
     
-    func viewController(viewController: GTMOAuth2ViewControllerTouch,
-        finishedWithAuth: GTMOAuth2Authentication, error: NSError?) {
-        println("\(error)")
-        if error != nil {
-            // Authentication failed
-        } else {
-            self.auth = finishedWithAuth;
-        }
+    @IBAction func doLogout(sender: AnyObject) {
+        GTMOAuth2ViewControllerTouch.removeAuthFromKeychainForName(Constants.KEYCHAIN_ITEM_NAME)
     }
     
+
+    @IBAction func requestClick(sender: AnyObject) {
+        doRequest()
+    }
+    
+    func doRequest() {
+        println("Doing request")
+        var awesomation = Awesomation(auth:self.auth!)
+        awesomation.get("/api/device/")
+    }
+
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

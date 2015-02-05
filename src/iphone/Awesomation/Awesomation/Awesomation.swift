@@ -11,39 +11,49 @@ import Foundation
 class Awesomation {
 
     struct Constants {
-        static let SCHEME = "https"
-        static let HOST = "homeawesomation.appspot.com"
         static let POST = "POST"
+        static let GET = "GET"
+        static let baseURL = NSURL(string: "https://homeawesomation.appspot.com")
     }
     
-    class func post(path: String, data: [String: String]) -> Awesomation {
+    var auth: GTMOAuth2Authentication
+    var config: NSURLSessionConfiguration?
+    var manager: AFHTTPRequestOperationManager
+    
+    init(auth:GTMOAuth2Authentication) {
+        self.auth = auth
+        self.manager = AFHTTPRequestOperationManager(baseURL: Constants.baseURL)
+    }
+    
+    // T here for any type as I don't care what it returns - better way of doing this? 'a?
+    func withToken<T>(block: (Void -> T)) {
+        var fakerequest = NSMutableURLRequest()
+        self.auth.authorizeRequest(fakerequest, { (error) in
+            self.manager.requestSerializer.setValue("Bearer \(self.auth.accessToken)", forHTTPHeaderField:"Authorization")
+
+            block()
+        })
+    }
+    
+    func get(path: String) {
+        withToken({
+            self.manager.GET(path, parameters: nil, success: { (op, result) in
+                println(result)
+            }, failure: { (op, error) in
+                println(error)
+            })
+        })
+    }
+    
+    /*func post(path: String, data: [String: String]) {
         var url = NSURL(scheme: Constants.SCHEME, host: Constants.HOST, path: path)
         var data = NSJSONSerialization.dataWithJSONObject(data, options:nil, error:nil)
         var request = NSMutableURLRequest(URL: url!)
         request.HTTPMethod = Constants.POST
         request.HTTPBody = data
         
-        var awesomation = Awesomation()
-        var connection = NSURLConnection(request: request, delegate: awesomation)
-        return awesomation
-    }
-    
-    var data: NSMutableData;
-    
-    init() {
-        data = NSMutableData()
-    }
-    
-    func connection(didReceiveResponse: NSURLConnection!, didReceiveResponse response: NSURLResponse!) {
-        println("didReceiveResponse")
-    }
-    
-    func connection(connection: NSURLConnection!, didReceiveData conData: NSData!) {
-        self.data.appendData(conData)
-    }
-    
-    func connectionDidFinishLoading(connection: NSURLConnection!) {
-        println(self.data)
-    }
-
+        self.auth.authorizeRequest(request)
+        
+        var connection = NSURLConnection(request: request, delegate: self)
+    }*/
 }

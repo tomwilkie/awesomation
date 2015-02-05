@@ -79,3 +79,6 @@
 [submodule "third_party/gtm-http-fetcher"]
 	path = third_party/gtm-http-fetcher
 	url = https://github.com/tomwilkie/gtm-http-fetcher
+[submodule "third_party/AFNetworking"]
+	path = third_party/AFNetworking
+	url = https://github.com/AFNetworking/AFNetworking.git
