@@ -2,6 +2,7 @@
 
 import json
 import logging
+import sys
 
 from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
@@ -79,9 +80,12 @@ class NestAccount(account.Account):
       request_data = json.dumps({'away': value})
       logging.info('Sending request "%s" to %s', request_data, url)
 
-      self.do_request(
-          url, payload=request_data,
-          method=urlfetch.PUT)
+      try:
+        self.do_request(
+            url, payload=request_data,
+            method=urlfetch.PUT)
+      except:
+        logging.error('Setting Away on nest failed', exc_info=sys.exc_info())
 
   @rest.command
   def refresh_devices(self):
