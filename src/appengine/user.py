@@ -28,8 +28,6 @@ def get_user_object():
     return user_object
 
   try:
-    logging.info(flask.request.headers)
-
     user_object = oauth.get_current_user(SCOPE)
 
     # When running locally app engine does this for some silly
@@ -40,7 +38,6 @@ def get_user_object():
 
     return user_object
   except oauth.OAuthRequestError:
-    logging.error("OAuthRequestError", exc_info=sys.exc_info())
     return None
 
 
