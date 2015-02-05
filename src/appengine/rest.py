@@ -2,7 +2,7 @@
 import logging
 import sys
 
-from google.appengine.api import namespace_manager, users
+from google.appengine.api import namespace_manager
 from google.appengine.ext import db
 
 import flask
@@ -134,7 +134,8 @@ class CommandView(flask.views.MethodView):
 def default_user_authentication():
   """Ensure user is authenticated, and switch to
      appropriate building namespace."""
-  user_object = users.get_current_user()
+
+  user_object = user.get_user_object()
   if not user_object:
     return flask.abort(401)
 

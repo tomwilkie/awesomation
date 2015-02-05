@@ -2,10 +2,12 @@
 import collections
 import logging
 import re
+import sys
 
 from google.appengine.api import app_identity
 from google.appengine.api import mail
 from google.appengine.api import namespace_manager
+from google.appengine.api import oauth
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
@@ -15,6 +17,31 @@ import pusher
 from appengine import building, pusher_client
 from common import public_creds, utils
 from pi import simple_pusher
+
+
+SCOPE = "https://www.googleapis.com/auth/userinfo.email"
+
+
+def get_user_object():
+  user_object = users.get_current_user()
+  if user_object is not None:
+    return user_object
+
+  try:
+    logging.info(flask.request.headers)
+
+    user_object = oauth.get_current_user(SCOPE)
+
+    # When running locally app engine does this for some silly
+    # reason.
+    if user_object.email() == 'example@example.com'\
+        and user_object.user_id() == '0':
+      return None
+
+    return user_object
+  except oauth.OAuthRequestError:
+    logging.error("OAuthRequestError", exc_info=sys.exc_info())
+    return None
 
 
 # We're not going to put these in a namespace.
@@ -74,7 +101,7 @@ blueprint = flask.Blueprint('user', __name__)
 @blueprint.before_request
 def authentication():
   """Ensure user is authenticated, but don't switch namespace."""
-  user_object = users.get_current_user()
+  user_object = get_user_object()
   if user_object is not None:
     return
 
@@ -91,7 +118,7 @@ def authentication():
 
 def get_person(buildings=None):
   """Return the user_id for the current logged in user."""
-  user = users.get_current_user()
+  user = get_user_object()
   assert user is not None
   assert user.email() is not None
   assert namespace_manager.get_namespace() == ''
