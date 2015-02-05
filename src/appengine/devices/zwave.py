@@ -126,12 +126,12 @@ class ZWaveDevice(device.Device):
   configured = ndb.ComputedProperty(lambda s: s.is_configured())
 
   # Haven't found a good way to fake out the properites yet
-  state = ndb.BooleanProperty()
-  brightness = ndb.IntegerProperty()
+  state = ndb.BooleanProperty(default=False)
+  brightness = ndb.IntegerProperty(default=0)
   occupied = ndb.BooleanProperty(default=False)
-  temperature = ndb.FloatProperty()
-  humidity = ndb.FloatProperty()
-  lux = ndb.FloatProperty()
+  temperature = ndb.FloatProperty(default=0.0)
+  humidity = ndb.FloatProperty(default=0.0)
+  lux = ndb.FloatProperty(default=0.0)
 
   def __init__(self, **kwargs):
     super(ZWaveDevice, self).__init__(**kwargs)

@@ -29,6 +29,10 @@ class TKBMultilevelPowerSwitch(zwave.Driver):
   def sync(self):
     ccv = self._device.get_command_class_value(
         'COMMAND_CLASS_SWITCH_MULTILEVEL', 0)
+
+    if self._device.brightness is None:
+      self._device.brightness = 0
+
     if self._device.state:
       value = self._device.brightness * 100 / 255
     else:
