@@ -18,16 +18,23 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
         static let SCOPE = "https://www.googleapis.com/auth/userinfo.email"
         static let RADIUS: CLLocationDistance = 10
         static let HOME = "Home"
+        static let YOU_ARE_HOME = "You are home."
+        static let YOU_ARE_NOT_HOME = "You are not home."
+        static let ESTIMOTE_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D"
+        static let ESTIMOTE_BEACONS = "Estimote Beacons"
     }
     
     var locationManager: CLLocationManager!
     var currentLocation: CLLocation!
     var geocoder: CLGeocoder?
     var auth: GTMOAuth2Authentication?
+    
     var home: CLCircularRegion?
     var homeAddress: String?
-
+    var amInHome = false
+    
     @IBOutlet weak var homeTextView: UITextView!
+    @IBOutlet weak var homeStateView: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,6 +44,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestAlwaysAuthorization()
         locationManager.startUpdatingLocation()
+        
+        var estimoteBeacons = CLBeaconRegion(proximityUUID: NSUUID(UUIDString: Constants.ESTIMOTE_UUID),
+            identifier: Constants.ESTIMOTE_BEACONS)
+        estimoteBeacons.notifyEntryStateOnDisplay = true
+        locationManager.startMonitoringForRegion(estimoteBeacons)
+        locationManager.startRangingBeaconsInRegion(estimoteBeacons)
         
         geocoder = CLGeocoder()
         
@@ -55,12 +68,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
     func updateUI() {
         dispatch_async(dispatch_get_main_queue(), {
             self.homeTextView.text = self.homeAddress
-            NSLog("homeTextView = \(self.homeAddress) - \(self.homeTextView)")
+            self.homeStateView.text = self.amInHome ? Constants.YOU_ARE_HOME : Constants.YOU_ARE_NOT_HOME
         })
     }
     
     func findRegionByName(name: String) -> CLRegion? {
-        NSLog("\(locationManager.monitoredRegions)")
         for region in locationManager.monitoredRegions {
             var region = region as CLRegion
             if region.identifier == name {
@@ -108,7 +120,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
             circularRegionWithCenter: currentLocation.coordinate,
             radius: radius, identifier: Constants.HOME)
         
-        println("startMonitoringForRegion \(region)")
+        NSLog("startMonitoringForRegion \(region)")
         locationManager.startMonitoringForRegion(region)
         locationManager.requestStateForRegion(region)
         
@@ -125,7 +137,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
     }
     
     func locationManager(manager: CLLocationManager!, didDetermineState state: CLRegionState, forRegion region: CLRegion!) {
-        NSLog("\(region) is \(state)")
+        if region.identifier == Constants.HOME {
+            amInHome = state == CLRegionState.Inside
+            updateUI()
+        }
     }
     
     func doAuth() {
@@ -135,7 +150,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
             clientSecret:Credentials.GOOGLE_CLIENT_SECRET)
 
         if self.auth != nil && self.auth!.canAuthorize {
-            println("Loaded auth cookie from keychain")
+            NSLog("Loaded auth cookie from keychain")
             getDevices()
             return
         }
@@ -146,7 +161,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
             clientSecret:Credentials.GOOGLE_CLIENT_SECRET,
             keychainItemName:Constants.KEYCHAIN_ITEM_NAME,
             completionHandler: {(viewController, auth, error) in
-                println(auth)
+                NSLog("\(auth)")
                 
                 // Get rid of the login view.
                 // self.parentViewController was saved somewhere else and is the parent
@@ -172,11 +187,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
     }
     
     func getDevices() {
-        println("Doing request")
+        NSLog("getDevices")
         var awesomation = Awesomation(auth:self.auth!)
-        awesomation.get("/api/device/", {(devices) in
-            
-        })
     }
 }
 

@@ -45,15 +45,32 @@
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="O7a-Xf-O5U">
                                 <rect key="frame" x="16" y="271" width="568" height="309"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <prototypes>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="GQi-xv-aW2">
+                                        <rect key="frame" x="0.0" y="0.0" width="568" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="GQi-xv-aW2" id="Ugh-A7-Ofw">
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
                             </tableView>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="None" translatesAutoresizingMaskIntoConstraints="NO" id="8aM-mS-Zci">
-                                <rect key="frame" x="16" y="110" width="568" height="153"/>
+                                <rect key="frame" x="16" y="110" width="568" height="118"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
+                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="118" id="bci-ac-wvb"/>
                                     <constraint firstAttribute="height" constant="153" id="iD5-28-FSc"/>
+                                    <constraint firstAttribute="height" constant="118" id="vnx-2F-nAj"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="bci-ac-wvb"/>
+                                        <exclude reference="iD5-28-FSc"/>
+                                    </mask>
+                                </variation>
                             </textView>
                             <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="chT-c5-kgX">
                                 <rect key="frame" x="16" y="74" width="66" height="30"/>
@@ -64,6 +81,12 @@
                                     <action selector="setCurrentLocationAsHome:" destination="5R8-Zj-Vyc" eventType="touchUpInside" id="n7A-1o-B3Z"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="G2r-Qm-LiE">
+                                <rect key="frame" x="542" y="237" width="42" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -73,9 +96,11 @@
                             <constraint firstItem="fQp-7X-fRc" firstAttribute="top" secondItem="O7a-Xf-O5U" secondAttribute="bottom" constant="20" id="NnE-TC-YPd"/>
                             <constraint firstItem="O7a-Xf-O5U" firstAttribute="leading" secondItem="I1J-fc-d0t" secondAttribute="leadingMargin" id="R9t-3g-PAw"/>
                             <constraint firstItem="O7a-Xf-O5U" firstAttribute="trailing" secondItem="I1J-fc-d0t" secondAttribute="trailingMargin" id="UUh-EU-Pdf"/>
+                            <constraint firstItem="G2r-Qm-LiE" firstAttribute="top" secondItem="8aM-mS-Zci" secondAttribute="bottom" constant="9" id="Xg4-gl-XhR"/>
                             <constraint firstItem="chT-c5-kgX" firstAttribute="top" secondItem="gAN-PW-2k9" secondAttribute="bottom" constant="8" id="Z9F-4r-ro5"/>
                             <constraint firstAttribute="centerX" secondItem="pfA-Fq-vln" secondAttribute="centerX" id="Zna-w5-Tsc"/>
                             <constraint firstItem="8aM-mS-Zci" firstAttribute="top" secondItem="chT-c5-kgX" secondAttribute="bottom" constant="8" id="b5S-H5-d0l"/>
+                            <constraint firstItem="G2r-Qm-LiE" firstAttribute="trailing" secondItem="I1J-fc-d0t" secondAttribute="trailingMargin" id="eq4-Sv-bXH"/>
                             <constraint firstItem="pfA-Fq-vln" firstAttribute="trailing" secondItem="I1J-fc-d0t" secondAttribute="trailingMargin" id="lJD-gP-MQ8"/>
                             <constraint firstItem="chT-c5-kgX" firstAttribute="leading" secondItem="I1J-fc-d0t" secondAttribute="leadingMargin" id="lzi-vb-pLt"/>
                             <constraint firstItem="pfA-Fq-vln" firstAttribute="top" secondItem="gAN-PW-2k9" secondAttribute="bottom" constant="8" id="miv-Jr-QYl"/>
@@ -93,6 +118,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="GW9-ba-7Ya"/>
                     <connections>
+                        <outlet property="homeStateView" destination="G2r-Qm-LiE" id="ki8-ar-qlG"/>
                         <outlet property="homeTextView" destination="8aM-mS-Zci" id="xhv-nx-yns"/>
                     </connections>
                 </viewController>

@@ -12,17 +12,23 @@ class Awesomation {
 
     struct Constants {
         static let BASE_URL = NSURL(string: "https://homeawesomation.appspot.com")
+        static let TYPES = ["device"]
     }
+    
+    typealias AwesomObject = [String: AnyObject]
 
     var auth: GTMOAuth2Authentication
     var config: NSURLSessionConfiguration?
     var manager: AFHTTPRequestOperationManager
-
+    var cache: [String: [String: AwesomObject]]
+    
     init(auth:GTMOAuth2Authentication) {
         self.auth = auth
         self.manager = AFHTTPRequestOperationManager(baseURL: Constants.BASE_URL)
         self.manager.requestSerializer = AFJSONRequestSerializer(writingOptions: NSJSONWritingOptions())
         self.manager.responseSerializer = AFJSONResponseSerializer()
+        self.cache = [:]
+        fetch()
     }
 
     func withToken(block: (Void -> Any)) {
@@ -54,6 +60,21 @@ class Awesomation {
                     println(error)
             })
         })
+    }
+    
+    func fetch() {
+        for type in Constants.TYPES {
+            get("/api/\(type)/", { (result) in
+                var objects = result["objects"] as [AwesomObject]
+                NSLog("Loaded \(objects.count) \(type)s")
+                var entry : [String: AwesomObject] = [:]
+                self.cache[type] = entry
+                for object in objects {
+                    var id = object["id"] as String
+                    entry[id] = object
+                }
+            })
+        }
     }
 }
 
