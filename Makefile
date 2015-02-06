@@ -138,4 +138,4 @@ other_tests: dist
 	  PYTHONPATH=$${PYTHONPATH}:dist:dist/third_party python dist/$${test}; \
 	done
 
-test: other_tests appengine_test
+test: other_tests appengine_tests
