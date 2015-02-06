@@ -33,14 +33,29 @@ class AccrualFailureDetector(object):
 
   def __init__(self):
     self._intervals = []
-    self._hosts = {}
+    self._mean = None
     self._timestamp = None
+
+  @classmethod
+  def from_dict(cls, values):
+    detector = cls()
+    detector._intervals = values['intervals']
+    detector._mean = values['mean']
+    detector._timestamp = values['timestamp']
+    return detector
+
+  def to_dict(self):
+    return {
+        'intervals': self._intervals,
+        'mean': self._mean,
+        'timestamp': self._timestamp
+    }
 
   def heartbeat(self):
     """ Call when host has indicated being alive (aka heartbeat) """
     now = time()
 
-    if not self._timestamp is None:
+    if self._timestamp is None:
       self._timestamp = time()
       return
 
@@ -52,32 +67,23 @@ class AccrualFailureDetector(object):
       self._intervals.pop(0)
 
     if len(self._intervals) > 1:
-      self._hosts['mean'] = sum(self._intervals) / float(len(self._intervals))
-      # lines below commented because deviation and variance are
-      # currently unused
-      #deviationsum = 0
-      #for i in self._intervals[host]:
-      # deviationsum += (i - self._hosts[host]['mean']) ** 2
-      #variance = deviationsum / float(len(self._intervals[host]))
-      #deviation = math.sqrt(variance)
-      #self._hosts[host]['deviation'] = deviation
+      self._mean = sum(self._intervals) / float(len(self._intervals))
 
   def _probability(self, timestamp):
     # cassandra does this, citing: /* Exponential CDF = 1 -e^-lambda*x */
     # but the paper seems to call for a probability density function
     # which I can't figure out :/
-    exponent = -1.0 * timestamp / self._hosts['mean']
+    exponent = -1.0 * timestamp / self._mean
     return 1 - (1.0 - math.pow(math.e, exponent))
 
   def phi(self, timestamp=None):
-    if self._timestamp is None:
+    if self._timestamp is None or self._mean is None:
       return 0
 
-    ts = timestamp
-    if ts is None:
-      ts = time()
+    if timestamp is None:
+      timestamp = time()
 
-    diff = ts - self._timestamp
+    diff = timestamp - self._timestamp
     prob = self._probability(diff)
     if Decimal(str(prob)).is_zero():
       # a very small number, avoiding ValueError: math domain error
