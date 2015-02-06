@@ -21,10 +21,11 @@ class Awesomation {
     init(auth:GTMOAuth2Authentication) {
         self.auth = auth
         self.manager = AFHTTPRequestOperationManager(baseURL: Constants.BASE_URL)
+        self.manager.requestSerializer = AFJSONRequestSerializer(writingOptions: NSJSONWritingOptions())
+        self.manager.responseSerializer = AFJSONResponseSerializer()
     }
 
-    // T here for any type as I don't care what it returns - better way of doing this? 'a?
-    func withToken<T>(block: (Void -> T)) {
+    func withToken(block: (Void -> Any)) {
         var fakerequest = NSMutableURLRequest()
         self.auth.authorizeRequest(fakerequest, { (error) in
             self.manager.requestSerializer.setValue("Bearer \(self.auth.accessToken)", forHTTPHeaderField:"Authorization")
@@ -33,25 +34,26 @@ class Awesomation {
         })
     }
 
-    func get(path: String) {
+    func get(path: String, success: ([String: AnyObject] -> Void)) {
         withToken({
             self.manager.GET(path, parameters: nil, success: { (op, result) in
-                println(result)
+                success(result as [String: AnyObject])
             }, failure: { (op, error) in
                 println(error)
             })
         })
     }
 
-    /*func post(path: String, data: [String: String]) {
-        var url = NSURL(scheme: Constants.SCHEME, host: Constants.HOST, path: path)
+    func post(path: String, data: [String: String], success: ([String: AnyObject] -> Void)) {
         var data = NSJSONSerialization.dataWithJSONObject(data, options:nil, error:nil)
-        var request = NSMutableURLRequest(URL: url!)
-        request.HTTPMethod = Constants.POST
-        request.HTTPBody = data
-
-        self.auth.authorizeRequest(request)
-
-        var connection = NSURLConnection(request: request, delegate: self)
-    }*/
+        
+        withToken({
+            self.manager.GET(path, parameters: data, success: { (op, result) in
+                success(result as [String: AnyObject])
+            }, failure: { (op, error) in
+                    println(error)
+            })
+        })
+    }
 }
+

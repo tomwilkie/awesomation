@@ -6,20 +6,28 @@
 //  Copyright (c) 2015 Awesomation. All rights reserved.
 //
 
-import UIKit
+import AddressBookUI
 import CoreLocation
+import UIKit
+
 
 class ViewController: UIViewController, CLLocationManagerDelegate  {
     
     struct Constants {
         static let KEYCHAIN_ITEM_NAME = "Awesomeation Credentials"
         static let SCOPE = "https://www.googleapis.com/auth/userinfo.email"
+        static let RADIUS: CLLocationDistance = 10
+        static let HOME = "Home"
     }
     
-    let RADIUS: CLLocationDistance = 10;
     var locationManager: CLLocationManager!
     var currentLocation: CLLocation!
+    var geocoder: CLGeocoder?
     var auth: GTMOAuth2Authentication?
+    var home: CLCircularRegion?
+    var homeAddress: String?
+
+    @IBOutlet weak var homeTextView: UITextView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,16 +36,99 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestAlwaysAuthorization()
-        
         locationManager.startUpdatingLocation()
+        
+        geocoder = CLGeocoder()
+        
+        updateHome()
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
     }
     
     override func viewDidAppear(animated: Bool) {
         self.doAuth();
     }
-
-    func doAuth() {
+    
+    func updateUI() {
+        dispatch_async(dispatch_get_main_queue(), {
+            self.homeTextView.text = self.homeAddress
+            NSLog("homeTextView = \(self.homeAddress) - \(self.homeTextView)")
+        })
+    }
+    
+    func findRegionByName(name: String) -> CLRegion? {
+        NSLog("\(locationManager.monitoredRegions)")
+        for region in locationManager.monitoredRegions {
+            var region = region as CLRegion
+            if region.identifier == name {
+                return region
+            }
+        }
+        return nil
+    }
+    
+    func updateHome() {
+        self.home = findRegionByName(Constants.HOME) as? CLCircularRegion;
+        if home == nil {
+            self.homeAddress = "None"
+            self.updateUI()
+            return
+        }
         
+        var location = CLLocation(latitude:home!.center.latitude, longitude:home!.center.longitude)
+        geocoder?.reverseGeocodeLocation(location, completionHandler: { (placemarks, error) -> Void in
+            if placemarks == nil || placemarks!.count == 0 {
+                self.homeAddress = "\(location)"
+            } else {
+                var placemark = placemarks[0] as CLPlacemark
+                self.homeAddress = ABCreateStringWithAddressDictionary(placemark.addressDictionary, false)
+            }
+            self.updateUI()
+        })
+    }
+  
+    @IBAction func setCurrentLocationAsHome(sender: AnyObject) {
+        var radius = Constants.RADIUS
+        var homeLocation = currentLocation
+        
+        if currentLocation == nil {
+            NSLog("Current location is nil")
+            return
+        }
+        
+        if radius > locationManager.maximumRegionMonitoringDistance {
+            radius = locationManager.maximumRegionMonitoringDistance;
+        }
+        
+        // Create the geographic region to be monitored.
+        var region = CLCircularRegion(
+            circularRegionWithCenter: currentLocation.coordinate,
+            radius: radius, identifier: Constants.HOME)
+        
+        println("startMonitoringForRegion \(region)")
+        locationManager.startMonitoringForRegion(region)
+        locationManager.requestStateForRegion(region)
+        
+        self.updateHome()
+    }
+    
+    func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
+        NSLog("didUpdateLocations \(locations)")
+        
+        if currentLocation == nil {
+            currentLocation = locations[locations.count - 1] as CLLocation
+            locationManager.stopUpdatingLocation()
+        }
+    }
+    
+    func locationManager(manager: CLLocationManager!, didDetermineState state: CLRegionState, forRegion region: CLRegion!) {
+        NSLog("\(region) is \(state)")
+    }
+    
+    func doAuth() {
         self.auth = GTMOAuth2ViewControllerTouch.authForGoogleFromKeychainForName(
             Constants.KEYCHAIN_ITEM_NAME,
             clientID:Credentials.GOOGLE_CLIENT_ID,
@@ -45,7 +136,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
 
         if self.auth != nil && self.auth!.canAuthorize {
             println("Loaded auth cookie from keychain")
-            doRequest()
+            getDevices()
             return
         }
         
@@ -60,75 +151,32 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
                 // Get rid of the login view.
                 // self.parentViewController was saved somewhere else and is the parent
                 // view controller of the view controller that shows the google login view.
-                self.navigationController?.dismissViewControllerAnimated(true, completion: nil)
-                viewController.removeFromParentViewController()
+                //self.navigationController?.dismissViewControllerAnimated(true, completion: nil)
+                //viewController.removeFromParentViewController()
                 
                 if error != nil {
                     // Authentication failed
                 } else {
                     self.auth = auth
-                    self.doRequest()
+                    self.getDevices()
                 }
         })
         
-        self.navigationController!.presentViewController(gtmOauthView, animated: true, completion: nil)
+        self.navigationController!.pushViewController(gtmOauthView, animated: true)
     }
     
     @IBAction func doLogout(sender: AnyObject) {
+        NSLog("doLogout")
         GTMOAuth2ViewControllerTouch.removeAuthFromKeychainForName(Constants.KEYCHAIN_ITEM_NAME)
+        doAuth()
     }
     
-
-    @IBAction func requestClick(sender: AnyObject) {
-        doRequest()
-    }
-    
-    func doRequest() {
+    func getDevices() {
         println("Doing request")
         var awesomation = Awesomation(auth:self.auth!)
-        awesomation.get("/api/device/")
+        awesomation.get("/api/device/", {(devices) in
+            
+        })
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-    func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
-        if currentLocation == nil {
-            currentLocation = locations[locations.count - 1] as CLLocation
-            println("\(currentLocation)")
-            locationManager.stopUpdatingLocation()
-        }
-    }
-    
-    @IBAction func registerLocation(sender: UIButton) {
-        var radius = RADIUS
-        var homeLocation = currentLocation
-
-        if currentLocation == nil {
-            println("Current location is nil")
-            return
-        }
-    
-        if radius > locationManager.maximumRegionMonitoringDistance {
-            radius = locationManager.maximumRegionMonitoringDistance;
-        }
-        
-        // Create the geographic region to be monitored.
-        var region = CLCircularRegion(
-            circularRegionWithCenter: currentLocation.coordinate,
-            radius: radius, identifier: "Home")
-
-        println("startMonitoringForRegion \(region)")
-        locationManager.startMonitoringForRegion(region)
-        
-        locationManager.requestStateForRegion(region)
-    }
-    
-    func locationManager(manager: CLLocationManager!, didDetermineState state: CLRegionState, forRegion region: CLRegion!) {
-        println("\(region) is \(state)")
-    }
-
 }
 
