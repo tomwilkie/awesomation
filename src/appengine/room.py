@@ -9,6 +9,8 @@ import flask
 
 from appengine import device, model, rest
 
+SENSOR_OVERIDE_PERIOD = 60 * 60
+
 
 class Room(model.Base):
   """A room in a property."""
@@ -22,7 +24,10 @@ class Room(model.Base):
   dim_end_time = ndb.IntegerProperty() # seconds from midnight
 
   # force the lights in this room on?
-  force_lights_state = ndb.BooleanProperty()
+  force_lights_state = ndb.BooleanProperty(default=False)
+  force_lights_at = ndb.IntegerProperty()
+
+  # deprecated
   force_lights_until = ndb.IntegerProperty()
 
   @classmethod
@@ -81,19 +86,28 @@ class Room(model.Base):
 
   def is_occupied(self, put_batch):
     """Work out if this room is occupied."""
-    # First, figure out it the room is occupied
+    occupied = False
+
+    # First, figure out if there are sensors
     sensors = (device.Device.get_by_capability('OCCUPIED')
                .filter(device.Device.room == self.key.string_id()).iter())
     sensors = list(sensors)
 
-    occupied = False
+    # if not sensors, then we have a room state for lighting,
+    # and we should just use that
+    if not sensors:
+      return (self.force_lights_state
+              if self.force_lights_state is not None else False)
+
+    # We have some sensors; if any detect movement,
+    # room is occupied
     for sensor in sensors:
       # use failure detector to decide if this sensor
       # is 'occupied'
       if sensor.is_occupied():
         occupied = True
 
-      # occupied is the raw signal, and if true
+      # sensor.occupied is the raw signal, and if true
       # then the detector has been updated, and
       # this object needs writing back to the datastore
       if sensor.occupied:
@@ -101,6 +115,13 @@ class Room(model.Base):
         put_batch.append(sensor)
 
     logging.info('  occupied = %s from %d sensors', occupied, len(sensors))
+
+    # Allow override of sensors for an hour
+    if self.force_lights_at is not None and self.force_lights_state is not None:
+      if (self.force_lights_at + SENSOR_OVERIDE_PERIOD) < time.time():
+        occupied = self.force_lights_state
+        logging.info('  state forced to %s until %d',
+                     occupied, self.force_lights_at + SENSOR_OVERIDE_PERIOD)
 
     return occupied
 
@@ -111,12 +132,6 @@ class Room(model.Base):
     put_batch = []
 
     occupied = self.is_occupied(put_batch)
-
-    if self.force_lights_until is not None and \
-        self.force_lights_until > time.time():
-      occupied = self.force_lights_state
-      logging.info('  state forced to %s until %d',
-                   occupied, self.force_lights_until)
 
     # Work out target brightness, color temperature
     target_brightness, target_color_temp = self.calculate_dimming()
@@ -149,13 +164,13 @@ class Room(model.Base):
   @rest.command
   def all_on(self):
     self.force_lights_state = True
-    self.force_lights_until = int(time.time() + 3600)
+    self.force_lights_at = int(time.time())
     self.update_lights()
 
   @rest.command
   def all_off(self):
     self.force_lights_state = False
-    self.force_lights_until = int(time.time() + 3600)
+    self.force_lights_at = int(time.time())
     self.update_lights()
 
 

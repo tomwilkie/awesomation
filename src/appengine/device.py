@@ -105,18 +105,18 @@ class DetectorMixin(object):
   def is_occupied(self):
     """Use a failure detector to determine state of sensor"""
     if self.detector is None:
-      self.detector = detector.AccrualFailureDetector()
+      instance = detector.AccrualFailureDetector()
     else:
-      self.detector = detector.AccrualFailureDetector.from_dict(self.detector)
+      instance = detector.AccrualFailureDetector.from_dict(self.detector)
 
     # As we don't get heart beats from the motion sensors,
     # we just fake them.
     if self.occupied:
-      detector.heartbeat()
+      instance.heartbeat()
 
-    self.detector = detector.to_dict()
+    self.detector = instance.to_dict()
 
-    return detector.is_alive()
+    return instance.is_alive()
 
 
 class Switch(Device):
