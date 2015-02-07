@@ -140,7 +140,19 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
         if region.identifier == Constants.HOME {
             amInHome = state == CLRegionState.Inside
             updateUI()
+            return
         }
+        
+        var beaconRegion = region as? CLBeaconRegion
+        if beaconRegion == nil {
+            return
+        }
+        
+        NSLog("\(beaconRegion)")
+    }
+    
+    func locationManager(manager: CLLocationManager!, didRangeBeacons beacons: [AnyObject]!, inRegion region: CLBeaconRegion!) {
+        NSLog("\(beacons)")
     }
     
     func doAuth() {
@@ -161,8 +173,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate  {
             clientSecret:Credentials.GOOGLE_CLIENT_SECRET,
             keychainItemName:Constants.KEYCHAIN_ITEM_NAME,
             completionHandler: {(viewController, auth, error) in
-                NSLog("\(auth)")
-                
                 // Get rid of the login view.
                 // self.parentViewController was saved somewhere else and is the parent
                 // view controller of the view controller that shows the google login view.
