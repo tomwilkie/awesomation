@@ -35,7 +35,7 @@ class AuthTests(unittest.TestCase):
     """Test all endpoints needs authentication."""
 
     for rule in main.app.url_map.iter_rules():
-      logging.info('Testing endpoint "%s"', rule.endpoint)
+      logging.debug('Testing endpoint "%s"', rule.endpoint)
 
       # special case static files, no auth..
       if rule.endpoint == 'static':
@@ -48,13 +48,13 @@ class AuthTests(unittest.TestCase):
       if rule.arguments == set(['object_id']):
         arguments = {'object_id': '12345'}
       elif not has_no_empty_params(rule):
-        logging.info(rule.arguments)
+        logging.error(rule.arguments)
         assert False
 
       with main.app.test_request_context():
         url = flask.url_for(rule.endpoint, **arguments)
 
-      logging.info('  url = "%s"', url)
+      logging.debug('  url = "%s"', url)
 
       # Only 2 special cases cause redirects - only human endpoints
       if rule.endpoint in {'root', 'user.use_invite'}:

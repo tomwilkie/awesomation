@@ -130,12 +130,6 @@ runonpi: dist
 
 APPENGINE=/Applications/GoogleAppEngineLauncher.app/Contents/Resources/GoogleAppEngine-default.bundle/Contents/Resources/google_appengine/
 
-appengine_tests: dist
-	PYTHONPATH=$${PYTHONPATH}:dist:dist/third_party bin/appenginetest $(APPENGINE) appengine
+test: dist
+	PYTHONPATH=$${PYTHONPATH}:dist:dist/third_party bin/appenginetest $(APPENGINE) dist
 
-other_tests: dist
-	for test in $$(find src -name *_tests.py | sed 's,^src/,,' | grep -v appengine); do \
-	  PYTHONPATH=$${PYTHONPATH}:dist:dist/third_party python dist/$${test}; \
-	done
-
-test: other_tests appengine_tests
