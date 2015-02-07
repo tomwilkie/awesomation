@@ -123,7 +123,7 @@ class DetectorMixin(object):
       last_state_change = self.occupied_last_update
       timeout = 240
       for sample in xrange(last_state_change, now, timeout):
-        instance.heartbeat(timestamp=sample)
+        instance.heartbeat(now=sample)
       #instance.heartbeat(timestamp=last_state_change-timeout)
 
   def is_occupied(self):
