@@ -529,7 +529,7 @@
 
           {{#HasCapability 'DIMMABLE'}}
           {{#if state}}
-          <span class="label label-success">brigthness: {{PercentOf brightness 255}}%</span>
+          <span class="label label-success">brightness: {{PercentOf brightness 255}}%</span>
           {{else}}
           <span class="label label-warning">brightness: {{PercentOf brightness 255}}%</span>
           {{/if}}
@@ -541,7 +541,7 @@
           {{#if co2}} <span class="label label-success">CO<sub>2</sub>: {{Int co2}} ppm</span>{{/if}}
           {{#if pressure}} <span class="label label-success">Pressure: {{Int pressure}} mb</span>{{/if}}
           {{#if noise}} <span class="label label-success">Noise: {{Int noise}} db</span>{{/if}}
-          {{#if lux}} <span class="label label-success">Brigthness: {{Int lux}} lux</span>{{/if}}
+          {{#if lux}} <span class="label label-success">Brightness: {{Int lux}} lux</span>{{/if}}
           {{/Category}}
 
           {{#Category 'MUSIC'}}
@@ -660,7 +660,7 @@
                 {{#if state}}
                   <span class="label label-success">state: on</span>
                   {{#if show_brightness}}
-                    <span class="label label-success">brigthness: {{PercentOf brightness 255}}%</span>
+                    <span class="label label-success">brightness: {{PercentOf brightness 255}}%</span>
                   {{/if}}
                   {{else}}
                   <span class="label label-warning">state: off</span>
@@ -753,10 +753,10 @@
                     - {{Int noise-max}} db</span>
                 {{/if}}
                 {{#if lux}}
-                  <span class="label label-success">Brigthness: {{Int lux}} lux</span>
+                  <span class="label label-success">Brightness: {{Int lux}} lux</span>
                 {{/if}}
                 {{#if lux-max}}
-                  <span class="label label-success">Brigthness: {{Int lux-min}} - {{Int lux-max}} lux</span>
+                  <span class="label label-success">Brightness: {{Int lux-min}} - {{Int lux-max}} lux</span>
                 {{/if}}
               {{/CategoryInfo}}
             </div>

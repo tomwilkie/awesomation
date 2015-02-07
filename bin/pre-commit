@@ -3,3 +3,4 @@
 set -eu
 
 bin/lint
+make test

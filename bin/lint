@@ -3,30 +3,58 @@
 set -eu
 
 PYLINT_DISABLE=import-error,locally-disabled,no-member,maybe-no-member,no-init,star-args,super-on-old-class,bare-except,no-self-use
+SPELLINGS=brigth
 
-#git stash -q --keep-index
+function quietly() {
+  output=$($@ 2>&1) || echo $output
+}
 
-git diff --cached --name-only | while read filename; do
-	if [ ! -e "${filename}" ]; then
-		continue
-	fi
+function spellcheck() {
+  filename=$1
+  ! grep -i --color ${SPELLINGS} ${filename}
+}
 
-	ext=${filename##*\.}
-	case "$ext" in
-		py)
-      /usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=$PYLINT_DISABLE ${filename} | sort --key=2,5 -n
-		;;
+function lint {
+  filename=$1
+  ext=${filename##*\.}
+
+  # Don't lint this script
+  if [ "${filename}" == "bin/lint" ]; then
+    return
+  fi
+
+  spellcheck ${filename}
+  case "$ext" in
+    py)
+      /usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=$PYLINT_DISABLE ${filename}
+      ;;
     js)
       /usr/local/bin/jshint ${filename}
-    ;;
+      ;;
     html)
       java -jar ~/bin/vnu.jar ${filename}
-      bootlint -d W002 ${filename}
-    ;;
+      quietly bootlint -d W002 ${filename}
+      ;;
     css)
       csslint --ignore=adjoining-classes,box-model,ids,box-sizing,vendor-prefix,qualified-headings ${filename}
-    ;;
-	esac
-done
+      ;;
+  esac
+}
 
-#git stash pop -q
+if [ $# -gt 0 ]; then
+  for filename in $@; do
+    lint ${filename}
+  done
+else
+  #git stash -q --keep-index
+  git diff --cached --name-only | while read filename; do
+    if [ ! -e "${filename}" ]; then
+      continue
+    fi
+
+    lint ${filename}
+  done
+  #git stash pop -q
+fi
+
+exit $?
