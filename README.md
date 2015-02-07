@@ -2,7 +2,7 @@
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tomwilkie/awesomation?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/tomwilkie/awesomation.svg?branch=master)](https://travis-ci.org/tomwilkie/awesomation)
 
-A Python 2 based home automation system.
+A Python 2 based, multi-user home automation system.
 
 ![Screenshot](/docs/screenshot.png?raw=true)
 
@@ -24,12 +24,19 @@ Currently supports the following devices:
   * Netatmo weather stations
 
 
-### Behaviours
+### Features
+
+Awesomation houses can be shared with other Google accounts, increasing WAF.  Use the
+'Configuring sharing...' option on the top right menu to invite others to your house.
+
+Awesomation supports OAuth 2.0 authentication, allowing other app to access and control
+you devices (with your persmission!).  This is used by the prototype iOS app.
 
 Awesomation currently implements the following behaviours:
 * If motion is sensed in a room, the lights are turned on.
 * If your phone is detected on the network, Nest is set to home; otherwise, set to away.
 * Lights can be automatically dimmed into the evening.
+* A learning algorithm is used to compensate for unreliable or insensitive motion sensors.
 
 Planned features:
 * If motion is detected and your phone isn't on the network, an alert is sent.
