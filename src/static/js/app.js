@@ -766,6 +766,15 @@ var AWESOMATION = (function() {
       });
     });
 
+    $('div#main').on('click', 'div.room .room-update-lights', function() {
+      var room_id = $(this).closest('div.room').data('room-id');
+      net.post(sprintf('/api/room/%s/command', room_id), {
+        command: 'update_lights',
+      });
+    });
+
+
+
     // Dialog: setup auto dimming
 
     $('div#main').on('click', 'div.room .configure-auto-dim', function() {
