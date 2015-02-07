@@ -7,6 +7,7 @@ from google.appengine.ext import ndb
 import flask
 
 from appengine import model, pushrpc, rest
+from common import detector
 
 
 DEVICE_TYPES = {}
@@ -98,8 +99,28 @@ class Device(model.Base):
     return room_obj
 
 
+class DetectorMixin(object):
+  detector = ndb.JsonProperty()
+
+  def is_occupied(self):
+    """Use a failure detector to determine state of sensor"""
+    if self.detector is None:
+      self.detector = detector.AccrualFailureDetector()
+    else:
+      self.detector = detector.AccrualFailureDetector.from_dict(self.detector)
+
+    # As we don't get heart beats from the motion sensors,
+    # we just fake them.
+    if self.occupied:
+      detector.heartbeat()
+
+    self.detector = detector.to_dict()
+
+    return detector.is_alive()
+
+
 class Switch(Device):
-  """A swtich."""
+  """A switch."""
   state = ndb.BooleanProperty()
 
   def get_capabilities(self):

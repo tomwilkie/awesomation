@@ -23,6 +23,11 @@ function lint {
     return
   fi
 
+  # Don't lint tests
+  if [[ "${filename}" == *_tests.py ]]; then
+    return
+  fi
+
   spellcheck ${filename}
   case "$ext" in
     py)

@@ -107,7 +107,7 @@ class CommandClassValue(ndb.Model):
 
 
 @device.register('zwave')
-class ZWaveDevice(device.Device):
+class ZWaveDevice(device.Device, device.DetectorMixin):
   """Generic Z Wave device driver."""
   # pylint: disable=too-many-instance-attributes
   zwave_node_id = ndb.IntegerProperty(required=False)

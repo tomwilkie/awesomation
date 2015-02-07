@@ -79,11 +79,8 @@ class Room(model.Base):
 
     return (brightness, color_temperature)
 
-  @rest.command
-  def update_lights(self):
-    """Update state of the lights in this room."""
-    logging.info('Updating light in \'%s\'', self.name)
-
+  def is_occupied(self, put_batch):
+    """Work out if this room is occupied."""
     # First, figure out it the room is occupied
     sensors = (device.Device.get_by_capability('OCCUPIED')
                .filter(device.Device.room == self.key.string_id()).iter())
@@ -91,9 +88,29 @@ class Room(model.Base):
 
     occupied = False
     for sensor in sensors:
-      if sensor.occupied:
+      # use failure detector to decide if this sensor
+      # is 'occupied'
+      if sensor.is_occupied():
         occupied = True
+
+      # occupied is the raw signal, and if true
+      # then the detector has been updated, and
+      # this object needs writing back to the datastore
+      if sensor.occupied:
+        assert occupied
+        put_batch.append(sensor)
+
     logging.info('  occupied = %s from %d sensors', occupied, len(sensors))
+
+    return occupied
+
+  @rest.command
+  def update_lights(self):
+    """Update state of the lights in this room."""
+    logging.info('Updating light in \'%s\'', self.name)
+    put_batch = []
+
+    occupied = self.is_occupied(put_batch)
 
     if self.force_lights_until is not None and \
         self.force_lights_until > time.time():
@@ -107,7 +124,6 @@ class Room(model.Base):
     # Now iterate over all the switches and configure them
     switches = (device.Device.get_by_capability('SWITCH')
                 .filter(device.Device.room == self.key.string_id()).iter())
-    switches_to_put = []
 
     for switch in switches:
       updated = (switch.state != occupied)
@@ -125,10 +141,10 @@ class Room(model.Base):
 
       if updated:
         switch.sync()
-        switches_to_put.append(switch)
+        put_batch.append(switch)
 
-    if switches_to_put:
-      ndb.put_multi(switches_to_put)
+    if put_batch:
+      ndb.put_multi(put_batch)
 
   @rest.command
   def all_on(self):

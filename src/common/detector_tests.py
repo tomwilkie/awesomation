@@ -17,7 +17,8 @@ class TestDetector(unittest.TestCase):
     dtor.heartbeat(now=0)
     self.assertTrue(dtor.is_alive(timestamp=1))
 
-    # check the detector is off after an hour
+    # check the detector is off after 7 mins
+    # default interval is a min
     self.assertTrue(dtor.is_dead(timestamp=7 * 60))
 
   def test_intermittent(self):
