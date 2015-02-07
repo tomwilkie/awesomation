@@ -1,8 +1,10 @@
 """A Phi accrual failure detector."""
-
-from time import time
-from decimal import Decimal
+import decimal
+import logging
 import math
+import sys
+import time
+
 
 class AccrualFailureDetector(object):
   """ Python implementation of 'The Phi Accrual Failure Detector'
@@ -29,11 +31,11 @@ class AccrualFailureDetector(object):
   max_sample_size = 1000
   # 1 = 10% error rate, 2 = 1%, 3 = 0.1%.., (eg threshold=3. no
   # heartbeat for >6s => node marked as dead
-  threshold = 7
+  threshold = 3
 
   def __init__(self):
     self._intervals = []
-    self._mean = None
+    self._mean = 60
     self._timestamp = None
 
   @classmethod
@@ -51,12 +53,13 @@ class AccrualFailureDetector(object):
         'timestamp': self._timestamp
     }
 
-  def heartbeat(self):
+  def heartbeat(self, now=None):
     """ Call when host has indicated being alive (aka heartbeat) """
-    now = time()
+    if now is None:
+      now = time.time()
 
     if self._timestamp is None:
-      self._timestamp = time()
+      self._timestamp = now
       return
 
     interval = now - self._timestamp
@@ -66,32 +69,44 @@ class AccrualFailureDetector(object):
     if len(self._intervals) > self.max_sample_size:
       self._intervals.pop(0)
 
-    if len(self._intervals) > 1:
+    if len(self._intervals) > 0:
       self._mean = sum(self._intervals) / float(len(self._intervals))
+      logging.debug('mean =  %s', self._mean)
 
-  def _probability(self, timestamp):
+  def _probability(self, diff):
+    if self._mean == 0:
+      # we've only seen one heartbeat
+      # so use a different formula
+      # for probability
+      return sys.float_info.max
+
     # cassandra does this, citing: /* Exponential CDF = 1 -e^-lambda*x */
     # but the paper seems to call for a probability density function
     # which I can't figure out :/
-    exponent = -1.0 * timestamp / self._mean
+    exponent = -1.0 * diff / self._mean
     return 1 - (1.0 - math.pow(math.e, exponent))
 
   def phi(self, timestamp=None):
-    if self._timestamp is None or self._mean is None:
-      return 0
+    if self._timestamp is None:
+      # we've never seen a heartbeat,
+      # so it must be missing...
+      return self.threshold
 
     if timestamp is None:
-      timestamp = time()
+      timestamp = time.time()
 
     diff = timestamp - self._timestamp
     prob = self._probability(diff)
-    if Decimal(str(prob)).is_zero():
+    logging.debug('Proability = %s', prob)
+    if decimal.Decimal(str(prob)).is_zero():
       # a very small number, avoiding ValueError: math domain error
       prob = 1E-128
     return -1 * math.log10(prob)
 
-  def is_alive(self):
-    return self.phi() < self.threshold
+  def is_alive(self, timestamp=None):
+    phi = self.phi(timestamp)
+    logging.debug('Phi = %s', phi)
+    return phi < self.threshold
 
-  def is_dead(self):
-    return not self.isAlive()
+  def is_dead(self, timestamp=None):
+    return not self.is_alive(timestamp)
