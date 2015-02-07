@@ -29,8 +29,5 @@ class AeonLabsMultiSensor(zwave.Driver):
         self._device.humidity = value['value']
 
     if value['commandClass'] == 'COMMAND_CLASS_SENSOR_BINARY':
-      self._device.occupied = value['value']
-      room = self._device.find_room()
-      if room:
-        room.update_lights()
+      self._device.real_occupied_state_change(value['value'])
 

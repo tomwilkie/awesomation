@@ -1,5 +1,6 @@
 """Factory for creating devices."""
 import logging
+import time
 
 from google.appengine.api import namespace_manager
 from google.appengine.ext import ndb
@@ -100,23 +101,62 @@ class Device(model.Base):
 
 
 class DetectorMixin(object):
+  """Add a failure detector to a device to interpret motion sensor data."""
   detector = ndb.JsonProperty()
+  occupied = ndb.BooleanProperty(default=False)
+  occupied_last_update = ndb.IntegerProperty()
+
+  def _load_detector(self):
+    """Either return the a rehydrated detector, or a fresh one."""
+    if self.detector is None:
+      return detector.AccrualFailureDetector()
+    else:
+      return detector.AccrualFailureDetector.from_dict(self.detector)
+
+  def _construct_fake_heartbeats(self, instance, now):
+    """Construct an appropriate set of fake heartbeats and
+       feed them to the detector."""
+    # As we don't get heart beats from the motion sensors,
+    # we just fake them.  We don't save these faked updates
+    # until we get real state changes from the sensor.
+    if self.occupied and self.occupied_last_update is not None:
+      last_state_change = self.occupied_last_update
+      timeout = 240
+      for sample in xrange(last_state_change, now, timeout):
+        instance.heartbeat(timestamp=sample)
+      #instance.heartbeat(timestamp=last_state_change-timeout)
 
   def is_occupied(self):
     """Use a failure detector to determine state of sensor"""
-    if self.detector is None:
-      instance = detector.AccrualFailureDetector()
-    else:
-      instance = detector.AccrualFailureDetector.from_dict(self.detector)
+    instance = self._load_detector()
+    now = int(time.time())
+    self._construct_fake_heartbeats(instance, now)
 
-    # As we don't get heart beats from the motion sensors,
-    # we just fake them.
-    if self.occupied:
-      instance.heartbeat()
-
-    self.detector = instance.to_dict()
-
+    # Explicitly don't save the detector - we only do
+    # this on real state changes
     return instance.is_alive()
+
+  def real_occupied_state_change(self, state):
+    """The underly state changed; synthensize events and save the detector."""
+    # I'm getting dupe events; ignore until
+    # I figure out why.
+    if state == self.state:
+      return
+
+    instance = self._load_detector()
+    now = int(time.time())
+    self._construct_fake_heartbeats(instance, now)
+
+    # save the detector and other fields
+    # no need to put this object, plumbing in device.py
+    # will do that for us.
+    self.detector = instance.to_dict()
+    self.occupied = state
+    self.occupied_last_update = now
+
+    room = self.find_room()
+    if room:
+      room.update_lights()
 
 
 class Switch(Device):

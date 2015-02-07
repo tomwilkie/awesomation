@@ -84,7 +84,7 @@ class Room(model.Base):
 
     return (brightness, color_temperature)
 
-  def is_occupied(self, put_batch):
+  def is_occupied(self):
     """Work out if this room is occupied."""
     occupied = False
 
@@ -107,13 +107,6 @@ class Room(model.Base):
       if sensor.is_occupied():
         occupied = True
 
-      # sensor.occupied is the raw signal, and if true
-      # then the detector has been updated, and
-      # this object needs writing back to the datastore
-      if sensor.occupied:
-        assert occupied
-        put_batch.append(sensor)
-
     logging.info('  occupied = %s from %d sensors', occupied, len(sensors))
 
     # Allow override of sensors for an hour
@@ -131,7 +124,7 @@ class Room(model.Base):
     logging.info('Updating light in \'%s\'', self.name)
     put_batch = []
 
-    occupied = self.is_occupied(put_batch)
+    occupied = self.is_occupied()
 
     # Work out target brightness, color temperature
     target_brightness, target_color_temp = self.calculate_dimming()
