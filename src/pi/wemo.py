@@ -32,10 +32,10 @@ class Wemo(scanning_proxy.ScanningProxy):
       self._state_cache[serialnumber] = state
 
       details = {
-        'serial_number': serialnumber,
-        'model': device.model,
-        'name': device.name,
-        'state': state
+          'serial_number': serialnumber,
+          'model': device.model,
+          'name': device.name,
+          'state': state
       }
 
       if not device_exists or state_changed:

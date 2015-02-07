@@ -55,7 +55,7 @@ class RFSwitch(proxy.Proxy):
 
       system_code, device_code, mode, repeats, generation = command
       if generation < self._device_command_generations[
-        (system_code, device_code)]:
+          (system_code, device_code)]:
         continue
 
       logging.info('system_code = %s, device_code = %s, '

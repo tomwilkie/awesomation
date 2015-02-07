@@ -4,6 +4,7 @@ set -eu
 
 PYLINT_DISABLE=import-error,locally-disabled,no-member,maybe-no-member,no-init,star-args,super-on-old-class,bare-except,no-self-use
 SPELLINGS=brigth
+EXIT_CODE=0
 
 function quietly() {
   output=$($@ 2>&1) || echo $output
@@ -11,12 +12,20 @@ function quietly() {
 
 function spellcheck() {
   filename=$1
-  ! grep -i --color ${SPELLINGS} ${filename}
+  ! grep -i --color ${SPELLINGS} ${filename} || EXIT_CODE=$?
 }
 
 function lint {
   filename=$1
   ext=${filename##*\.}
+
+  # If this is a directory, then lint the files in it
+  if [[ -d ${filename} ]]; then
+    find ${filename} -type f | while read filename; do
+      lint ${filename}
+    done
+    return
+  fi
 
   # Don't lint this script
   if [ "${filename}" == "bin/lint" ]; then
@@ -31,7 +40,7 @@ function lint {
   spellcheck ${filename}
   case "$ext" in
     py)
-      /usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=$PYLINT_DISABLE ${filename}
+      /usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=$PYLINT_DISABLE ${filename} || EXIT_CODE=$?
       ;;
     js)
       /usr/local/bin/jshint ${filename}
@@ -41,7 +50,7 @@ function lint {
       quietly bootlint -d W002 ${filename}
       ;;
     css)
-      csslint --ignore=adjoining-classes,box-model,ids,box-sizing,vendor-prefix,qualified-headings ${filename}
+      quietly csslint --ignore=adjoining-classes,box-model,ids,box-sizing,vendor-prefix,qualified-headings ${filename}
       ;;
   esac
 }
@@ -62,4 +71,4 @@ else
   #git stash pop -q
 fi
 
-exit $?
+exit $EXIT_CODE

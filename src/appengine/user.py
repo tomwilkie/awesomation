@@ -2,7 +2,6 @@
 import collections
 import logging
 import re
-import sys
 
 from google.appengine.api import app_identity
 from google.appengine.api import mail
@@ -23,6 +22,8 @@ SCOPE = "https://www.googleapis.com/auth/userinfo.email"
 
 
 def get_user_object():
+  """Get the appengine user object (using login or oauth), or return None."""
+
   user_object = users.get_current_user()
   if user_object is not None:
     return user_object
@@ -56,7 +57,7 @@ class Person(ndb.Model):
     # If we are running in local mode,
     # tell the UI to connect somewhere
     # special for push updates.
-    # TODO get hostname (socket doesn't work)
+    # TO DO: get hostname (socket doesn't work)
     if pusher_client.should_use_local():
       values['ws'] = 'ws://localhost:%d/' % (
           simple_pusher.WEBSOCKET_PORT)
@@ -201,8 +202,8 @@ def pusher_client_auth_callback():
 
   from common import creds
   client = pusher.Pusher(
-      app_id=creds.pusher_app_id,
-      key=public_creds.pusher_key, secret=creds.pusher_secret)
+      app_id=creds.PUSHER_APP_ID,
+      key=public_creds.pusher_key, secret=creds.PUSHER_SECRET)
   auth = client[channel_name].authenticate(socket_id)
 
   return flask.jsonify(**auth)

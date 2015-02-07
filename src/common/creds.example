@@ -1,7 +1,7 @@
 """Private credentials."""
 
-pusher_app_id = None
-pusher_secret = None
+PUSHER_APP_ID = None
+PUSHER_SECRET = None
 
 NEST_CLIENT_ID = None
 NEST_CLIENT_SECRET = None

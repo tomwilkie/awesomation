@@ -17,9 +17,9 @@ class PusherWrapper(object):
     # Hack, but some people won't have this (when running locally)
     from common import creds
     self._pusher_client = pusher.Pusher(
-      app_id=creds.pusher_app_id,
-      key=public_creds.pusher_key, secret=creds.pusher_secret,
-      **kwargs)
+        app_id=creds.PUSHER_APP_ID,
+        key=public_creds.pusher_key, secret=creds.PUSHER_SECRET,
+        **kwargs)
 
   def push(self, channel_id, batch):
     self._pusher_client[channel_id].trigger('events', batch)

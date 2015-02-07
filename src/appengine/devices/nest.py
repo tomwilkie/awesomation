@@ -60,6 +60,7 @@ class NestAccount(account.Account):
   def __init__(self, *args, **kwargs):
     super(NestAccount, self).__init__(*args, **kwargs)
 
+    # pylint: disable=invalid-name
     from common import creds
     self.CLIENT_ID = creds.NEST_CLIENT_ID
     self.CLIENT_SECRET = creds.NEST_CLIENT_SECRET

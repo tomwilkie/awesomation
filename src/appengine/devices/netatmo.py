@@ -46,6 +46,7 @@ class NetatmoAccount(account.Account):
   def __init__(self, *args, **kwargs):
     super(NetatmoAccount, self).__init__(*args, **kwargs)
 
+    # pylint: disable=invalid-name
     from common import creds
     self.CLIENT_ID = creds.NETATMO_CLIENT_ID
     self.CLIENT_SECRET = creds.NETATMO_CLIENT_SECRET

@@ -14,7 +14,7 @@ class DecimalProperty(ndb.IntegerProperty):
   def _validate(self, value):
     if not isinstance(value, (decimal.Decimal, str, unicode, int, long)):
       raise TypeError('Expected a Decimal, str, unicode, int '
-                     'or long an got instead %s' % repr(value))
+                      'or long an got instead %s' % repr(value))
 
   def _to_base_type(self, value):
     return int(decimal.Decimal(value) * 100)

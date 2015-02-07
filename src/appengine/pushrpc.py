@@ -138,8 +138,8 @@ def pusher_client_auth_callback():
   # Hack, but some people won't have this (when running locally)
   from common import creds
   client = pusher.Pusher(
-      app_id=creds.pusher_app_id,
-      key=public_creds.pusher_key, secret=creds.pusher_secret)
+      app_id=creds.PUSHER_APP_ID,
+      key=public_creds.pusher_key, secret=creds.PUSHER_SECRET)
   auth = client[channel_name].authenticate(socket_id)
 
   return flask.jsonify(**auth)
