@@ -12,6 +12,7 @@ import ipaddr
 import netifaces
 import pyping
 
+from common import detector
 from pi import scanning_proxy
 
 
@@ -39,8 +40,9 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
     self._timeout_secs = timeout_secs
     self._ping_frequency_secs = 60
 
-    self._hosts = {}
+    self._hosts = collections.defaultdict(lambda: False)
     self._last_ping = collections.defaultdict(float)
+    self._detectors = collections.defaultdict(detector.AccrualFailureDetector)
 
     # This module has to poll the network pretty
     # frequently to have a good chance of catching
@@ -158,17 +160,19 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
       if state != 'REACHABLE':
         continue
 
-      if mac not in self._hosts:
-        logging.info('Found new device - %s, %s, %s', ip_address, mac, state)
+      self._detectors[mac].heartbeart(now)
+
+    for mac, dtor in self._detectors.iteritems():
+      # Has there been a state change?
+      is_alive = dtor.is_alive(now)
+      if is_alive == self._hosts[mac]:
+        continue
+
+      self._hosts[mac] = is_alive
+      if is_alive:
+        logging.info('Found new device - %s', mac)
         self._callback('network', None, {'appeared': mac})
-
-      # update last seen time
-      self._hosts[mac] = now
-
-    # Expire old timestamps
-    for mac, timestamp in self._hosts.items():
-      if timestamp + self._timeout_secs < now:
-        del self._hosts[mac]
+      else:
         logging.info('Device disappeared - %s', mac)
         self._callback('network', None, {'disappeared': mac})
 
@@ -176,4 +180,6 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
     # devices we can see.
     if self._last_level_event + self._level_event_frequency_secs < now:
       self._last_level_event = now
-      self._callback('network', None, {'devices': self._hosts.keys()})
+      alive = [mac for mac, dtor in self._detectors.iteritems()
+               if dtor.is_alive()]
+      self._callback('network', None, {'devices': alive})
