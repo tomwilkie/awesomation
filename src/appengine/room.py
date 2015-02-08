@@ -111,7 +111,7 @@ class Room(model.Base):
 
     # Allow override of sensors for an hour
     if self.force_lights_at is not None and self.force_lights_state is not None:
-      if (self.force_lights_at + SENSOR_OVERIDE_PERIOD) < time.time():
+      if (self.force_lights_at + SENSOR_OVERIDE_PERIOD) > time.time():
         occupied = self.force_lights_state
         logging.info('  state forced to %s until %d',
                      occupied, self.force_lights_at + SENSOR_OVERIDE_PERIOD)
