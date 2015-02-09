@@ -546,6 +546,7 @@ var AWESOMATION = (function() {
       var device_id = $(this).closest('div.device').data('device-id');
       var data = {
         state: $(this).hasClass('switch-on'),
+        indended_state: $(this).hasClass('switch-on'),
         state_last_updated: moment().unix()
       };
 

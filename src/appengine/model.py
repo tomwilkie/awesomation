@@ -32,6 +32,10 @@ class Base(polymodel.PolyModel):
     result['id'] = self.key.id()
     result['class'] = result['class_'][-1]
     del result['class_']
+
+    # Should move this into detector mixin when I figure out how
+    if 'detector' in result:
+      del result['detector']
     return result
 
   @classmethod

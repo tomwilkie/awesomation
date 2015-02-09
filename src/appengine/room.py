@@ -86,37 +86,52 @@ class Room(model.Base):
 
   def is_occupied(self):
     """Work out if this room is occupied."""
-    occupied = False
-
     # First, figure out if there are sensors
     sensors = (device.Device.get_by_capability('OCCUPIED')
                .filter(device.Device.room == self.key.string_id()).iter())
     sensors = list(sensors)
 
-    # if not sensors, then we have a room state for lighting,
-    # and we should just use that
+    # If we didn't find any, we can't tell if the room
+    # is occupied
     if not sensors:
-      return (self.force_lights_state
-              if self.force_lights_state is not None else False)
+      return None, None
 
     # We have some sensors; if any detect movement,
     # room is occupied
+    readings = []
+    any_true = False
     for sensor in sensors:
       # use failure detector to decide if this sensor
       # is 'occupied'
-      if sensor.is_occupied():
-        occupied = True
+      status = sensor.is_occupied()
+      any_true |= status
+      readings.append((status, sensor.inferred_last_update))
 
-    logging.info('  occupied = %s from %d sensors', occupied, len(sensors))
+    # Either one of more have detected occupied, or none have
+    # We're going to report different timestamps in each case
+    if not any_true:
+      # If we didn't find any, return the largest timestamp
+      # ie the latest any movement was detected
+      return False, max(timestamp for _, timestamp in readings)
+    else:
+      # If we did find some, return the return the larget timestamp
+      # which is true - the earliest any movement was detected.
+      return True, min(timestamp for reading, timestamp in readings if reading)
 
-    # Allow override of sensors for an hour
-    if self.force_lights_at is not None and self.force_lights_state is not None:
-      if (self.force_lights_at + SENSOR_OVERIDE_PERIOD) > time.time():
-        occupied = self.force_lights_state
-        logging.info('  state forced to %s until %d',
-                     occupied, self.force_lights_at + SENSOR_OVERIDE_PERIOD)
+    # This model is not sufficient, as if two sensors are in the room
+    # alternating status with a slight overlap, we'll report an early
+    # state change.
 
-    return occupied
+  def resolve(self, states):
+    """Resolve a list of tuples (state, time) to find the latest states.
+       input does not need to be sorted."""
+
+    def key((_, timestamp)):
+      if timestamp is None:
+        return 0
+      return timestamp
+    states.sort(key=key)
+    return states[-1][0]
 
   @rest.command
   def update_lights(self):
@@ -124,7 +139,19 @@ class Room(model.Base):
     logging.info('Updating light in \'%s\'', self.name)
     put_batch = []
 
-    occupied = self.is_occupied()
+    # The state of a given light is comprised of 3 things:
+    # the indended state of the room, the state of the motion
+    # sensors, and the indended state of the lights.  We use
+    # simple last-writer-wins approach to device which one to use.
+    states = [(self.force_lights_state, self.force_lights_at)]
+    occupied, occupied_at = self.is_occupied()
+    if occupied is not None:
+      states.append((occupied, occupied_at))
+    potential_intended_state = self.resolve(states)
+    if potential_intended_state is None:
+      potential_intended_state = False
+    logging.info('potential_intended_state = %s, states = %s',
+                 potential_intended_state, states)
 
     # Work out target brightness, color temperature
     target_brightness, target_color_temp = self.calculate_dimming()
@@ -134,8 +161,14 @@ class Room(model.Base):
                 .filter(device.Device.room == self.key.string_id()).iter())
 
     for switch in switches:
-      updated = (switch.state != occupied)
-      switch.state = occupied
+      if switch.intended_state is not None:
+        intended_state = self.resolve(
+            states + [(switch.intended_state, switch.state_last_update)])
+      else:
+        intended_state = potential_intended_state
+
+      updated = (switch.state != potential_intended_state)
+      switch.state = intended_state
 
       if (target_brightness is not None) \
           and ('DIMMABLE' in switch.capabilities):

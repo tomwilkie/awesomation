@@ -116,6 +116,13 @@ class DetectorMixin(object):
   inferred_state = ndb.BooleanProperty(default=False)
   inferred_last_update = ndb.IntegerProperty(default=0)
 
+  #def to_dict(self):
+  #  """We don't need to expose the detector in the dict repr."""
+  #  # Mainly as its too big for pusher
+  #  result = super(DetectorMixin, self).to_dict()
+  #  del result['detector']
+  #  return result
+
   def _load_detector(self):
     """Either return the a rehydrated detector, or a fresh one."""
     if self.detector is None:
@@ -136,6 +143,7 @@ class DetectorMixin(object):
     if self.inferred_state != inferred_state:
       self.inferred_state = inferred_state
       self.inferred_last_update = int(time.time())
+      self.put()
 
     return inferred_state
 
@@ -165,7 +173,7 @@ class DetectorMixin(object):
       timeout = 240
       start = self.occupied_last_update
       end = now - timeout
-      assert state < end
+      assert start < end
 
       diff = end - start
       count = math.ceil(diff * 1.0 / timeout)
@@ -187,7 +195,15 @@ class DetectorMixin(object):
 
 class Switch(Device):
   """A switch."""
+  # Represents the actual state of the switch; changing this
+  # (and calling update()) will changed the switch.
   state = ndb.BooleanProperty(default=False)
+
+  # Represents the state the user wants, and when they asked for
+  # it.  Most of the time users will control rooms etc, not individual
+  # lights.  But its possible.
+  # UI should set this and call update_lights on the room.
+  intended_state = ndb.BooleanProperty()
   state_last_update = ndb.IntegerProperty(default=0)
 
   def get_capabilities(self):

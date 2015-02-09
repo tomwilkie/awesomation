@@ -126,12 +126,21 @@ class ZWaveDevice(device.Device, device.DetectorMixin):
   configured = ndb.ComputedProperty(lambda s: s.is_configured())
 
   # Haven't found a good way to fake out the properites yet
-  state = ndb.BooleanProperty(default=False)
-  state_last_update = ndb.IntegerProperty(default=0)
   brightness = ndb.IntegerProperty(default=0)
   temperature = ndb.FloatProperty(default=0.0)
   humidity = ndb.FloatProperty(default=0.0)
   lux = ndb.FloatProperty(default=0.0)
+
+  # Represents the actual state of the switch; changing this
+  # (and calling update()) will changed the switch.
+  state = ndb.BooleanProperty(default=False)
+
+  # Represents the state the user wants, and when they asked for
+  # it.  Most of the time users will control rooms etc, not individual
+  # lights.  But its possible.
+  # UI should set this and call update_lights on the room.
+  intended_state = ndb.BooleanProperty()
+  state_last_update = ndb.IntegerProperty(default=0)
 
   def __init__(self, **kwargs):
     super(ZWaveDevice, self).__init__(**kwargs)
