@@ -1,5 +1,6 @@
 """Factory for creating devices."""
 import logging
+import math
 import time
 
 from google.appengine.api import namespace_manager
@@ -103,8 +104,17 @@ class Device(model.Base):
 class DetectorMixin(object):
   """Add a failure detector to a device to interpret motion sensor data."""
   detector = ndb.JsonProperty()
+
+  # These fields represent the real state of this sensor
+  # and when the real state last changes
   occupied = ndb.BooleanProperty(default=False)
   occupied_last_update = ndb.IntegerProperty()
+
+  # These fields represent the inferred state of this sensor
+  # after processing by the failure detector, and the time
+  # when this inferred state last changed.
+  inferred_state = ndb.BooleanProperty(default=False)
+  inferred_last_update = ndb.IntegerProperty(default=0)
 
   def _load_detector(self):
     """Either return the a rehydrated detector, or a fresh one."""
@@ -113,28 +123,21 @@ class DetectorMixin(object):
     else:
       return detector.AccrualFailureDetector.from_dict(self.detector)
 
-  def _construct_fake_heartbeats(self, instance, now):
-    """Construct an appropriate set of fake heartbeats and
-       feed them to the detector."""
-    # As we don't get heart beats from the motion sensors,
-    # we just fake them.  We don't save these faked updates
-    # until we get real state changes from the sensor.
-    if self.occupied and self.occupied_last_update is not None:
-      last_state_change = self.occupied_last_update
-      timeout = 240
-      for sample in xrange(last_state_change, now, timeout):
-        instance.heartbeat(now=sample)
-      #instance.heartbeat(timestamp=last_state_change-timeout)
-
   def is_occupied(self):
     """Use a failure detector to determine state of sensor"""
-    instance = self._load_detector()
-    now = int(time.time())
-    self._construct_fake_heartbeats(instance, now)
+    # Does the sensor say we're occupied?
+    if self.occupied:
+      return True
 
-    # Explicitly don't save the detector - we only do
-    # this on real state changes
-    return instance.is_alive()
+    # If not, does the detector?
+    instance = self._load_detector()
+    inferred_state = instance.is_alive()
+
+    if self.inferred_state != inferred_state:
+      self.inferred_state = inferred_state
+      self.inferred_last_update = int(time.time())
+
+    return inferred_state
 
   def real_occupied_state_change(self, state):
     """The underly state changed; synthensize events and save the detector."""
@@ -145,7 +148,30 @@ class DetectorMixin(object):
 
     instance = self._load_detector()
     now = int(time.time())
-    self._construct_fake_heartbeats(instance, now)
+
+    # Construct an appropriate set of fake heartbeats and
+    # feed them to the detector.
+    # As we don't get heart beats from the motion sensors,
+    # we just fake them.  We only do this if the sensor
+    # is transitions from occupied -> not occupied.  We
+    # don't need to do it for the other way as we just use
+    # the real state.
+    if self.occupied and self.occupied_last_update is not None:
+      # We know the first hit was at self.occupied_last_update.
+      # We know the sensor can't have recieved a hit in the past
+      # timeout seconds, so the last hit was now - timeout ago
+      # Otherwise, we're going to put a bunch of hits inbetween
+      # those times
+      timeout = 240
+      start = self.occupied_last_update
+      end = now - timeout
+      assert state < end
+
+      diff = end - start
+      count = math.ceil(diff * 1.0 / timeout)
+      inc = diff / count
+      for i in xrange(int(count)):
+        instance.heartbeat(start + int(i * inc))
 
     # save the detector and other fields
     # no need to put this object, plumbing in device.py
@@ -161,7 +187,8 @@ class DetectorMixin(object):
 
 class Switch(Device):
   """A switch."""
-  state = ndb.BooleanProperty()
+  state = ndb.BooleanProperty(default=False)
+  state_last_update = ndb.IntegerProperty(default=0)
 
   def get_capabilities(self):
     return ['SWITCH']

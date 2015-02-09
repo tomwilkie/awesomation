@@ -542,6 +542,16 @@ var AWESOMATION = (function() {
       });
     });
 
+    $('div#main').on('click', 'div.switch-on, div.switch-off', function() {
+      var device_id = $(this).closest('div.device').data('device-id');
+      var data = {
+        state: $(this).hasClass('switch-on'),
+        state_last_updated: moment().unix()
+      };
+
+      net.post(sprintf('/api/device/%s', device_id), data);
+    });
+
     $('div#main').on('click', 'div.room .lighting-toggle', function() {
       var room_id = $(this).closest('div.room').data('room-id');
       var devices = $.map(cache.objects.device, function(device) {

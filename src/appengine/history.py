@@ -1,3 +1,4 @@
+"""Save version of objects to dynamodb."""
 import logging
 import os
 import time
@@ -82,9 +83,10 @@ INDEXES = [
 ]
 FIELDS_TO_IGNORE = {'class', 'id', 'owner', 'last_update', 'capabilities',
                     # can't deal with repeated values yet.
-                    'zwave_command_class_values', 'capabilities'}
+                    'zwave_command_class_values', 'capabilities', 'detector'}
 
 def get_history_table():
+  """Build the history table, depending on the environment."""
   if os.environ.get('SERVER_SOFTWARE', '').startswith('Development'):
     logging.info('Using local dynamodb.')
     connection = layer1.DynamoDBConnection(
@@ -144,13 +146,13 @@ def store_batch():
   # we might, for some reason, try and store
   # two versions of the same objects in a single
   # request.  We just drop the first in this case.
-  dt = long(time.time() * 1000)
+  timestamp = long(time.time() * 1000)
   items = {}
 
   for building_id, version in history:
     version['hash_key'] = '%s-%s-%s' % (
         building_id, version['class'], version['id'])
-    version['range_key'] = dt
+    version['range_key'] = timestamp
     for key in FIELDS_TO_IGNORE:
       version.pop(key, None)
 
@@ -174,6 +176,7 @@ def store_batch():
 
 
 def get_range(cls, object_id, start, end, field):
+  """Get histroic values for a given object and field."""
   building_id = building.get_id()
   history_table = get_history_table()
   values = history_table.query_2(

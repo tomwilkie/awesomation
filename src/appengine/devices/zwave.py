@@ -127,6 +127,7 @@ class ZWaveDevice(device.Device, device.DetectorMixin):
 
   # Haven't found a good way to fake out the properites yet
   state = ndb.BooleanProperty(default=False)
+  state_last_update = ndb.IntegerProperty(default=0)
   brightness = ndb.IntegerProperty(default=0)
   temperature = ndb.FloatProperty(default=0.0)
   humidity = ndb.FloatProperty(default=0.0)
