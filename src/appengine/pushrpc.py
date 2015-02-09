@@ -56,13 +56,13 @@ def authenticate():
 
   header = flask.request.headers.get('awesomation-proxy', None)
   if header != 'true':
-    logging.error('Incorrent header for proxy auth - '
+    logging.debug('Incorrent header for proxy auth - '
                   'awesomation-proxy = \'%s\'', header)
     return None
 
   if flask.request.endpoint not in {'device.handle_events',
                                     'pushrpc.pusher_client_auth_callback'}:
-    logging.error('Endpoint not allowed for proxy auth - '
+    logging.debug('Endpoint not allowed for proxy auth - '
                   '\'%s\'', flask.request.endpoint)
     return None
 
