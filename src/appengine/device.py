@@ -173,7 +173,10 @@ class DetectorMixin(object):
       timeout = 240
       start = self.occupied_last_update
       end = now - timeout
-      assert start < end
+      if start > end:
+        logging.error("This shouldn't happen; start = %s < end = %s",
+                      start, end)
+        start = end - 1
 
       diff = end - start
       count = math.ceil(diff * 1.0 / timeout)
