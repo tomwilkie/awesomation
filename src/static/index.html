@@ -14,6 +14,7 @@
   <link rel="stylesheet" type="text/css" href="/static/css/glyphicons-bootstrap.css">
   <link rel="stylesheet" type="text/css" href="/static/css/glyphicons.css">
   <link rel="stylesheet" type="text/css" href="/static/css/screen.css">
+  <link rel="stylesheet" type="text/css" href="/static/css/history.css">
 
   <script type="text/javascript" src="/static/js/jquery.js"></script>
   <script type="text/javascript" src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
@@ -23,6 +24,7 @@
   <script type="text/javascript" src="/static/js/handlebars.js"></script>
   <script type="text/javascript" src="/static/js/bootstrap.js"></script>
   <script type="text/javascript" src="/static/js/moment.js"></script>
+  <script type="text/javascript" src="/static/js/d3.js"></script>
   <script type="text/javascript" src="/static/js/app.js"></script>
 </head>
 <body>
@@ -895,15 +897,18 @@
     {{/if}}
   </script>
 
+  <script type="text/x-handlebars-template" id="history-template">
+    <svg id="history"></div>
+  </script>
+
   <div>
     <div class="header">
       <div class="no-overflow pull-left">
         <h1>Awesomation</h1>
         <ul class="nav nav-pills">
-          <li class="active" data-mode="devices"><a href="#">
-            Rooms
-          </a></li>
-          <li data-mode="accounts"><a href="#">Accounts <span class="sr-only">(current)</span></a></li>
+          <li class="active" data-mode="devices"><a href="#">Rooms</a></li>
+          <li data-mode="accounts"><a href="#">Accounts</a></li>
+          <li data-mode="history"><a href="#">History</a></li>
         </ul>
       </div>
 

@@ -465,6 +465,10 @@ var AWESOMATION = (function() {
       };
       var rendered = template(data);
       $('div#main').html(rendered);
+
+      if (mode == 'history') {
+        render_history();
+      }
     }
 
     $('body').on('cache_updated', render);
@@ -575,6 +579,70 @@ var AWESOMATION = (function() {
     $('.logout').on('click', function() {
       cache.logout();
     });
+
+    function render_history() {
+      $.each(cache.objects.room, function(room_id) {
+        net.post(sprintf('/api/room/%s/history', room_id), {
+          start_time: moment().subtract(1, 'weeks').unix(),
+          end_time: moment().unix()
+        }).done(function (data) {
+          console.log(data);
+        });
+      });
+
+      var data = [
+        {room: 'Office',
+         start: new Date("Sun Dec 09 01:36:45 EST 2012"),
+         end: new Date("Sun Dec 09 02:36:45 EST 2012")}
+       ];
+
+      var margin = {top: 20, right: 30, bottom: 30, left: 40},
+          width = 960 - margin.left - margin.right,
+          height = 500 - margin.top - margin.bottom;
+
+      var x = d3.time.scale()
+          .range([0, width])
+          .domain([
+            d3.min(data, function(d) { return d.start; }),
+            d3.max(data, function(d) { return d.end; })
+          ]);
+
+      var y = d3.scale.ordinal()
+          .rangeRoundBands([height, 0], 0.1)
+          .domain(data.map(function(d) { return d.room; }));
+
+      var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient("bottom");
+
+      var yAxis = d3.svg.axis()
+          .scale(y)
+          .orient("left");
+
+      var chart = d3.select("#history")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      chart.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
+
+      chart.append("g")
+          .attr("class", "y axis")
+          .call(yAxis);
+
+      chart.selectAll(".bar")
+          .data(data)
+          .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", function(d) { return x(d.start); })
+            .attr("y", function(d) { return y(d.name); })
+            .attr("height", y.rangeBand())
+            .attr("width", function(d) { return x(d.end); });
+    }
 
     // Dialogs
 
@@ -783,8 +851,6 @@ var AWESOMATION = (function() {
         command: 'update_lights',
       });
     });
-
-
 
     // Dialog: setup auto dimming
 
