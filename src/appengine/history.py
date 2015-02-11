@@ -175,7 +175,7 @@ def store_batch():
       batch.put_item(data=item)
 
 
-def get_range(cls, object_id, start, end, field):
+def get_range(cls, object_id, start, end):
   """Get histroic values for a given object and field."""
   building_id = building.get_id()
   history_table = get_history_table()
@@ -185,5 +185,6 @@ def get_range(cls, object_id, start, end, field):
       range_ket__lte=end)
 
   for value in values:
-    yield (value['range_key'], value[field])
+    del value['hash_key']
+    yield value
 

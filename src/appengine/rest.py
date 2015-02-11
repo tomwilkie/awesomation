@@ -131,6 +131,36 @@ class CommandView(flask.views.MethodView):
     return flask.jsonify(result=result)
 
 
+class HistoryView(flask.views.MethodView):
+  """Implements /history endpoints for models."""
+
+  def __init__(self, classname, cls):
+    super(HistoryView, self).__init__()
+    self._classname = classname
+    self._cls = cls
+
+  def post(self, object_id):
+    """Fetch the history for an object."""
+    default_user_authentication()
+
+    body = flask.request.get_json()
+    if body is None:
+      flask.abort(400, 'JSON body and mime type required.')
+
+    start_time = body.pop('start_time', None)
+    end_time = body.pop('end_time', None)
+    if start_time is None or end_time is None:
+      flask.abort(400, 'start_time and end_time expected.')
+
+    obj = self._cls.get_by_id(object_id)
+    if not obj:
+      flask.abort(404)
+
+    result = obj.get_history(start=start_time, end=end_time)
+    result = list(result)
+    return flask.jsonify(result=result)
+
+
 def default_user_authentication():
   """Ensure user is authenticated, and switch to
      appropriate building namespace."""
@@ -170,3 +200,8 @@ def register_class(blueprint, cls, create_callback):
                                           blueprint.name, cls)
   blueprint.add_url_rule('/<object_id>/command', methods=['POST'],
                          view_func=command_view_func)
+
+  history_view_func = HistoryView.as_view('%s_history' % cls.__name__,
+                                          blueprint.name, cls)
+  blueprint.add_url_rule('/<object_id>/history', methods=['POST'],
+                         view_func=history_view_func)

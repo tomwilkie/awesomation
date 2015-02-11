@@ -54,10 +54,10 @@ class Base(polymodel.PolyModel):
   put_async = _put_async
 
   @rest.command
-  def get_history(self, field, start, end):
+  def get_history(self, start, end):
     values = self.to_dict()
     return history.get_range(values['class'], values['id'],
-                             start, end, field)
+                             start, end)
 
   def sync(self):
     """Called when fields on the object are updated
