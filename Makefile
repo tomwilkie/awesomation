@@ -63,19 +63,7 @@ dist/static/%: src/static/%
 	@mkdir -p $(@D)
 	ln -f $< $@
 
-dist/static/%: third_party/static/bootstrap/dist/%
-	@mkdir -p $(@D)
-	cp $< $@
-
-dist/static/js/jquery.ba-bbq.js: third_party/static/jquery-bbq/jquery.ba-bbq.js
-	@mkdir -p $(@D)
-	cp $< $@
-
 dist/static/js/jquery.js: third_party/static/jquery/jquery-2.1.1.js
-	@mkdir -p $(@D)
-	cp $< $@
-
-dist/static/js/sprintf.js: third_party/static/sprintf.js/src/sprintf.js
 	@mkdir -p $(@D)
 	cp $< $@
 
@@ -83,18 +71,21 @@ dist/static/js/handlebars.js: third_party/static/handlebars/handlebars-v2.0.0.js
 	@mkdir -p $(@D)
 	cp $< $@
 
-dist/static/js/moment.js: third_party/static/moment/moment.js
-	@mkdir -p $(@D)
-	cp $< $@
-
 # final actual targets
 py_files := $(patsubst src/%,dist/%,$(shell find src -name *.py))
 static_files = $(patsubst src/static/%,dist/static/%,$(shell find src/static -type f))
-static_files := $(static_files) $(patsubst %,dist/static/%,js/jquery.js js/sprintf.js js/handlebars.js js/jquery.ba-bbq.js js/moment.js)
+static_files := $(static_files) $(patsubst %,dist/static/%,js/jquery.js js/handlebars.js)
 
 define INCLUDE_STATIC_SUBDIR
 static_files := $(static_files) $(patsubst $(1)/%,dist/static/$(2)/%,$(shell find $(1) -type f))
 dist/static/$(2)/%: $(1)/%
+	@mkdir -p $$(@D)
+	cp $$< $$@
+endef
+
+define INCLUDE_STATIC_FILE
+static_files := $(static_files) dist/static/$(2)/$(shell basename $(1))
+dist/static/$(2)/$(shell basename $(1)): $(1)
 	@mkdir -p $$(@D)
 	cp $$< $$@
 endef
@@ -104,6 +95,10 @@ $(eval $(call INCLUDE_STATIC_SUBDIR,third_party/static/bootstrap/dist/js,js))
 $(eval $(call INCLUDE_STATIC_SUBDIR,third_party/static/bootstrap/dist/fonts,fonts))
 $(eval $(call INCLUDE_STATIC_SUBDIR,third_party/static/glyphicons_pro/glyphicons/web/bootstrap_example/css,css))
 $(eval $(call INCLUDE_STATIC_SUBDIR,third_party/static/glyphicons_pro/glyphicons/web/bootstrap_example/fonts,fonts))
+$(eval $(call INCLUDE_STATIC_FILE,third_party/static/moment/moment.js,js))
+$(eval $(call INCLUDE_STATIC_FILE,third_party/static/d3/d3.js,js))
+$(eval $(call INCLUDE_STATIC_FILE,third_party/static/sprintf.js/src/sprintf.js,js))
+$(eval $(call INCLUDE_STATIC_FILE,third_party/static/jquery-bbq/jquery.ba-bbq.js,js))
 
 dist/static: $(static_files)
 
