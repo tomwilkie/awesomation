@@ -87,7 +87,7 @@ FIELDS_TO_IGNORE = {'class', 'id', 'owner', 'last_update', 'capabilities',
 
 def get_history_table():
   """Build the history table, depending on the environment."""
-  if os.environ.get('SERVER_SOFTWARE', '').startswith('Development'):
+  if False: #os.environ.get('SERVER_SOFTWARE', '').startswith('Development'):
     logging.info('Using local dynamodb.')
     connection = layer1.DynamoDBConnection(
         region='anything',

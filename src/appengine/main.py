@@ -1,6 +1,7 @@
 """Main module for appengine app."""
 import calendar
 import datetime
+import decimal
 import logging
 import os
 import sys
@@ -11,6 +12,7 @@ from google.appengine.ext import ndb
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
 
 import flask
+from boto.dynamodb2 import items
 
 from appengine import account, device, driver, history
 from appengine import pushrpc, room, tasks, user
@@ -44,6 +46,12 @@ class Encoder(flask.json.JSONEncoder):
 
     elif isinstance(obj, ndb.Key):
       return obj.string_id()
+
+    elif isinstance(obj, items.Item):
+      return {k: v for (k, v) in obj.items()}
+
+    elif isinstance(obj, decimal.Decimal):
+      return float(obj)
 
     else:
       return flask.json.JSONEncoder.default(self, obj)
