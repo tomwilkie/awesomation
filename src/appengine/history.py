@@ -182,7 +182,7 @@ def get_range(cls, object_id, start, end):
   values = history_table.query_2(
       hash_key__eq='%s-%s-%s' % (building_id, cls, object_id),
       range_key__gt=start,
-      range_ket__lte=end)
+      range_key__lte=end)
 
   for value in values:
     del value['hash_key']
