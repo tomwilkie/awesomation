@@ -1,6 +1,6 @@
 # "Home Awesomation"
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tomwilkie/awesomation?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/tomwilkie/awesomation.svg?branch=master)](https://travis-ci.org/tomwilkie/awesomation)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tomwilkie/awesomation?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/tomwilkie/awesomation.svg?branch=master)](https://travis-ci.org/tomwilkie/awesomation) [![Blog](https://img.shields.io/badge/awesomation-blog-green.svg)](http://homeawesomation.blogspot.co.uk/)
 
 A Python 2 based, multi-user home automation system.
 
