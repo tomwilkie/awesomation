@@ -566,6 +566,10 @@
           <li><a href="#" class="device-command" data-command="scan">Scan</a></li>
           {{/HasCapability}}
 
+          {{#HasCapability 'HEAL'}}
+          <li><a href="#" class="device-command" data-command="heal_node">Heal</a></li>
+          {{/HasCapability}}
+
           {{#HasCapability 'SWITCH'}}
           {{#if state}}
           <li><a href="#" class="switch-on">Turn off</a></li>
