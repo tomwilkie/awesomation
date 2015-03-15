@@ -65,10 +65,20 @@ class Room(model.Base):
     def interpolate(from_value, to_value):
       """Given current seconds since midnight, interpolate
          between max_value and target_value."""
-      if seconds_since_midnight < self.dim_start_time:
+
+      # If its before 4am, lights should be target value.
+      # This stops the lights going full bright at midnight.
+      if seconds_since_midnight < (4 * 3600):
+        return to_value
+
+      # Otherwise, if its before the dim start time,
+      # they should be on initial value (ie bright)
+      elif seconds_since_midnight < self.dim_start_time:
         return from_value
 
-      if seconds_since_midnight > self.dim_end_time:
+      # Finally, if its after the dimming end time,
+      # should be on target value
+      elif seconds_since_midnight > self.dim_end_time:
         return to_value
 
       value_range = from_value - to_value
