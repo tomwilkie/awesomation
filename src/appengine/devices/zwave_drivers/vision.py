@@ -4,7 +4,7 @@ from appengine.devices import zwave
 
 @zwave.register(manufacturer_id='0109', product_type='2002', product_id='0203')
 class VisionMotionSensor(zwave.Driver):
-  """Driver for Aeon Labs Multi Sensor."""
+  """Driver for Vision Motion Sensor."""
   #CONFIGURATION = {
   #    ('COMMAND_CLASS_CONFIGURATION', 5): 'Binary Sensor Report',
   #    ('COMMAND_CLASS_CONFIGURATION', 101): 0b11100001,
