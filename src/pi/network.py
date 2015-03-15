@@ -160,7 +160,7 @@ class NetworkMonitor(scanning_proxy.ScanningProxy):
       if state != 'REACHABLE':
         continue
 
-      self._detectors[mac].heartbeart(now)
+      self._detectors[mac].heartbeat(now)
 
     for mac, dtor in self._detectors.iteritems():
       # Has there been a state change?

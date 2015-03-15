@@ -74,7 +74,7 @@ class Hue(scanning_proxy.ScanningProxy):
 
     bridge = self._bridges.get(bridge_id, None)
     if not bridge:
-      logging.error('Bridge %d not found!', bridge_id)
+      logging.error('Bridge %s not found!', bridge_id)
 
     command = {'on' : mode,
                'bri' : brightness}
