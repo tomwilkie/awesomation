@@ -43,7 +43,7 @@ function lint {
       /usr/local/bin/pylint --rcfile=.pylintrc -rno --disable=$PYLINT_DISABLE ${filename} || EXIT_CODE=$?
       ;;
     js)
-      /usr/local/bin/jshint ${filename}
+      /usr/local/bin/jshint ${filename} || EXIT_CODE=$?
       ;;
     html)
       java -jar ~/bin/vnu.jar ${filename}
