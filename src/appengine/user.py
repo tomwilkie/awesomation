@@ -1,4 +1,5 @@
 """Handle user related queries."""
+import base64
 import collections
 import logging
 import re
@@ -167,8 +168,15 @@ def push_events():
   # partition events by building
   events_by_building = collections.defaultdict(list)
   for building_id, event in events:
-    compressed = zlib.compress(event)
-    events_by_building[building_id].append({'c': compressed})
+    # The UI can deal with compressed and uncompressed events.
+    # Lets compress the event, base64 encode it, and it thats
+    # shorter send that.  Otherwise send the original event.
+    encoded_event = flask.json.dumps(event)
+    compressed_event = zlib.compress(encoded_event)
+    compressed_event = base64.b64encode(compressed_event)
+    if len(encoded_event) > len(compressed_event):
+      event = {'c': compressed_event}
+    events_by_building[building_id].append(event)
 
   pusher_shim = pusher_client.get_client(encoder=flask.json.JSONEncoder)
 

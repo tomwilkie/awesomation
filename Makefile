@@ -99,6 +99,7 @@ $(eval $(call INCLUDE_STATIC_FILE,third_party/static/moment/moment.js,js))
 $(eval $(call INCLUDE_STATIC_FILE,third_party/static/d3/d3.js,js))
 $(eval $(call INCLUDE_STATIC_FILE,third_party/static/sprintf.js/src/sprintf.js,js))
 $(eval $(call INCLUDE_STATIC_FILE,third_party/static/jquery-bbq/jquery.ba-bbq.js,js))
+$(eval $(call INCLUDE_STATIC_FILE,third_party/static/pako/dist/pako_inflate.js,js))
 
 dist/static: $(static_files)
 

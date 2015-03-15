@@ -79,6 +79,12 @@ var AWESOMATION = (function() {
 
     function handle_events(events) {
       $.each(events, function(i, event) {
+        if ('c' in event) {
+          var decoded = atob(event.c);
+          var uncompressed = pako.inflate(decoded, {to: 'string'});
+          event = JSON.parse(uncompressed);
+        }
+
         switch (event.event) {
         case 'delete':
           delete objects[event.cls][event.id];
