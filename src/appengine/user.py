@@ -2,6 +2,7 @@
 import collections
 import logging
 import re
+import zlib
 
 from google.appengine.api import app_identity
 from google.appengine.api import mail
@@ -166,7 +167,8 @@ def push_events():
   # partition events by building
   events_by_building = collections.defaultdict(list)
   for building_id, event in events:
-    events_by_building[building_id].append(event)
+    compressed = zlib.compress(event)
+    events_by_building[building_id].append({'c': compressed})
 
   pusher_shim = pusher_client.get_client(encoder=flask.json.JSONEncoder)
 
