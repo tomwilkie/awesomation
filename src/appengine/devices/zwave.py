@@ -35,7 +35,7 @@ class Driver(object):
     pushrpc.send_event(event)
 
   def get_capabilities(self):
-    return []
+    return ['HEAL']
 
   def get_categories(self):
     return []

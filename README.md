@@ -12,6 +12,7 @@ Currently supports the following devices:
   * [Aeon Labs Multisensor](docs/aeotec_multisensor_tech.pdf)
   * [TKB TZ67-E Wall Plug Dimmer](docs/TKB_TZ67-E.pdf)
   * [Fibaro Motion Sensor](docs/Fibaro Motion-Sensor_EN_5.3.14.pdf)
+  * [Vision Motion Sensor](docs/z_wave_vision_motion_detector_manual.pdf)
 * Local Wifi
   * Philips Hue lights
   * Belkin Wemo switches

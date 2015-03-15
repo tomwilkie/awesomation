@@ -1,4 +1,4 @@
 """Zwave device-specific code."""
 
 # This makes the import * in main.py work.
-__all__ = ["aeon", "tkb"]
+__all__ = ["aeon", "tkb", "vision"]

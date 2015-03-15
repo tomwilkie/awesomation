@@ -9,7 +9,8 @@ class TKBMultilevelPowerSwitch(zwave.Driver):
   # Device seems to only support 0-100, so scale our 0-255 range
 
   def get_capabilities(self):
-    return ['SWITCH', 'DIMMABLE']
+    return super(TKBMultilevelPowerSwitch, self).get_capabilities() \
+       + ['SWITCH', 'DIMMABLE']
 
   def get_categories(self):
     return ['LIGHTING']

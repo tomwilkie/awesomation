@@ -12,7 +12,8 @@ class AeonLabsMultiSensor(zwave.Driver):
   }
 
   def get_capabilities(self):
-    return ['OCCUPIED']
+    return super(AeonLabsMultiSensor, self).get_capabilities() \
+        + ['OCCUPIED']
 
   def get_categories(self):
     return ['CLIMATE']
