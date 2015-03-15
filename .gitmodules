@@ -85,6 +85,6 @@
 [submodule "third_party/static/d3"]
 	path = third_party/static/d3
 	url = https://github.com/mbostock/d3.git
-[submodule "third_party/static/zlib.js"]
-	path = third_party/static/zlib.js
-	url = https://github.com/imaya/zlib.js.git
+[submodule "third_party/static/pako"]
+	path = third_party/static/pako
+	url = https://github.com/nodeca/pako.git
