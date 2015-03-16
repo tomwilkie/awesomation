@@ -136,7 +136,7 @@ def oauth_start_flow():
   instance.put()
 
   return flask.redirect(instance.AUTH_URL %
-                        {'client_id': cls.CLIENT_ID,
+                        {'client_id': instance.CLIENT_ID,
                          'state': key})
 
 

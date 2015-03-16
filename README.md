@@ -23,6 +23,7 @@ Currently supports the following devices:
 * Internet / OAuth
   * Nest Thermostats and Protects
   * Netatmo weather stations
+  * Insteon hub & devices ([using their OAuth2 api](http://docs.insteon.apiary.io/))
 
 
 ### Features
