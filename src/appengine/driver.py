@@ -33,6 +33,10 @@ class Driver(object):
     return func
 
   @staticmethod
+  def put():
+    pass
+
+  @staticmethod
   def query():
     return Query()
 
