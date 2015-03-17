@@ -16,6 +16,8 @@ class Wemo(scanning_proxy.ScanningProxy):
     self._callback = callback
     self._devices = {}
     self._state_cache = {}
+    self._subscriptions = pywemo.SubscriptionRegistry()
+    self._subscriptions.start()
 
   def _scan_once(self):
     devices = pywemo.discover_devices()
@@ -44,3 +46,7 @@ class Wemo(scanning_proxy.ScanningProxy):
   @proxy.command
   def set_state(self, serial_number, state):
     self._devices[serial_number].set_state(state)
+
+  def stop(self):
+    super(Wemo, self).stop()
+    self._subscriptions.stop()

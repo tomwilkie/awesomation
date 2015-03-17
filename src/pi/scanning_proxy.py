@@ -18,7 +18,8 @@ class ScanningProxy(proxy.Proxy):
 
     self._exiting = False
     self._scan_thread_condition = threading.Condition()
-    self._scan_thread = threading.Thread(target=self._scan)
+    self._scan_thread = threading.Thread(
+        target=self._scan, name='%s thread' % self.__class__.__name__)
     self._scan_thread.daemon = True
     self._scan_thread.start()
 
@@ -38,13 +39,12 @@ class ScanningProxy(proxy.Proxy):
                       exc_info=sys.exc_info())
 
       with self._scan_thread_condition:
-        if not self._exiting:
-          self._scan_thread_condition.wait(self._refresh_period)
-
         if self._exiting:
           break
+        else:
+          self._scan_thread_condition.wait(self._refresh_period)
 
-    logging.info('Exiting %s scan thread', self.__class__.__name__)
+    logging.info('Exited %s scan thread', self.__class__.__name__)
 
   @abc.abstractmethod
   def _scan_once(self):
