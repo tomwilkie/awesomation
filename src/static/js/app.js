@@ -552,12 +552,12 @@ var AWESOMATION = (function() {
       });
     });
 
-    $('div#main').on('click', 'div.switch-on, div.switch-off', function() {
+    $('div#main').on('click', '.switch-on, .switch-off', function() {
       var device_id = $(this).closest('div.device').data('device-id');
       var data = {
         state: $(this).hasClass('switch-on'),
-        indended_state: $(this).hasClass('switch-on'),
-        state_last_updated: moment().unix()
+        intended_state: $(this).hasClass('switch-on'),
+        state_last_update: moment().unix()
       };
 
       net.post(sprintf('/api/device/%s', device_id), data);
