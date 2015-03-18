@@ -2,9 +2,12 @@ language: python
 python:
   - "2.7"
 
+# This can run in containers
+sudo: false
+
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
-  - wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.17.zip
+  - wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.18.zip
   - unzip -q google_appengine_1.9.17.zip
   - make dist
 
