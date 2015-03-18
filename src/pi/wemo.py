@@ -19,6 +19,7 @@ class Wemo(scanning_proxy.ScanningProxy):
     self._subscriptions = pywemo.SubscriptionRegistry()
     self._subscriptions.start()
 
+
   def _scan_once(self):
     devices = pywemo.discover_devices()
 
@@ -40,12 +41,21 @@ class Wemo(scanning_proxy.ScanningProxy):
           'state': state
       }
 
+      if not device_exists:
+        self._subscriptions.register(device)
+        #self._subscriptions.on(device, )
+
       if not device_exists or state_changed:
         self._callback('wemo', 'wemo-%s' % device.serialnumber, details)
 
   @proxy.command
   def set_state(self, serial_number, state):
-    self._devices[serial_number].set_state(state)
+    device = self._devices.get(serial_number)
+    if not device:
+      logging.error('Device "%s" not found', serial_number)
+      return
+
+    device.set_state(state)
 
   def stop(self):
     super(Wemo, self).stop()
