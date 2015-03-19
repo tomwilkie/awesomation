@@ -143,3 +143,6 @@ class ZWave(proxy.Proxy):
       self._manager.writeConfig(self._home_id)
     self._manager.removeWatcher(self._callback)
     self._manager.removeDriver(self._device)
+
+  def join(self):
+    pass
