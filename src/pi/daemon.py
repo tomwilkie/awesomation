@@ -4,6 +4,7 @@
 # Site says it public domain.
 
 import sys, os, time, atexit
+import code, traceback, signal
 from signal import SIGTERM
 
 class Daemon(object):
@@ -18,6 +19,19 @@ class Daemon(object):
     self.stderr = stderr
     self.pidfile = pidfile
     self._daemonize = daemonize
+
+  # From http://stackoverflow.com/questions/132058/showing-the-stack-trace-from-a-running-python-application
+  def debug(self, sig, frame):
+      """Interrupt running process, and provide a python prompt for
+      interactive debugging."""
+      debug = {'_frame':frame}  # Allow access to frame object.
+      debug.update(frame.f_globals)  # Unless shadowed by global
+      debug.update(frame.f_locals)
+
+      interactive = code.InteractiveConsole(debug)
+      message  = "Signal received : entering python shell.\nTraceback:\n"
+      message += ''.join(traceback.format_stack(frame))
+      interactive.interact(message)
 
   def daemonize(self):
     """
@@ -87,6 +101,8 @@ class Daemon(object):
     # Start the daemon
     if self._daemonize:
       self.daemonize()
+    else:
+      signal.signal(signal.SIGUSR1, self.debug)  # Register handler
     self.run()
 
   def stop(self):
