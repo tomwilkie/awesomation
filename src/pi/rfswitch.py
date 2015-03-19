@@ -77,4 +77,6 @@ class RFSwitch(proxy.Proxy):
   def stop(self):
     self._exiting = True
     self._command_queue.put(None)
+
+  def join(self):
     self._command_thread.join()

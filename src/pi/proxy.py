@@ -28,3 +28,7 @@ class Proxy(object):
   @abc.abstractmethod
   def stop(self):
     pass
+
+  @abc.abstractmethod
+  def join(self):
+    pass

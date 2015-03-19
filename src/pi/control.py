@@ -76,6 +76,9 @@ class Control(daemon.Daemon):
     for proxy in self._proxies.itervalues():
       proxy.stop()
 
+    for proxy in self._proxies.itervalues():
+      proxy.join()
+
   def _push_event_callback(self, commands):
     """Handle event from the cloud."""
     logging.info('Processing %d commands', len(commands))

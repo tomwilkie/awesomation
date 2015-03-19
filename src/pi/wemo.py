@@ -60,3 +60,7 @@ class Wemo(scanning_proxy.ScanningProxy):
   def stop(self):
     super(Wemo, self).stop()
     self._subscriptions.stop()
+
+  def join(self):
+    super(Wemo, self).join()
+    self._subscriptions.join()

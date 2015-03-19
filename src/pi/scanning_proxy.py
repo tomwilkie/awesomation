@@ -54,4 +54,6 @@ class ScanningProxy(proxy.Proxy):
     with self._scan_thread_condition:
       self._exiting = True
       self._scan_thread_condition.notify()
+
+  def join(self):
     self._scan_thread.join()
