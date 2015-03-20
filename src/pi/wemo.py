@@ -43,7 +43,7 @@ class Wemo(scanning_proxy.ScanningProxy):
 
       if not device_exists:
         self._subscriptions.register(device)
-        #self._subscriptions.on(device, )
+        self._subscriptions.on(device, 'BinaryState', self._event)
 
       if not device_exists or state_changed:
         self._callback('wemo', 'wemo-%s' % device.serialnumber, details)
@@ -56,6 +56,16 @@ class Wemo(scanning_proxy.ScanningProxy):
       return
 
     device.set_state(state)
+
+  def _event(self, device, value):
+    details = {
+      'serial_number': device.serialnumber,
+      'model': device.model,
+      'name': device.name,
+      'state': int(value) == 1
+    }
+
+    self._callback('wemo', 'wemo-%s' % device.serialnumber, details)
 
   def stop(self):
     super(Wemo, self).stop()
