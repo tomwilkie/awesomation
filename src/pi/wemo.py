@@ -45,8 +45,25 @@ class Wemo(scanning_proxy.ScanningProxy):
         self._subscriptions.register(device)
         self._subscriptions.on(device, 'BinaryState', self._event)
 
+      device_type = self.get_type(device)
+      if device_type is None:
+        return
+
       if not device_exists or state_changed:
-        self._callback('wemo', 'wemo-%s' % device.serialnumber, details)
+        self._callback(device_type, 'wemo-%s' % device.serialnumber, details)
+
+  def get_type(self, device):
+    uuid = device._config.UDN
+    if uuid.startswith('uuid:Socket'):
+      return 'wemo_switch'
+    #elif uuid.startswith('uuid:Lightswitch'):
+    #    return LightSwitch(location)
+    #elif uuid.startswith('uuid:Insight'):
+    #    return Insight(location)
+    elif uuid.startswith('uuid:Sensor'):
+      return 'wemo_motion'
+    else:
+      return None
 
   @proxy.command
   def set_state(self, serial_number, state):
@@ -58,6 +75,10 @@ class Wemo(scanning_proxy.ScanningProxy):
     device.set_state(state)
 
   def _event(self, device, value):
+    device_type = self.get_type(device)
+    if device_type is None:
+      return
+
     details = {
       'serial_number': device.serialnumber,
       'model': device.model,
@@ -65,7 +86,7 @@ class Wemo(scanning_proxy.ScanningProxy):
       'state': int(value) == 1
     }
 
-    self._callback('wemo', 'wemo-%s' % device.serialnumber, details)
+    self._callback(device_type, 'wemo-%s' % device.serialnumber, details)
 
   def stop(self):
     super(Wemo, self).stop()

@@ -151,7 +151,7 @@ class DetectorMixin(object):
     """The underly state changed; synthensize events and save the detector."""
     # I'm getting dupe events; ignore until
     # I figure out why.
-    if state == self.state:
+    if state == self.occupied:
       return
 
     instance = self._load_detector()
