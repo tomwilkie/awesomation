@@ -15,9 +15,10 @@ Currently supports the following devices:
   * [Vision Motion Sensor](docs/z_wave_vision_motion_detector_manual.pdf)
 * Local Wifi
   * Philips Hue lights
-  * Belkin Wemo switches
+  * Belkin Wemo switches + motion sensors
   * Arbitrary wifi devices (ie your phone, for presence)
   * Sonos devices (basic detection right now)
+  * Edimax mains switch (planned)
 * 433Mhz
   * RF Switches (testing with [Brennenstuhl remote control mains sockets](http://www.amazon.co.uk/dp/B003BIFLSY))
 * Internet / OAuth

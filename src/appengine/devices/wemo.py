@@ -5,7 +5,8 @@ from google.appengine.ext import ndb
 from appengine import device, pushrpc
 
 
-class WemoBase(device.Device):
+class WemoMixin(object):
+  """All wemo's have a model and serial number in common."""
   serial_number = ndb.StringProperty(required=True)
   model = ndb.StringProperty()
 
@@ -22,7 +23,7 @@ class WemoBase(device.Device):
 
 
 @device.register('wemo_motion')
-class WemoMotion(WemoBase, device.DetectorMixin):
+class WemoMotion(device.Device, WemoMixin, device.DetectorMixin):
   """A Wemo Motion Sensor"""
 
   def get_capabilities(self):
@@ -33,30 +34,22 @@ class WemoMotion(WemoBase, device.DetectorMixin):
 
   def handle_event(self, event):
     """Handle a device update event."""
-    super(WemoMotion, self).handle_event(event)
+    WemoMixin.handle_event(self, event)
     self.real_occupied_state_change(event['state'])
 
 
 @device.register('wemo_switch')
-class WemoSwitch(WemoBase):
+class WemoSwitch(device.Switch, WemoMixin):
   """A Wemo switch."""
-  state = ndb.IntegerProperty()
-
-  def get_capabilities(self):
-    return ['SWITCH']
-
-  def get_categories(self):
-    return ['LIGHTING']
-
   def sync(self):
     """Update the state of a light."""
     event = {'type': 'wemo',
              'command': 'set_state',
              'serial_number': self.serial_number,
-             'state': 1 if self.state else 0}
+             'state': self.state}
     pushrpc.send_event(event)
 
   def handle_event(self, event):
     """Handle a device update event."""
-    super(WemoSwitch, self).handle_event(event)
+    WemoMixin.handle_event(self, event)
     self.state = event['state']

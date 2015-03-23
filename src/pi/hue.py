@@ -27,13 +27,14 @@ class Hue(scanning_proxy.ScanningProxy):
     for bridge in bridges:
       bridge_id = bridge['id']
       bridge_ip = bridge['internalipaddress']
-      bridge_name = bridge['name']
+      bridge_name = None
 
       # Event explicity doesn't contain ip (it might change)
       # or id (its in the device path)
       event = None
       try:
         bridge = phue.Bridge(ip=bridge_ip)
+        bridge_name = bridge.name
 
         if bridge_id not in self._bridges:
           self._bridges[bridge_id] = bridge
@@ -41,7 +42,7 @@ class Hue(scanning_proxy.ScanningProxy):
       except phue.PhueRegistrationException:
         if bridge_id in self._bridges:
           del self._bridges[bridge_id]
-        event = {'name': bridge_name, 'linked': False}
+        event = {'linked': False}
 
       if event is not None:
         logging.debug('Hue bridge \'%s\' (%s) found at %s - linked=%s',
@@ -75,6 +76,7 @@ class Hue(scanning_proxy.ScanningProxy):
     bridge = self._bridges.get(bridge_id, None)
     if not bridge:
       logging.error('Bridge %s not found!', bridge_id)
+      return
 
     command = {'on' : mode,
                'bri' : brightness}

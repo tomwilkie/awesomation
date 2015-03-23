@@ -38,7 +38,7 @@ class Wemo(scanning_proxy.ScanningProxy):
           'serial_number': serialnumber,
           'model': device.model,
           'name': device.name,
-          'state': state
+          'state': state == 1
       }
 
       if not device_exists:
@@ -72,7 +72,7 @@ class Wemo(scanning_proxy.ScanningProxy):
       logging.error('Device "%s" not found', serial_number)
       return
 
-    device.set_state(state)
+    device.set_state(1 if state else 0)
 
   def _event(self, device, value):
     device_type = self.get_type(device)
