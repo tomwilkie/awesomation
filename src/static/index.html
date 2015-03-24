@@ -541,7 +541,11 @@
           {{#if inferred_state}}
           <span class="label label-success">occupied: yes</span>
           {{else}}
-          <span class="label label-warning">occupied: no</span>
+              {{#if occupied}}
+              <span class="label label-success">occupied: yes</span>
+              {{else}}
+              <span class="label label-warning">occupied: no</span>
+              {{/if}}
           {{/if}}
           {{/HasCapability}}
 
