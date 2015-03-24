@@ -149,13 +149,15 @@ class DetectorMixin(object):
 
   def real_occupied_state_change(self, state):
     """The underly state changed; synthensize events and save the detector."""
+    now = int(time.time())
+    logging.info('real_occupied_state_change %s, state=%s', self, state)
+
     # I'm getting dupe events; ignore until
     # I figure out why.
     if state == self.occupied:
       return
 
     instance = self._load_detector()
-    now = int(time.time())
 
     # Construct an appropriate set of fake heartbeats and
     # feed them to the detector.
@@ -165,6 +167,7 @@ class DetectorMixin(object):
     # don't need to do it for the other way as we just use
     # the real state.
     if self.occupied and self.occupied_last_update is not None:
+      assert state == False
       # We know the first hit was at self.occupied_last_update.
       # We know the sensor can't have recieved a hit in the past
       # timeout seconds, so the last hit was now - timeout ago
@@ -176,7 +179,7 @@ class DetectorMixin(object):
       if start > end:
         logging.error("This shouldn't happen; start = %s < end = %s",
                       start, end)
-        start = end - 1
+        end = start + 1
 
       diff = end - start
       count = math.ceil(diff * 1.0 / timeout)
