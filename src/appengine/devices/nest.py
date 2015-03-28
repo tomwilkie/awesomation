@@ -15,7 +15,6 @@ class NestThermostat(device.Device):
   """Class represents a Nest thermostat."""
   temperature = ndb.FloatProperty()
   humidity = ndb.FloatProperty()
-  account = ndb.StringProperty()
   target_temperature = ndb.FloatProperty()
 
   def get_categories(self):
@@ -32,7 +31,6 @@ class NestThermostat(device.Device):
 @device.register('nest_protect')
 class NestProtect(device.Device):
   """Class represents a Nest protect (smoke alarm)."""
-  account = ndb.StringProperty()
 
   def get_categories(self):
     return ['CLIMATE']

@@ -53,14 +53,23 @@ class Account(model.Base):
   def _get_refresh_data(self):
     return ''
 
-  def do_request(self, url, **kwargs):
+  def _get_auth_headers(self):
+    return {}
+
+  def do_request(self, url, headers=None, **kwargs):
     retries = 10
     while retries > 0:
       retries -= 1
 
       try:
+        if headers:
+          headers.update(self._get_auth_headers())
+        else:
+          headers = self._get_auth_headers()
+
         result = urlfetch.fetch(
             url=url % {'access_token': self.access_token},
+            headers=headers,
             deadline=15,
             **kwargs)
 
@@ -69,7 +78,8 @@ class Account(model.Base):
           self.refresh_access_token()
           continue
 
-        assert 200 <= result.status_code < 300
+        assert 200 <= result.status_code < 300, (
+          "%s, %s" % (result.status_code, result.content))
         return json.loads(result.content)
       except urlfetch_errors.DeadlineExceededError:
         if retries > 0:

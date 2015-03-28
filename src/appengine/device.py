@@ -8,7 +8,7 @@ from google.appengine.ext import ndb
 
 import flask
 
-from appengine import model, pushrpc, rest
+from appengine import account, model, pushrpc, rest
 from common import detector
 
 
@@ -65,6 +65,9 @@ class Device(model.Base):
   categories = ndb.ComputedProperty(lambda self: self.get_categories(),
                                     repeated=True)
 
+  # Does this device belong to an account?
+  account = ndb.StringProperty()
+
   def get_capabilities(self):
     return []
 
@@ -94,11 +97,24 @@ class Device(model.Base):
     # This is a horrible hack, but room imports devices,
     # so need to be lazy here.
     from appengine import room
-    room_obj = room.Room.get_by_id(self._device.room)
+    room_obj = room.Room.get_by_id(self.room)
     if not room_obj:
       return None
 
     return room_obj
+
+  def find_account(self):
+    """Resolve the account for this device.  May return null."""
+    if not self.account:
+      return None
+
+    # This is a horrible hack, but room imports devices,
+    # so need to be lazy here.
+    account_obj = account.Account.get_by_id(self.account)
+    if not account_obj:
+      return None
+
+    return account_obj
 
 
 class DetectorMixin(object):

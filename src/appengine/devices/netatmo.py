@@ -11,8 +11,6 @@ from appengine import account, device, rest
 @device.register('netatmo_weather_station')
 class NetatmoWeatherStation(device.Device):
   """A Netatmo Weather Station."""
-  account = ndb.StringProperty()
-
   temperature = ndb.FloatProperty()
   humidity = ndb.FloatProperty()
   co2 = ndb.FloatProperty()
