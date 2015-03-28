@@ -33,7 +33,7 @@ Awesomation houses can be shared with other Google accounts, increasing WAF.  Us
 'Configuring sharing...' option on the top right menu to invite others to your house.
 
 Awesomation supports OAuth 2.0 authentication, allowing other app to access and control
-you devices (with your persmission!).  This is used by the prototype iOS app.
+you devices (with your permission!).  This is used by the prototype iOS app.
 
 Awesomation currently implements the following behaviours:
 * If motion is sensed in a room, the lights are turned on.

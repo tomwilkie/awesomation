@@ -46,7 +46,7 @@ class InsteonAccount(account.Account):
     if self.refresh_token is None:
       values['grant_type'] = 'authorization_code'
       values['code'] = self.auth_code
-      values['redirect_uri'] = account.REDIRECT_URL
+      values['redirect_uri'] = '' # Don't provide a redirect, or you'll get a 401
     else:
       values['grant_type'] = 'refresh_token'
       values['refresh_token'] = self.refresh_token

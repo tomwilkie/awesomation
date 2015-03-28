@@ -90,7 +90,9 @@ class Account(model.Base):
 
     try:
       # empty data to trigger a post
-      result = urllib2.urlopen(url, data)
+      req = urllib2.Request(url, data)
+      req.add_header('Content-Type', 'application/x-www-form-urlencoded')
+      result = urllib2.urlopen(req)
       result = json.load(result)
       logging.info('result: %s', result)
     except urllib2.HTTPError, err:
@@ -153,6 +155,9 @@ def oauth_redirect_callback():
   if auth_code is None or state is None:
     logging.info('No auth_code of state found!')
     flask.abort(400)
+
+  logging.info('Got OAuth callback state="%s", auth_code="%s"',
+               state, auth_code)
 
   account = Account.get_by_id(state)
   if account is None:
