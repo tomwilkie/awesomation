@@ -199,9 +199,10 @@ class DetectorMixin(object):
 
       diff = end - start
       count = math.ceil(diff * 1.0 / timeout)
-      inc = diff / count
-      for i in xrange(int(count)):
-        instance.heartbeat(start + int(i * inc))
+      if count > 0:
+        inc = diff / count
+        for i in xrange(int(count)):
+          instance.heartbeat(start + int(i * inc))
 
     # save the detector and other fields
     # no need to put this object, plumbing in device.py
