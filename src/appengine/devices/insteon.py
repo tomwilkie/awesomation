@@ -3,6 +3,7 @@
 import json
 import logging
 import urllib
+import time
 
 from google.appengine.ext import ndb
 
@@ -26,17 +27,20 @@ class InsteonSwitch(device.Switch):
       logging.info("Couldn't find account.")
       return
 
-    command = 'on' if self.state else 'off'
-    my_account.send_command(command, device_id=self.insteon_device_id)
+    command = 'fast_on' if self.state else 'fast_off  '
+    command = my_account.send_command(command, device_id=self.insteon_device_id)
+    logging.info(command)
 
 
 @account.register('insteon')
 class InsteonAccount(account.Account):
   """Class represents a Insteon account."""
-  BASE_URL = 'https://connect.insteon.com/api/v2'
-  AUTH_URL = (BASE_URL + '/oauth2/auth?client_id=%(client_id)s&state=%(state)s&'
+  BASE_URL = 'https://connect.insteon.com'
+  AUTH_URL = (BASE_URL + '/api/v2/oauth2/auth?' +
+              'client_id=%(client_id)s&state=%(state)s&'
               'response_type=code&redirect_uri=' + account.REDIRECT_URL)
-  ACCESS_TOKEN_URL = (BASE_URL + '/oauth2/token')
+  ACCESS_TOKEN_URL = (BASE_URL + '/api/v2/oauth2/token')
+  COMMAND_RETRIES = 10
 
   def __init__(self, *args, **kwargs):
     super(InsteonAccount, self).__init__(*args, **kwargs)
@@ -68,6 +72,7 @@ class InsteonAccount(account.Account):
   def get_human_type(self):
     return 'Insteon'
 
+  @rest.command
   def send_command(self, command, **kwargs):
     """Utility to send commands to API."""
     if self.access_token is None:
@@ -76,11 +81,21 @@ class InsteonAccount(account.Account):
 
     kwargs['command'] = command
     payload = json.dumps(kwargs)
-    logging.info(payload)
     result = self.do_request(
-      self.BASE_URL + '/commands', method='POST', payload=payload,
+      self.BASE_URL + '/api/v2/commands', method='POST', payload=payload,
       headers={'Content-Type': 'application/json'})
     logging.info(result)
+
+    state = None
+    for _ in range(self.COMMAND_RETRIES):
+      state = self.do_request(self.BASE_URL + result['link'])
+      logging.info(state)
+      assert state['status'] != 'failed'
+      if state['status'] == 'suceeded':
+        break
+      time.sleep(1)
+
+    return state
 
   @rest.command
   def refresh_devices(self):
@@ -88,7 +103,7 @@ class InsteonAccount(account.Account):
       logging.info('No access token, skipping.')
       return
 
-    devices = self.do_request(self.BASE_URL + '/devices?properties=all')
+    devices = self.do_request(self.BASE_URL + '/api/v2/devices?properties=all')
     logging.info(devices)
 
     events = []
