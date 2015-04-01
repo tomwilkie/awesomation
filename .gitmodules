@@ -33,7 +33,7 @@
 	url = https://github.com/studioimaginaire/phue.git
 [submodule "third_party/wiringPi"]
 	path = third_party/wiringPi
-	url = git://git.drogon.net/wiringPi
+	url = https://github.com/tomwilkie/wiringPi
 [submodule "third_party/fswatch"]
 	path = third_party/fswatch
 	url = https://github.com/alandipert/fswatch.git
