@@ -515,6 +515,21 @@ var AWESOMATION = (function() {
       net.post(sprintf('/api/room/%s', room_id), data);
     });
 
+    function room_set_lighting_state(room_id, state) {
+      // If we found a light that is on, turn them all off.
+      var command = state ? 'all_on' : 'all_off';
+
+      net.post(sprintf('/api/room/%s/command', room_id), {
+        command: command,
+      });
+    }
+
+    $('.all-off').on('click', function() {
+      $.each(cache.objects.room, function(room_id) {
+        room_set_lighting_state(room_id, false);
+      });
+    });
+
     $('div#main').on('change', 'div.device input.on-change-device-set', function() {
       var that = $(this),
         device_id = that.closest('div.device').data('device-id'),
@@ -574,12 +589,7 @@ var AWESOMATION = (function() {
         }
       });
 
-      // If we found a light that is on, turn them all off.
-      var command = devices.length > 0 ? 'all_off' : 'all_on';
-
-      net.post(sprintf('/api/room/%s/command', room_id), {
-        command: command,
-      });
+      room_set_lighting_state(room_id, devices.length === 0);
     });
 
     $('.logout').on('click', function() {
