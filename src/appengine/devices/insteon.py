@@ -27,7 +27,7 @@ class InsteonSwitch(device.Switch):
       logging.info("Couldn't find account.")
       return
 
-    command = 'fast_on' if self.state else 'fast_off  '
+    command = 'fast_on' if self.state else 'fast_off'
     command = my_account.send_command(command, device_id=self.insteon_device_id)
     logging.info(command)
 
