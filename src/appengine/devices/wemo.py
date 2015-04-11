@@ -27,7 +27,7 @@ class WemoMotion(device.Device, WemoMixin, device.DetectorMixin):
   """A Wemo Motion Sensor"""
 
   def get_capabilities(self):
-    return ['OCCUPIED']
+    return ['OCCUPIED', 'SCAN']
 
   def get_categories(self):
     return ['CLIMATE']
@@ -41,6 +41,10 @@ class WemoMotion(device.Device, WemoMixin, device.DetectorMixin):
 @device.register('wemo_switch')
 class WemoSwitch(device.Switch, WemoMixin):
   """A Wemo switch."""
+
+  def get_capabilities(self):
+    return super(WemoSwitch, self).get_capabilities() + ['SCAN']
+
   def sync(self):
     """Update the state of a light."""
     event = {'type': 'wemo',
