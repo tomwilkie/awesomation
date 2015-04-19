@@ -11,7 +11,7 @@ from boto.dynamodb2 import layer1
 
 import flask
 
-from appengine import building
+from common import batcher
 
 # Every time we put an object to the appengine datastore,
 # we're also going to save a copy to dynamodb.  This will
@@ -125,22 +125,11 @@ def get_history_table():
 
 def store_version(version):
   """Post events back to the pi."""
-  batch = flask.g.get('history', None)
-  if batch is None:
-    batch = []
-    setattr(flask.g, 'history', batch)
-
-  building_id = building.get_id()
-  batch.append((building_id, version))
+  #versions.append(version)
 
 
-def store_batch():
+def store_batch(batch):
   """Push all the events that have been caused by this request."""
-  history = flask.g.get('history', None)
-  setattr(flask.g, 'history', None)
-  if history is None:
-    return
-
   logging.info('Saving %d versions to dynamodb.', len(history))
 
   # we might, for some reason, try and store
@@ -149,7 +138,7 @@ def store_batch():
   timestamp = long(time.time() * 1000)
   items = {}
 
-  for building_id, version in history:
+  for version in history:
     version['hash_key'] = '%s-%s-%s' % (
         building_id, version['class'], version['id'])
     version['range_key'] = timestamp
@@ -173,6 +162,9 @@ def store_batch():
   with history_table.batch_write() as batch:
     for item in items.itervalues():
       batch.put_item(data=item)
+
+
+versions = batcher.Batcher(store_batch)
 
 
 def get_range(cls, object_id, start, end):

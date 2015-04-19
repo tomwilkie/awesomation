@@ -6,11 +6,6 @@ import logging
 import os
 import sys
 
-from google.appengine.api import users
-from google.appengine.ext import ndb
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../third_party'))
-
 import flask
 from boto.dynamodb2 import items
 
@@ -63,8 +58,6 @@ app.debug = True
 app.json_encoder = Encoder
 
 # These are not namespaced, and do their own auth
-app.register_blueprint(user.blueprint, url_prefix='/api/user')
-app.register_blueprint(pushrpc.blueprint, url_prefix='/api/proxy')
 app.register_blueprint(tasks.blueprint, url_prefix='/tasks')
 
 # There are all namespaced, and auth is done in the rest module
@@ -76,9 +69,6 @@ app.register_blueprint(room.blueprint, url_prefix='/api/room')
 
 @app.route('/')
 def root():
-  user_object = users.get_current_user()
-  if not user_object:
-    return flask.redirect(users.create_login_url(flask.request.url))
   return flask.send_from_directory(static_dir(), 'index.html')
 
 
@@ -87,11 +77,4 @@ def custom400(error):
   response = flask.jsonify({'message': error.description})
   return response, 400
 
-
-@app.after_request
-def after_request(response):
-  pushrpc.push_batch()
-  user.push_events()
-  history.store_batch()
-  return response
 

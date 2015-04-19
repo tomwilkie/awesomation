@@ -2,9 +2,6 @@
 import logging
 import sys
 
-from google.appengine.ext.ndb import metadata
-from google.appengine.api import namespace_manager
-
 import flask
 
 from appengine import account, pushrpc, room, user
@@ -30,7 +27,7 @@ def _update_per_namespace():
       acc.put()
     except:
       logging.error('Error refreshing account %s',
-                    acc.key.string_id(), exc_info=sys.exc_info())
+                    acc.id, exc_info=sys.exc_info())
 
   for _room in room.Room.query().iter():
     try:

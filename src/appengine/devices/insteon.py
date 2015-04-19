@@ -5,15 +5,13 @@ import logging
 import urllib
 import time
 
-from google.appengine.ext import ndb
-
-from appengine import account, device, rest
+from appengine import model, account, device, rest
 
 
 @device.register('insteon_switch')
 class InsteonSwitch(device.Switch):
   """Class represents a Insteon switch."""
-  insteon_device_id = ndb.IntegerProperty()
+  insteon_device_id = model.Property()
 
   def handle_event(self, event):
     self.account = event['account']
@@ -110,7 +108,7 @@ class InsteonAccount(account.Account):
     for entry in devices['DeviceList']:
       # This covers some swtich types, will need extending for more
       if entry['DevCat'] == 2 and entry['SubCat'] in {53, 54, 55, 56, 57}:
-        entry['account'] = self.key.string_id()
+        entry['account'] = self.id
         events.append({
             'device_type': 'insteon_switch',
             'device_id': 'insteon-%s' % entry['InsteonID'],

@@ -1,16 +1,14 @@
 """Philips hue integration."""
 
-from google.appengine.ext import ndb
-
-from appengine import device, pushrpc
+from appengine import device, model, pushrpc
 
 
 @device.register('sonos')
 class SonosDevice(device.Device):
   """A hue light."""
-  uid = ndb.StringProperty(required=True)
-  state = ndb.StringProperty()
-  currently_playing = ndb.JsonProperty()
+  uid = model.Property()
+  state = model.Property()
+  currently_playing = model.Property()
 
   def get_categories(self):
     return ['MUSIC']

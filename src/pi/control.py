@@ -11,18 +11,15 @@ LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
 PIDFILE = '/var/run/control.pid'
 
 
-class Control(daemon.Daemon):
+class Control(object):
   """'Controller class, ties proxies and rpc together."""
 
-  def __init__(self, args):
-    super(Control, self).__init__(PIDFILE, daemonize=args.daemonize)
+  def __init__(self, args, send_event):
     self._args = args
-    self._push_rpc = None
     self._proxies = {}
+    self._send_event = send_event
 
-  def run(self):
-    self._push_rpc = pushrpc.PushRPC(self._push_event_callback, self._args)
-
+  def start(self):
     # These modules should work 100% of the time -
     # they don't need special hardware, or root
     self._proxies = {
@@ -64,15 +61,7 @@ class Control(daemon.Daemon):
       logging.error('Failed to initialize zwave module - have you '
                     'installed libopenzwave?')
 
-    # Just sit in a loop sleeping for now
-    try:
-      events.run()
-    except KeyboardInterrupt:
-      logging.info('Shutting down')
-
-    # Now try and shut everything down gracefully
-    self._push_rpc.stop()
-
+  def stop(self):
     for proxy in self._proxies.itervalues():
       proxy.stop()
 
@@ -98,55 +87,4 @@ class Control(daemon.Daemon):
     """Handle event from a device."""
     event = {'device_type': device_type, 'device_id': device_id,
              'event': event_body}
-    self._push_rpc.send_event(event)
-
-
-def main():
-  """Main function."""
-  # Setup logging
-  logging.basicConfig(format=LOGFMT, level=logging.INFO)
-  file_handler = logging.FileHandler('control.log')
-  file_handler.setFormatter(logging.Formatter(LOGFMT))
-  logging.getLogger().addHandler(file_handler)
-  logging.getLogger('requests.packages.urllib3.connectionpool'
-                   ).setLevel(logging.ERROR)
-  logging.getLogger('soco.services').setLevel(logging.ERROR)
-
-  # Command line arguments
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--daemonize', dest='daemonize', action='store_true')
-  parser.add_argument('--nodaemonize', dest='daemonize', action='store_false')
-  parser.set_defaults(daemonize=True)
-
-  parser.add_argument('--local', dest='local', action='store_true')
-  parser.add_argument('--nolocal', dest='local', action='store_false')
-  parser.set_defaults(daemonize=False)
-
-  parser.add_argument('--zwave_device',
-                      default='/dev/ttyUSB0')
-  parser.add_argument('--rfswtich_pin',
-                      default=3)
-  parser.add_argument('--hue_scan_interval_secs',
-                      default=5*60)
-  parser.add_argument('--network_scan_interval_secs',
-                      default=10)
-  parser.add_argument('--network_scan_timeout_secs',
-                      default=5*60)
-  parser.add_argument('action', nargs=1, choices=['start', 'stop', 'restart'],
-                      metavar='<action>')
-  args = parser.parse_args()
-
-  control = Control(args)
-
-  if args.action[0] == 'start':
-    control.start()
-  elif args.action[0] == 'stop':
-    control.stop()
-  elif args.action[0] == 'restart':
-    control.restart()
-  else:
-    assert False, args.action
-
-
-if __name__ == '__main__':
-  main()
+    self._send_event(event)

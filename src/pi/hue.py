@@ -42,7 +42,7 @@ class Hue(scanning_proxy.ScanningProxy):
       except phue.PhueRegistrationException:
         if bridge_id in self._bridges:
           del self._bridges[bridge_id]
-        event = {'linked': False}
+        event = {'name': 'Unknown hue bridge', 'linked': False}
 
       if event is not None:
         logging.debug('Hue bridge \'%s\' (%s) found at %s - linked=%s',

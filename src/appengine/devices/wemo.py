@@ -1,14 +1,12 @@
 """Philips hue integration."""
 
-from google.appengine.ext import ndb
-
-from appengine import device, pushrpc
+from appengine import device, model, pushrpc
 
 
 class WemoMixin(object):
   """All wemo's have a model and serial number in common."""
-  serial_number = ndb.StringProperty(required=True)
-  model = ndb.StringProperty()
+  serial_number = model.Property()
+  model = model.Property()
 
   @classmethod
   @device.static_command

@@ -1,15 +1,13 @@
 """Generic device driver for 433mhz switches."""
 
-from google.appengine.ext import ndb
-
-from appengine import device, pushrpc
+from appengine import device, model, pushrpc
 
 
 @device.register('rfswitch')
 class RFSwitch(device.Switch):
   """A 433mhz rf switch."""
-  system_code = ndb.StringProperty(required=True)
-  device_code = ndb.IntegerProperty(required=True)
+  system_code = model.Property()
+  device_code = model.Property()
 
   def sync(self):
     event = {'type': 'rfswitch', 'command': 'set_state',

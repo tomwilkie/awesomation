@@ -2,9 +2,6 @@
 import logging
 import sys
 
-from google.appengine.api import namespace_manager
-from google.appengine.ext import db
-
 import flask
 import flask.views
 

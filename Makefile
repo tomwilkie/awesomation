@@ -105,24 +105,12 @@ dist/static: $(static_files)
 
 dist: dist/app.yaml dist/cron.yaml $(py_files) $(third_party_pyfiles) dist/static
 
-upload-prod: dist
-	appcfg.py --oauth2 update dist
-
-upload-dev: dist
-	appcfg.py --oauth2 --application=awesomation-dev update dist
-
-devapp: dist
-	PYTHONPATH=${PYTHONPATH}:./dist:./dist/third_party dev_appserver.py --use_mtime_file_watcher=true --host=0.0.0.0 dist/app.yaml
-
-pusher: dist
-	PYTHONPATH=${PYTHONPATH}:./dist:./dist/third_party python dist/pi/simple_pusher.py
-
-runpi: dist
-	sudo PYTHONPATH=$${PYTHONPATH}:dist:dist/third_party python dist/pi/control.py --nodaemonize restart
-
 runonpi: dist
 	rsync -arvz dist/ pi@domicspi.local:~/dist/
 	ssh -t pi@domicspi.local 'sudo PYTHONPATH=$${PYTHONPATH}:~/dist:~/dist/third_party python ~/dist/pi/control.py --nodaemonize restart'
+
+runapp: dist
+	PYTHONPATH=$${PYTHONPATH}:dist:dist/third_party python dist/main.py
 
 APPENGINE=/Applications/GoogleAppEngineLauncher.app/Contents/Resources/GoogleAppEngine-default.bundle/Contents/Resources/google_appengine/
 

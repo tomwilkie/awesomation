@@ -3,15 +3,13 @@
 import logging
 import re
 
-from google.appengine.ext import ndb
-
-from appengine import device, pushrpc
+from appengine import model, device, pushrpc
 
 
 @device.register('hue_bridge')
 class HueBridge(device.Device):
   """A hue bridge."""
-  linked = ndb.BooleanProperty(required=True)
+  linked = model.Property()
 
   def get_capabilities(self):
     return ['SCAN']
@@ -40,10 +38,10 @@ LIGHT_ID_RE = re.compile(r'hue-([0-9a-f]+)-([0-9]+)')
 @device.register('hue_light')
 class HueLight(device.Switch):
   """A hue light."""
-  hue_type = ndb.StringProperty()
-  hue_model_id = ndb.StringProperty()
-  brightness = ndb.IntegerProperty() # 0 - 255
-  color_temperature = ndb.IntegerProperty() # 153 - 500
+  hue_type = model.Property()
+  hue_model_id = model.Property()
+  brightness = model.Property() # 0 - 255
+  color_temperature = model.Property() # 153 - 500
 
   def get_capabilities(self):
     capabilities = ['SWITCH', 'DIMMABLE']

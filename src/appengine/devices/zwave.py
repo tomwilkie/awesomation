@@ -2,9 +2,7 @@
 
 import logging
 
-from google.appengine.ext import ndb
-
-from appengine import device, pushrpc, rest
+from appengine import device, model, pushrpc, rest
 
 
 NODE_ADDED = 'NodeAdded'
@@ -84,18 +82,18 @@ def register(manufacturer_id, product_type, product_id):
   return class_rebuilder
 
 
-class CommandClassValue(ndb.Model):
+class CommandClassValue(model.Base):
   """A particular (command class, value)."""
 
-  command_class = ndb.StringProperty()
-  index = ndb.IntegerProperty()
-  value = ndb.GenericProperty()
-  read_only = ndb.BooleanProperty()
-  units = ndb.StringProperty()
-  genre = ndb.StringProperty()
-  label = ndb.StringProperty()
-  value_id = ndb.IntegerProperty()
-  type = ndb.StringProperty()
+  command_class = model.Property()
+  index = model.Property()
+  value = model.Property()
+  read_only = model.Property()
+  units = model.Property()
+  genre = model.Property()
+  label = model.Property()
+  value_id = model.Property()
+  type = model.Property()
 
   def set_value(self, value):
     """Convenience method to send a command to this device."""
@@ -110,37 +108,36 @@ class CommandClassValue(ndb.Model):
 class ZWaveDevice(device.Device, device.DetectorMixin):
   """Generic Z Wave device driver."""
   # pylint: disable=too-many-instance-attributes
-  zwave_node_id = ndb.IntegerProperty(required=False)
-  zwave_home_id = ndb.IntegerProperty(required=False)
-  zwave_command_class_values = ndb.StructuredProperty(
-      CommandClassValue, repeated=True)
+  zwave_node_id = model.Property()
+  zwave_home_id = model.Property()
+  zwave_command_class_values = model.Property()
 
-  zwave_node_type = ndb.StringProperty()
-  zwave_node_name = ndb.StringProperty()
-  zwave_manufacturer_name = ndb.StringProperty()
-  zwave_manufacturer_id = ndb.StringProperty()
-  zwave_product_name = ndb.StringProperty()
-  zwave_product_type = ndb.StringProperty()
-  zwave_product_id = ndb.StringProperty()
+  zwave_node_type = model.Property()
+  zwave_node_name = model.Property()
+  zwave_manufacturer_name = model.Property()
+  zwave_manufacturer_id = model.Property()
+  zwave_product_name = model.Property()
+  zwave_product_type = model.Property()
+  zwave_product_id = model.Property()
 
-  configured = ndb.ComputedProperty(lambda s: s.is_configured())
+  configured = model.ComputedProperty(lambda s: s.is_configured())
 
   # Haven't found a good way to fake out the properites yet
-  brightness = ndb.IntegerProperty(default=0)
-  temperature = ndb.FloatProperty(default=0.0)
-  humidity = ndb.FloatProperty(default=0.0)
-  lux = ndb.FloatProperty(default=0.0)
+  brightness = model.Property(default=0)
+  temperature = model.Property(default=0.0)
+  humidity = model.Property(default=0.0)
+  lux = model.Property(default=0.0)
 
   # Represents the actual state of the switch; changing this
   # (and calling update()) will changed the switch.
-  state = ndb.BooleanProperty(default=False)
+  state = model.Property(default=False)
 
   # Represents the state the user wants, and when they asked for
   # it.  Most of the time users will control rooms etc, not individual
   # lights.  But its possible.
   # UI should set this and call update_lights on the room.
-  intended_state = ndb.BooleanProperty()
-  state_last_update = ndb.IntegerProperty(default=0)
+  intended_state = model.Property()
+  state_last_update = model.Property(default=0)
 
   def __init__(self, **kwargs):
     super(ZWaveDevice, self).__init__(**kwargs)

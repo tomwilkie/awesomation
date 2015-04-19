@@ -2,9 +2,7 @@
 import logging
 import math
 import time
-
-from google.appengine.api import namespace_manager
-from google.appengine.ext import ndb
+import inspect
 
 import flask
 
@@ -49,24 +47,21 @@ class Device(model.Base):
   """Base class for all device drivers."""
 
   # This is the name the user sets
-  name = ndb.StringProperty(required=False)
+  name = model.Property()
 
   # This is the (optional) name read from the device itself
-  device_name = ndb.StringProperty(required=False)
+  device_name = model.Property()
 
-  last_update = ndb.DateTimeProperty(required=False, auto_now=True)
-  room = ndb.StringProperty()
+  room = model.Property()
 
   # What can I do with this device? ie SWITCH, DIMMABLE, COLOR_TEMP etc
-  capabilities = ndb.ComputedProperty(lambda self: self.get_capabilities(),
-                                      repeated=True)
+  capabilities = model.ComputedProperty(lambda self: self.get_capabilities())
 
   # What broad category does this device belong to?  LIGHTING, CLIMATE, MUSIC
-  categories = ndb.ComputedProperty(lambda self: self.get_categories(),
-                                    repeated=True)
+  categories = model.ComputedProperty(lambda self: self.get_categories())
 
   # Does this device belong to an account?
-  account = ndb.StringProperty()
+  account = model.Property()
 
   def get_capabilities(self):
     return []
@@ -119,25 +114,25 @@ class Device(model.Base):
 
 class DetectorMixin(object):
   """Add a failure detector to a device to interpret motion sensor data."""
-  detector = ndb.JsonProperty()
+  detector = model.Property()
 
   # These fields represent the real state of this sensor
   # and when the real state last changes
-  occupied = ndb.BooleanProperty(default=False)
-  occupied_last_update = ndb.IntegerProperty()
+  occupied = model.Property()
+  occupied_last_update = model.Property()
 
   # These fields represent the inferred state of this sensor
   # after processing by the failure detector, and the time
   # when this inferred state last changed.
-  inferred_state = ndb.BooleanProperty(default=False)
-  inferred_last_update = ndb.IntegerProperty(default=0)
+  inferred_state = model.Property()
+  inferred_last_update = model.Property()
 
-  #def to_dict(self):
-  #  """We don't need to expose the detector in the dict repr."""
-  #  # Mainly as its too big for pusher
-  #  result = super(DetectorMixin, self).to_dict()
-  #  del result['detector']
-  #  return result
+  def to_dict(self):
+    """We don't need to expose the detector in the dict repr."""
+    # Mainly as its too big for pusher
+    result = super(DetectorMixin, self).to_dict()
+    del result['detector']
+    return result
 
   def _load_detector(self):
     """Either return the a rehydrated detector, or a fresh one."""
@@ -220,14 +215,14 @@ class Switch(Device):
   """A switch."""
   # Represents the actual state of the switch; changing this
   # (and calling update()) will changed the switch.
-  state = ndb.BooleanProperty(default=False)
+  state = model.Property(default=False)
 
   # Represents the state the user wants, and when they asked for
   # it.  Most of the time users will control rooms etc, not individual
   # lights.  But its possible.
   # UI should set this and call update_lights on the room.
-  intended_state = ndb.BooleanProperty()
-  state_last_update = ndb.IntegerProperty(default=0)
+  intended_state = model.Property()
+  state_last_update = model.Property(default=0)
 
   def get_capabilities(self):
     return ['SWITCH']
@@ -241,56 +236,23 @@ blueprint = flask.Blueprint('device', __name__)
 rest.register_class(blueprint, Device, create_device)
 
 
-def process_events(events):
+def handle_event(event):
   """Process a set of events."""
 
-  device_cache = {}
+  device_type = event['device_type']
+  device_id = event['device_id']
+  event_body = event['event']
 
-  for event in events:
-    device_type = event['device_type']
-    device_id = event['device_id']
-    event_body = event['event']
+  if device_id is None:
+    DEVICE_TYPES[device_type].handle_static_event(event_body)
+    return
 
-    if device_id is None:
-      DEVICE_TYPES[device_type].handle_static_event(event_body)
-      continue
+  device = Device.get_by_id(device_id)
+  if not device:
+    device = create_device(device_id, None,
+                           device_type=device_type)
 
-    if device_id in device_cache:
-      device = device_cache[device_id]
-    else:
-      device = Device.get_by_id(device_id)
-      if not device:
-        device = create_device(device_id, None,
-                               device_type=device_type)
-      device_cache[device_id] = device
-
-    device.handle_event(event_body)
-
-  ndb.put_multi(device_cache.values())
-
-
-@blueprint.route('/events', methods=['POST'])
-def handle_events():
-  """Handle events from devices."""
-
-  # This endpoint needs to authenticate itself.
-  proxy = pushrpc.authenticate()
-  if proxy is None:
-    flask.abort(401)
-
-  # If proxy hasn't been claimed, not much we can do.
-  if proxy.building_id is None:
-    logging.info('Dropping events as this proxy is not claimed')
-    return ('', 204)
-
-  # We need to set namespace - not done by main.py
-  namespace_manager.set_namespace(proxy.building_id)
-
-  events = flask.request.get_json()
-  logging.info('Processing %d events', len(events))
-
-  process_events(events)
-
-  return ('', 204)
+  device.handle_event(event_body)
+  device.put()
 
 

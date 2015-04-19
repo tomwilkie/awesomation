@@ -7,10 +7,6 @@ import time
 import urllib2
 import uuid
 
-from google.appengine.api import urlfetch
-from google.appengine.api import urlfetch_errors
-from google.appengine.ext import ndb
-
 import flask
 
 from appengine import model, rest
@@ -35,13 +31,12 @@ class Account(model.Base):
   ACCESS_TOKEN_URL = None
   AUTH_URL = None
 
-  auth_code = ndb.StringProperty(required=False)
-  access_token = ndb.StringProperty(required=False)
-  expires = ndb.IntegerProperty(required=False)
-  refresh_token = ndb.StringProperty(required=False)
+  auth_code = model.Property()
+  access_token = model.Property()
+  expires = model.Property()
+  refresh_token = model.Property()
 
-  human_type = ndb.ComputedProperty(lambda a: a.get_human_type())
-  last_update = ndb.DateTimeProperty(required=False, auto_now=True)
+  human_type = model.ComputedProperty(lambda a: a.get_human_type())
 
   @classmethod
   def _event_classname(cls):

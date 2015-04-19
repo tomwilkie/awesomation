@@ -1,57 +1,87 @@
 """Base classes for my data model."""
 import decimal
 
-from google.appengine.ext import ndb
-from google.appengine.ext.ndb import polymodel
-
 from appengine import history, rest, user
 
+class Property(object):
+  def __init__(self, default=None):
+    self._name = None
+    self._default = default
 
-# From http://stackoverflow.com/questions/10035133/ndb-decimal-property
-class DecimalProperty(ndb.IntegerProperty):
-  """Decimal property ideal to store currency values, such as $20.34."""
-  # See https://developers.google.com/appengine/docs/python/ndb/subclassprop
-  def _validate(self, value):
-    if not isinstance(value, (decimal.Decimal, str, unicode, int, long)):
-      raise TypeError('Expected a Decimal, str, unicode, int '
-                      'or long an got instead %s' % repr(value))
+  def get_default(self):
+    return self._default
 
-  def _to_base_type(self, value):
-    return int(decimal.Decimal(value) * 100)
+  def get_value(self, instance):
+    return instance.__dict__.get(self._name, self._default)
 
-  def _from_base_type(self, value):
-    return decimal.Decimal(value)/decimal.Decimal(100)
+class ComputedProperty(object):
+  def __init__(self, f):
+    self._f = f
 
+  def get_default(self):
+    return self._f()
 
-class Base(polymodel.PolyModel):
+  def get_value(self, instance):
+    return self._f()
+
+class MetaModel(type):
+  def __init__(cls, name, bases, classdict):
+    super(MetaModel, cls).__init__(name, bases, classdict)
+
+    cls._properties = {}  # Map of {name: Property}
+    for name in set(dir(cls)):
+      attr = getattr(cls, name, None)
+      if isinstance(attr, Property):
+        attr._name = name
+        cls._properties[attr._name] = attr
+
+class Base(object):
   """Base for all objects."""
+  __metaclass__ = MetaModel
+  _properties = None
+  _store = None
+
+  @classmethod
+  def set_store(cls, store):
+    cls._store = store
+
+  def __init__(self, id, **kwargs):
+    self.id = id
+    self.populate(**kwargs)
+
+  def populate(self, **kwargs):
+    for k, v in kwargs.iteritems():
+      prop = getattr(self.__class__, k)
+      self.__dict__[k] = v
+    # init defaults
+    for k, prop in self.__class__._properties.iteritems():
+      if k in kwargs: continue
+      self.__dict__[k] = prop.get_default()
 
   def to_dict(self):
     """Convert this object to a python dict."""
-    result = super(Base, self).to_dict()
-    result['id'] = self.key.id()
-    result['class'] = result['class_'][-1]
-    del result['class_']
-
-    # Should move this into detector mixin when I figure out how
-    if 'detector' in result:
-      del result['detector']
+    result = {"id": self.id, "class": self.__class__.name}
+    for propname in self.__class__._properties.iterkeys():
+      result[propname] = self.__dict__.get(propname, None)
     return result
 
   @classmethod
   def _event_classname(cls):
     return None
 
-  def _put_async(self, **ctx_options):
+  @classmethod
+  def get_by_id(cls, id):
+    return cls._store.get(id)
+
+  def put(self):
     """Overrides _put_async and sends event to UI."""
+    Base._store.put(self.id, self)
     classname = self._event_classname()
     if classname is not None:
       values = self.to_dict()
-      user.send_event(cls=classname, id=self.key.string_id(),
+      user.send_event(cls=classname, id=self.id,
                       event='update', obj=values)
       history.store_version(values)
-    return super(Base, self)._put_async(**ctx_options)
-  put_async = _put_async
 
   @rest.command
   def get_history(self, start, end):

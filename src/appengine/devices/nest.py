@@ -4,18 +4,15 @@ import json
 import logging
 import sys
 
-from google.appengine.api import urlfetch
-from google.appengine.ext import ndb
-
-from appengine import account, device, rest
+from appengine import account, device, model, rest
 
 
 @device.register('nest_thermostat')
 class NestThermostat(device.Device):
   """Class represents a Nest thermostat."""
-  temperature = ndb.FloatProperty()
-  humidity = ndb.FloatProperty()
-  target_temperature = ndb.FloatProperty()
+  temperature = model.Property()
+  humidity = model.Property()
+  target_temperature = model.Property()
 
   def get_categories(self):
     return ['CLIMATE']
@@ -99,7 +96,7 @@ class NestAccount(account.Account):
 
     if 'smoke_co_alarms' in result:
       for protect_id, protect_info in result['smoke_co_alarms'].iteritems():
-        protect_info['account'] = self.key.string_id()
+        protect_info['account'] = self.id
         events.append({
             'device_type': 'nest_protect',
             'device_id': 'nest-protect-%s' % protect_id,
@@ -108,7 +105,7 @@ class NestAccount(account.Account):
 
     if 'thermostats' in result:
       for thermostat_id, thermostat_info in result['thermostats'].iteritems():
-        thermostat_info['account'] = self.key.string_id()
+        thermostat_info['account'] = self.id
         events.append({
             'device_type': 'nest_thermostat',
             'device_id': 'nest-thermostat-%s' % thermostat_id,

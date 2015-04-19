@@ -2,9 +2,7 @@
 import logging
 import re
 
-from google.appengine.ext import ndb
-
-from appengine import device
+from appengine import device, model
 from appengine.devices import nest
 
 
@@ -14,7 +12,7 @@ RE = re.compile(r'mac-(.*)')
 @device.register('network')
 class NetworkDevice(device.Device):
   """A device on the network."""
-  present = ndb.BooleanProperty(required=True, default=False)
+  present = model.Property()
 
   @staticmethod
   def update_presence():
@@ -67,7 +65,7 @@ class NetworkDevice(device.Device):
       devices_to_put = []
 
       for network_device in NetworkDevice.query().iter():
-        match = RE.match(network_device.key.string_id())
+        match = RE.match(network_device.id)
         assert match is not None
 
         mac = match.group(1)

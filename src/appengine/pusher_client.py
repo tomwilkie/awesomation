@@ -3,8 +3,6 @@ import json
 import logging
 import os
 
-from google.appengine.api import urlfetch
-
 import pusher
 
 from common import public_creds

@@ -3,19 +3,17 @@
 import logging
 import urllib
 
-from google.appengine.ext import ndb
-
-from appengine import account, device, rest
+from appengine import account, device, model, rest
 
 
 @device.register('netatmo_weather_station')
 class NetatmoWeatherStation(device.Device):
   """A Netatmo Weather Station."""
-  temperature = ndb.FloatProperty()
-  humidity = ndb.FloatProperty()
-  co2 = ndb.FloatProperty()
-  pressure = ndb.FloatProperty()
-  noise = ndb.FloatProperty()
+  temperature = model.Property()
+  humidity = model.Property()
+  co2 = model.Property()
+  pressure = model.Property()
+  noise = model.Property()
 
   def get_categories(self):
     return ['CLIMATE']
@@ -80,7 +78,7 @@ class NetatmoAccount(account.Account):
       if details['type'] not in {'NAModule1', 'NAModule4'}:
         continue
 
-      details['account'] = self.key.string_id()
+      details['account'] = self.id
       events.append({
           'device_type': 'netatmo_weather_station',
           'device_id': 'netatmo-%s' % details['_id'],
@@ -91,7 +89,7 @@ class NetatmoAccount(account.Account):
       if details['type'] not in {'NAMain'}:
         continue
 
-      details['account'] = self.key.string_id()
+      details['account'] = self.id
       events.append({
           'device_type': 'netatmo_weather_station',
           'device_id': 'netatmo-%s' % details['_id'],

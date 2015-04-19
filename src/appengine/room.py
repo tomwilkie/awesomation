@@ -3,8 +3,6 @@ import datetime
 import logging
 import time
 
-from google.appengine.ext import ndb
-
 import flask
 
 from appengine import device, model, rest
@@ -14,21 +12,21 @@ SENSOR_OVERIDE_PERIOD = 60 * 60
 
 class Room(model.Base):
   """A room in a property."""
-  name = ndb.StringProperty(required=False)
+  name = model.Property()
 
   # automatically dim lights in this room?
-  auto_dim_lights = ndb.BooleanProperty(default=False)
-  target_brightness = ndb.IntegerProperty()
-  target_color_temperature = ndb.IntegerProperty()
-  dim_start_time = ndb.IntegerProperty() # seconds from midnight
-  dim_end_time = ndb.IntegerProperty() # seconds from midnight
+  auto_dim_lights = model.Property(default=False)
+  target_brightness = model.Property()
+  target_color_temperature = model.Property()
+  dim_start_time = model.Property() # seconds from midnight
+  dim_end_time = model.Property() # seconds from midnight
 
   # force the lights in this room on?
-  force_lights_state = ndb.BooleanProperty(default=False)
-  force_lights_at = ndb.IntegerProperty()
+  force_lights_state = model.Property(default=False)
+  force_lights_at = model.Property()
 
   # deprecated
-  force_lights_until = ndb.IntegerProperty()
+  model.force_lights_until = model.Property()
 
   @classmethod
   def _event_classname(cls):
@@ -98,7 +96,7 @@ class Room(model.Base):
     """Work out if this room is occupied."""
     # First, figure out if there are sensors
     sensors = (device.Device.get_by_capability('OCCUPIED')
-               .filter(device.Device.room == self.key.string_id()).iter())
+               .filter(device.Device.room == self.id).iter())
     sensors = list(sensors)
 
     # If we didn't find any, we can't tell if the room
@@ -168,7 +166,7 @@ class Room(model.Base):
 
     # Now iterate over all the switches and configure them
     switches = (device.Device.get_by_capability('SWITCH')
-                .filter(device.Device.room == self.key.string_id()).iter())
+                .filter(device.Device.room == self.id).iter())
 
     for switch in switches:
       if switch.intended_state is not None:
