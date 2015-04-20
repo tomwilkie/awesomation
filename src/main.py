@@ -5,7 +5,7 @@ import threading
 
 import store
 from pi import control
-from pi import simple_pusher
+from push import simple_pusher
 import appengine.main
 
 LOGFMT = '%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s'
@@ -32,6 +32,7 @@ def main():
   parser.set_defaults(daemonize=False)
 
   parser.add_argument('--http-port', default=8080)
+  parser.add_argument('--websocket-port', default=8101)
 
   parser.add_argument('--zwave_device',
                       default='/dev/ttyUSB0')
@@ -56,13 +57,14 @@ def main():
   c.start()
 
   # start the websocker server
-  #pusher = simple_pusher.SimplePusher(args)
-  #pusher.start()
+  pusher = simple_pusher.SimplePusher(args.websocket_port)
+  pusher.start()
 
   # start the app
   appengine.main.app.run(port=args.http_port)
 
   logging.info("App exiting...")
+  pusher.stop()
   c.stop()
 
 if __name__ == '__main__':
